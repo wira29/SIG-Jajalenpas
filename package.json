@@ -10,8 +10,8 @@
   },
   "dependencies": {
     "@prisma/client": "^6.0.1",
+    "@types/leaflet": "^1.9.15",
     "bcrypt-ts": "^5.0.3",
-    "leaflet": "^1.9.4",
     "leaflet-defaulticon-compatibility": "^0.1.2",
     "leaflet.markercluster": "^1.5.3",
     "next": "15.0.4",
@@ -21,6 +21,7 @@
     "react-dom": "^19.0.0",
     "react-leaflet": "^4.2.1",
     "react-leaflet-markercluster": "^4.2.1",
+    "seed-color": "^2.0.1",
     "shadcn": "^2.1.7",
     "zustand": "^5.0.2"
   },
