@@ -2,26 +2,21 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+.active-link-color[aria-current="page"] {
+  color: yellow; /* Ganti dengan warna yang Anda inginkan */
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+.bg-auth {
+  /* background-image: url("/assets/bg-login.jpg");
+  background-size: cover;
+  background-position: center; */
+  /* background-color: aqua; */
+  width: 100vw;
+  height: 100vh;
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
-}
-
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+.bg-card-auth {
+  background-image: url("/images/bg-login.jpg");
+  background-size: cover;
+  background-position: center;
 }

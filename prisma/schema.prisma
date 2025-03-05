@@ -1,0 +1,1081 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model accidents {
+  id                  String            @id @db.Char(36)
+  executor_project_id String            @db.Char(36)
+  location            String            @db.VarChar(255)
+  time                DateTime          @db.DateTime(0)
+  description         String            @db.Text
+  loss                String            @db.Text
+  problem             String            @db.Text
+  created_at          DateTime?         @db.Timestamp(0)
+  updated_at          DateTime?         @db.Timestamp(0)
+  executor_projects   executor_projects @relation(fields: [executor_project_id], references: [id], onDelete: Cascade, map: "accidents_executor_project_id_foreign")
+
+  @@index([executor_project_id], map: "accidents_executor_project_id_foreign")
+}
+
+model amendment_deeds {
+  id                  String            @id @db.Char(36)
+  service_provider_id String            @db.Char(36)
+  deed_number         String            @db.VarChar(255)
+  notary_name         String            @db.VarChar(255)
+  address             String            @db.Text
+  city                String            @db.VarChar(255)
+  province            String            @db.VarChar(255)
+  created_at          DateTime?         @db.Timestamp(0)
+  updated_at          DateTime?         @db.Timestamp(0)
+  service_providers   service_providers @relation(fields: [service_provider_id], references: [id], onDelete: Cascade, map: "amendment_deeds_service_provider_id_foreign")
+
+  @@index([service_provider_id], map: "amendment_deeds_service_provider_id_foreign")
+}
+
+model associations {
+  id                  String              @id @db.Char(36)
+  name                String              @unique(map: "associations_name_unique") @db.VarChar(255)
+  slug                String              @unique(map: "associations_slug_unique") @db.VarChar(255)
+  email               String              @unique(map: "associations_email_unique") @db.VarChar(255)
+  email_leader        String              @unique(map: "associations_email_leader_unique") @db.VarChar(255)
+  address             String              @db.Text
+  city                String              @db.VarChar(50)
+  postal_code         String              @db.Char(10)
+  phone_number        String              @db.VarChar(15)
+  leader              String              @db.VarChar(255)
+  address_leader      String              @db.Text
+  phone_number_leader String              @db.VarChar(15)
+  created_at          DateTime?           @db.Timestamp(0)
+  updated_at          DateTime?           @db.Timestamp(0)
+  service_providers   service_providers[]
+}
+
+model certificates {
+  id                 String           @id @db.Char(36)
+  training_member_id String           @db.Char(36)
+  created_at         DateTime?        @db.Timestamp(0)
+  updated_at         DateTime?        @db.Timestamp(0)
+  training_members   training_members @relation(fields: [training_member_id], references: [id], onDelete: Cascade, map: "certificates_training_member_id_foreign")
+
+  @@index([training_member_id], map: "certificates_training_member_id_foreign")
+}
+
+model classification_trainings {
+  id                           String                         @id @db.Char(36)
+  name                         String                         @db.VarChar(255)
+  created_at                   DateTime?                      @db.Timestamp(0)
+  updated_at                   DateTime?                      @db.Timestamp(0)
+  sub_classification_trainings sub_classification_trainings[]
+}
+
+model classifications {
+  id                  String                @id @db.Char(36)
+  name                String                @db.VarChar(255)
+  created_at          DateTime?             @db.Timestamp(0)
+  updated_at          DateTime?             @db.Timestamp(0)
+  sub_classifications sub_classifications[]
+}
+
+model consultant_projects {
+  id                      String                                     @id @db.Char(36)
+  dinas_id                String                                     @db.Char(36)
+  fund_source_id          String                                     @db.Char(36)
+  contract_category_id    String                                     @db.Char(36)
+  service_provider_id     String                                     @db.Char(36)
+  fiscal_year_id          String                                     @db.Char(36)
+  name                    String                                     @db.VarChar(255)
+  project_value           Int?
+  characteristic_project  consultant_projects_characteristic_project
+  finance_progress_start  DateTime?                                  @db.DateTime(0)
+  finance_progress        Float                                      @default(0)
+  contract                String?                                    @db.VarChar(255)
+  administrative_minutes  String?                                    @db.VarChar(255)
+  report                  String?                                    @db.VarChar(255)
+  minutes_of_disbursement String?                                    @db.VarChar(255)
+  minutes_of_hand_over    String?                                    @db.VarChar(255)
+  order_mail              String?                                    @db.VarChar(255)
+  pcm_minutes             String?                                    @db.VarChar(255)
+  start_at                DateTime?                                  @db.DateTime(0)
+  end_at                  DateTime?                                  @db.DateTime(0)
+  status                  consultant_projects_status
+  created_at              DateTime?                                  @db.Timestamp(0)
+  updated_at              DateTime?                                  @db.Timestamp(0)
+  logtitude               Float?
+  latitude                Float?
+  nomorRuas               Int?                                       @db.UnsignedInt
+  verification            Int                                        @default(0) @db.TinyInt
+  longtitude              Float?
+  contract_categories     contract_categories                        @relation(fields: [contract_category_id], references: [id], onDelete: Cascade, map: "consultant_projects_contract_category_id_foreign")
+  dinas                   dinas                                      @relation(fields: [dinas_id], references: [id], onDelete: Cascade, map: "consultant_projects_dinas_id_foreign")
+  fiscal_years            fiscal_years                               @relation(fields: [fiscal_year_id], references: [id], onDelete: Cascade, map: "consultant_projects_fiscal_year_id_foreign")
+  fund_sources            fund_sources                               @relation(fields: [fund_source_id], references: [id], onDelete: Cascade, map: "consultant_projects_fund_source_id_foreign")
+  service_providers       service_providers                          @relation(fields: [service_provider_id], references: [id], onDelete: Cascade, map: "consultant_projects_service_provider_id_foreign")
+  executor_projects       executor_projects[]
+
+  @@index([contract_category_id], map: "consultant_projects_contract_category_id_foreign")
+  @@index([dinas_id], map: "consultant_projects_dinas_id_foreign")
+  @@index([fiscal_year_id], map: "consultant_projects_fiscal_year_id_foreign")
+  @@index([fund_source_id], map: "consultant_projects_fund_source_id_foreign")
+  @@index([nomorRuas], map: "consultant_projects_nomorruas_foreign")
+  @@index([service_provider_id], map: "consultant_projects_service_provider_id_foreign")
+}
+
+model contract_categories {
+  id                  String                @id @db.Char(36)
+  name                String                @db.VarChar(255)
+  created_at          DateTime?             @db.Timestamp(0)
+  updated_at          DateTime?             @db.Timestamp(0)
+  consultant_projects consultant_projects[]
+  executor_projects   executor_projects[]
+}
+
+model dinas {
+  id                            String                @id @db.Char(36)
+  user_id                       Int                   @db.UnsignedInt
+  name_opd                      String?               @db.VarChar(255)
+  address                       String?               @db.Text
+  phone_number_opd              String?               @db.VarChar(255)
+  person_responsible            String                @db.VarChar(255)
+  position                      String?               @db.VarChar(255)
+  civil_servant_identity_number String?               @db.VarChar(255)
+  created_at                    DateTime?             @db.Timestamp(0)
+  updated_at                    DateTime?             @db.Timestamp(0)
+  consultant_projects           consultant_projects[]
+  executor_projects             executor_projects[]
+
+  @@index([user_id], map: "dinas_user_id_foreign")
+}
+
+model dummy_projects {
+  id               Int       @id @default(autoincrement()) @db.UnsignedInt
+  nama_dinas       String?   @db.VarChar(255)
+  nama_pekerjaan   String?   @db.VarChar(255)
+  tahun_anggaran   String?   @db.VarChar(255)
+  nilai_kontrak    Int       @default(0)
+  sumber_dana      String?   @db.VarChar(255)
+  tanggal_mulai    DateTime? @db.Date
+  tanggal_berakhir DateTime? @db.Date
+  created_at       DateTime? @db.Timestamp(0)
+  updated_at       DateTime? @db.Timestamp(0)
+  tanggal_kontrak  DateTime? @db.Date
+  nama_pelaksana   String?   @db.VarChar(255)
+}
+
+model executor_projects {
+  id                         String                                   @id @db.Char(36)
+  fund_source_id             String                                   @db.Char(36)
+  contract_category_id       String                                   @db.Char(36)
+  service_provider_id        String                                   @db.Char(36)
+  consultant_project_id      String?                                  @db.Char(36)
+  fiscal_year_id             String                                   @db.Char(36)
+  name                       String                                   @db.VarChar(255)
+  project_value              BigInt?
+  characteristic_project     executor_projects_characteristic_project
+  physical_progress          Float                                    @default(0)
+  physical_progress_start    DateTime?                                @db.DateTime(0)
+  finance_progress_start     DateTime?                                @db.DateTime(0)
+  finance_progress           Float                                    @default(0)
+  contract                   String?                                  @db.VarChar(255)
+  administrative_minutes     String?                                  @db.VarChar(255)
+  uitzet_minutes             String?                                  @db.VarChar(255)
+  mutual_check_0             String?                                  @db.VarChar(255)
+  mutual_check_100           String?                                  @db.VarChar(255)
+  p1_meeting_minutes         String?                                  @db.VarChar(255)
+  p2_meeting_minutes         String?                                  @db.VarChar(255)
+  minutes_of_disbursement    String?                                  @db.VarChar(255)
+  order_mail                 String?                                  @db.VarChar(255)
+  pcm_minutes                String?                                  @db.VarChar(255)
+  shop_drawing               String?                                  @db.VarChar(255)
+  asbuild_drawing            String?                                  @db.VarChar(255)
+  report                     String?                                  @db.VarChar(255)
+  start_at                   DateTime?                                @db.DateTime(0)
+  end_at                     DateTime?                                @db.DateTime(0)
+  status                     executor_projects_status
+  created_at                 DateTime?                                @db.Timestamp(0)
+  updated_at                 DateTime?                                @db.Timestamp(0)
+  dinas_id                   String?                                  @db.Char(36)
+  executor_physical_progress Int                                      @default(0)
+  logtitude                  Float?
+  latitude                   Float?
+  nomorRuas                  BigInt?                                  @db.UnsignedBigInt
+  verification               Int                                      @default(0) @db.TinyInt
+  longtitude                 Float?
+  invoice                    String?                                  @db.VarChar(255)
+  accidents                  accidents[]
+  consultant_projects        consultant_projects?                     @relation(fields: [consultant_project_id], references: [id], onDelete: Cascade, map: "executor_projects_consultant_project_id_foreign")
+  contract_categories        contract_categories                      @relation(fields: [contract_category_id], references: [id], onDelete: Cascade, map: "executor_projects_contract_category_id_foreign")
+  dinas                      dinas?                                   @relation(fields: [dinas_id], references: [id], onDelete: Cascade, map: "executor_projects_dinas_id_foreign")
+  fiscal_years               fiscal_years                             @relation(fields: [fiscal_year_id], references: [id], onDelete: Cascade, map: "executor_projects_fiscal_year_id_foreign")
+  fund_sources               fund_sources                             @relation(fields: [fund_source_id], references: [id], onDelete: Cascade, map: "executor_projects_fund_source_id_foreign")
+  service_providers          service_providers                        @relation(fields: [service_provider_id], references: [id], onDelete: Cascade, map: "executor_projects_service_provider_id_foreign")
+  material_projects          material_projects[]
+  service_provider_projects  service_provider_projects[]
+  surveys                    surveys[]
+  tool_projects              tool_projects[]
+
+  @@index([consultant_project_id], map: "executor_projects_consultant_project_id_foreign")
+  @@index([contract_category_id], map: "executor_projects_contract_category_id_foreign")
+  @@index([dinas_id], map: "executor_projects_dinas_id_foreign")
+  @@index([fiscal_year_id], map: "executor_projects_fiscal_year_id_foreign")
+  @@index([fund_source_id], map: "executor_projects_fund_source_id_foreign")
+  @@index([nomorRuas], map: "executor_projects_nomorruas_foreign")
+  @@index([service_provider_id], map: "executor_projects_service_provider_id_foreign")
+}
+
+model failed_jobs {
+  id         BigInt   @id @default(autoincrement()) @db.UnsignedBigInt
+  uuid       String   @unique(map: "failed_jobs_uuid_unique") @db.VarChar(255)
+  connection String   @db.Text
+  queue      String   @db.Text
+  payload    String   @db.LongText
+  exception  String   @db.LongText
+  failed_at  DateTime @default(now()) @db.Timestamp(0)
+}
+
+model faqs {
+  id         BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  question   String    @db.VarChar(255)
+  answer     String    @db.Text
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+}
+
+model feature {
+  id                  String            @id @db.Char(36)
+  featureCollectionId String            @db.Char(36)
+  type                String            @db.VarChar(255)
+  createdAt           DateTime          @default(now()) @db.Timestamp(3)
+  featurecollection   featurecollection @relation(fields: [featureCollectionId], references: [id], onDelete: Cascade, map: "feature_featurecollectionid_foreign")
+  geometry            geometry[]
+  properties          properties[]
+
+  @@index([featureCollectionId], map: "feature_featurecollectionid_foreign")
+}
+
+model featurecollection {
+  id        String    @id @db.Char(36)
+  name      String    @db.VarChar(255)
+  type      String    @db.VarChar(255)
+  color     String    @db.VarChar(255)
+  weight    Int       @default(1)
+  dashed    Boolean   @default(false)
+  radius    Int       @default(5)
+  tahun     Int       @default(2023)
+  createdAt DateTime  @default(now()) @db.Timestamp(0)
+  feature   feature[]
+}
+
+model fiscal_years {
+  id                  String                @id @db.Char(36)
+  name                String                @db.VarChar(4)
+  created_at          DateTime?             @db.Timestamp(0)
+  updated_at          DateTime?             @db.Timestamp(0)
+  consultant_projects consultant_projects[]
+  executor_projects   executor_projects[]
+  trainings           trainings[]
+}
+
+model founding_deeds {
+  id                  String            @id @db.Char(36)
+  service_provider_id String            @db.Char(36)
+  deed_number         String            @db.VarChar(255)
+  notary_name         String            @db.VarChar(255)
+  address             String            @db.Text
+  city                String            @db.VarChar(255)
+  province            String            @db.VarChar(255)
+  deed_date           DateTime          @db.Date
+  created_at          DateTime?         @db.Timestamp(0)
+  updated_at          DateTime?         @db.Timestamp(0)
+  service_providers   service_providers @relation(fields: [service_provider_id], references: [id], onDelete: Cascade, map: "founding_deeds_service_provider_id_foreign")
+
+  @@index([service_provider_id], map: "founding_deeds_service_provider_id_foreign")
+}
+
+model fund_sources {
+  id                  String                @id @db.Char(36)
+  name                String                @db.VarChar(150)
+  created_at          DateTime?             @db.Timestamp(0)
+  updated_at          DateTime?             @db.Timestamp(0)
+  consultant_projects consultant_projects[]
+  executor_projects   executor_projects[]
+  trainings           trainings[]
+}
+
+model geometry {
+  id          String   @id @db.Char(36)
+  featureId   String   @db.Char(36)
+  type        String   @db.VarChar(255)
+  coordinates Json
+  createdAt   DateTime @default(now()) @db.Timestamp(0)
+  feature     feature  @relation(fields: [featureId], references: [id], onDelete: Cascade, map: "geometry_featureid_foreign")
+
+  @@index([featureId], map: "geometry_featureid_foreign")
+}
+
+model history_logins {
+  id         String    @id @db.Char(36)
+  user_id    BigInt    @db.UnsignedBigInt
+  ip_address String    @db.VarChar(255)
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+
+  @@index([user_id], map: "history_logins_user_id_foreign")
+}
+
+model images {
+  id         String            @id @db.Char(36)
+  photo      String            @db.LongText
+  categories images_categories
+  created_at DateTime?         @db.Timestamp(0)
+  updated_at DateTime?         @db.Timestamp(0)
+}
+
+model jalan {
+  id         String    @id @db.Char(36)
+  nama       String    @unique(map: "jalan_nama_unique") @db.VarChar(255)
+  tahun      Int       @default(2023)
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+  ruas       ruas[]
+}
+
+model material_projects {
+  id                  String            @id @db.Char(36)
+  executor_project_id String            @db.Char(36)
+  name                String            @db.VarChar(255)
+  sub_name            String            @db.VarChar(255)
+  merk                String?           @db.VarChar(255)
+  kuantitas           Int
+  tkdn                Int
+  is_delete           Int               @default(0) @db.TinyInt
+  created_at          DateTime?         @db.Timestamp(0)
+  updated_at          DateTime?         @db.Timestamp(0)
+  executor_projects   executor_projects @relation(fields: [executor_project_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "material_projects_executor_project_id_foreign")
+
+  @@index([executor_project_id], map: "material_projects_executor_project_id_foreign")
+}
+
+model migrations {
+  id        Int    @id @default(autoincrement()) @db.UnsignedInt
+  migration String @db.VarChar(255)
+  batch     Int
+}
+
+model model_has_permissions {
+  permission_id BigInt @db.UnsignedBigInt
+  model_type    String @db.VarChar(255)
+  model_id      BigInt @db.UnsignedBigInt
+
+  @@id([permission_id, model_id, model_type])
+  @@index([model_id, model_type], map: "model_has_permissions_model_id_model_type_index")
+}
+
+model model_has_roles {
+  role_id    BigInt @db.UnsignedBigInt
+  model_type String @db.VarChar(255)
+  model_id   BigInt @db.UnsignedBigInt
+
+  @@id([role_id, model_id, model_type])
+  @@index([model_id, model_type], map: "model_has_roles_model_id_model_type_index")
+}
+
+model mytable {
+  id               Int      @id
+  nama_dinas       String   @db.VarChar(48)
+  nama_pekerjaan   String   @db.VarChar(88)
+  tahun_anggaran   Int
+  nilai_kontrak    Int
+  sumber_dana      String   @db.VarChar(6)
+  tanggal_mulai    DateTime @db.Date
+  tanggal_berakhir String?  @db.VarChar(30)
+  created_at       String?  @db.VarChar(30)
+  updated_at       String?  @db.VarChar(15)
+}
+
+model news {
+  id         String    @id @db.Char(36)
+  slug       String    @db.VarChar(255)
+  title      String    @db.VarChar(150)
+  thumbnail  String    @db.Text
+  content    String    @db.LongText
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+  type       String    @default("news") @db.VarChar(255)
+}
+
+model officers {
+  id                       String                  @id @db.Char(36)
+  service_provider_id      String                  @db.Char(36)
+  national_identity_number String                  @db.Char(18)
+  name                     String                  @db.VarChar(255)
+  birth_date               DateTime                @db.Date
+  gender                   officers_gender
+  address                  String                  @db.Text
+  religion                 officers_religion
+  marital_status           officers_marital_status
+  position                 String                  @db.VarChar(255)
+  citizenship              String                  @db.VarChar(255)
+  education                String                  @db.VarChar(255)
+  created_at               DateTime?               @db.Timestamp(0)
+  updated_at               DateTime?               @db.Timestamp(0)
+  service_providers        service_providers       @relation(fields: [service_provider_id], references: [id], onDelete: Cascade, map: "officers_service_provider_id_foreign")
+
+  @@index([service_provider_id], map: "officers_service_provider_id_foreign")
+}
+
+model password_reset_tokens {
+  email         String    @id @db.VarChar(255)
+  token         String    @db.VarChar(255)
+  expired_token DateTime  @default(now()) @db.Timestamp(0)
+  created_at    DateTime? @db.Timestamp(0)
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model password_resets {
+  email      String    @db.VarChar(255)
+  token      String    @db.VarChar(255)
+  created_at DateTime? @db.Timestamp(0)
+
+  @@index([email], map: "password_resets_email_index")
+  @@ignore
+}
+
+model permissions {
+  id         BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  name       String    @db.VarChar(255)
+  guard_name String    @db.VarChar(255)
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+
+  @@unique([name, guard_name], map: "permissions_name_guard_name_unique")
+}
+
+model personal_access_tokens {
+  id             BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  tokenable_type String    @db.VarChar(255)
+  tokenable_id   String    @db.Char(36)
+  name           String    @db.VarChar(255)
+  token          String    @unique(map: "personal_access_tokens_token_unique") @db.VarChar(64)
+  abilities      String?   @db.Text
+  last_used_at   DateTime? @db.Timestamp(0)
+  expires_at     DateTime? @db.Timestamp(0)
+  created_at     DateTime? @db.Timestamp(0)
+  updated_at     DateTime? @db.Timestamp(0)
+
+  @@index([tokenable_type, tokenable_id], map: "personal_access_tokens_tokenable_type_tokenable_id_index")
+}
+
+model photo {
+  id          String     @id @db.Char(36)
+  propertyId  String     @db.Char(36)
+  path        String?    @db.VarChar(255)
+  url         String?    @db.VarChar(255)
+  description String?    @db.VarChar(255)
+  createdAt   DateTime   @default(now()) @db.Timestamp(0)
+  properties  properties @relation(fields: [propertyId], references: [id], onDelete: Cascade, map: "photo_propertyid_foreign")
+
+  @@index([propertyId], map: "photo_propertyid_foreign")
+}
+
+model picture {
+  id                    String                  @id @db.Char(36)
+  path                  String                  @db.VarChar(255)
+  createdAt             DateTime                @default(now()) @db.Timestamp(0)
+  picturesonruas        picturesonruas[]
+  picturesonruashistory picturesonruashistory[]
+  picturesonsta         picturesonsta[]
+  picturesonstahistory  picturesonstahistory[]
+}
+
+model picturesonruas {
+  idPicture   String  @db.Char(36)
+  idRuas      BigInt  @db.UnsignedBigInt
+  description String?
+  picture     picture @relation(fields: [idPicture], references: [id], onDelete: Cascade, map: "picturesonruas_idpicture_foreign")
+
+  @@id([idRuas, idPicture])
+  @@index([idPicture], map: "picturesonruas_idpicture_foreign")
+}
+
+model picturesonruashistory {
+  idPicture     String      @db.Char(36)
+  idRuasHistory String      @db.Char(36)
+  description   String?     @db.VarChar(255)
+  picture       picture     @relation(fields: [idPicture], references: [id], onDelete: Cascade, map: "picturesonruashistory_idpicture_foreign")
+  ruashistory   ruashistory @relation(fields: [idRuasHistory], references: [id], onDelete: Cascade, map: "picturesonruashistory_idruashistory_foreign")
+
+  @@id([idRuasHistory, idPicture])
+  @@index([idPicture], map: "picturesonruashistory_idpicture_foreign")
+}
+
+model picturesonsta {
+  idPicture   String  @db.Char(36)
+  idSta       String  @db.Char(36)
+  description String? @db.VarChar(255)
+  picture     picture @relation(fields: [idPicture], references: [id], onDelete: Cascade, map: "picturesonsta_idpicture_foreign")
+  sta         sta     @relation(fields: [idSta], references: [id], onDelete: Cascade, map: "picturesonsta_idsta_foreign")
+
+  @@id([idSta, idPicture])
+  @@index([idPicture], map: "picturesonsta_idpicture_foreign")
+}
+
+model picturesonstahistory {
+  idStaHistory String     @db.Char(36)
+  idPicture    String     @db.Char(36)
+  description  String?    @db.VarChar(255)
+  picture      picture    @relation(fields: [idPicture], references: [id], onDelete: Cascade, map: "picturesonstahistory_idpicture_foreign")
+  stahistory   stahistory @relation(fields: [idStaHistory], references: [id], onDelete: Cascade, map: "picturesonstahistory_idstahistory_foreign")
+
+  @@id([idStaHistory, idPicture])
+  @@index([idPicture], map: "picturesonstahistory_idpicture_foreign")
+}
+
+model properties {
+  id        String   @id @db.Char(36)
+  data      Json
+  featureId String   @db.Char(36)
+  createdAt DateTime @default(now()) @db.Timestamp(0)
+  photo     photo[]
+  feature   feature  @relation(fields: [featureId], references: [id], onDelete: Cascade, map: "properties_featureid_foreign")
+
+  @@index([featureId], map: "properties_featureid_foreign")
+}
+
+model qualification_level_trainings {
+  id                        String                  @id @db.Char(36)
+  qualification_training_id String                  @db.Char(36)
+  name                      String                  @db.VarChar(255)
+  created_at                DateTime?               @db.Timestamp(0)
+  updated_at                DateTime?               @db.Timestamp(0)
+  qualification_trainings   qualification_trainings @relation(fields: [qualification_training_id], references: [id], onDelete: Cascade, map: "qualification_level_trainings_qualification_training_id_foreign")
+  trainings                 trainings[]
+
+  @@index([qualification_training_id], map: "qualification_level_trainings_qualification_training_id_foreign")
+}
+
+model qualification_levels {
+  id               String         @id @db.Char(36)
+  qualification_id String         @db.Char(36)
+  name             String         @db.VarChar(255)
+  created_at       DateTime?      @db.Timestamp(0)
+  updated_at       DateTime?      @db.Timestamp(0)
+  qualifications   qualifications @relation(fields: [qualification_id], references: [id], onDelete: Cascade, map: "qualification_levels_qualification_id_foreign")
+
+  @@index([qualification_id], map: "qualification_levels_qualification_id_foreign")
+}
+
+model qualification_trainings {
+  id                            String                          @id @db.Char(36)
+  name                          String                          @db.VarChar(255)
+  created_at                    DateTime?                       @db.Timestamp(0)
+  updated_at                    DateTime?                       @db.Timestamp(0)
+  qualification_level_trainings qualification_level_trainings[]
+  trainings                     trainings[]
+}
+
+model qualifications {
+  id                              String                            @id @db.Char(36)
+  name                            String                            @db.VarChar(255)
+  created_at                      DateTime?                         @db.Timestamp(0)
+  updated_at                      DateTime?                         @db.Timestamp(0)
+  qualification_levels            qualification_levels[]
+  service_provider_qualifications service_provider_qualifications[]
+}
+
+model report {
+  id          String   @id @db.Char(36)
+  title       String   @db.VarChar(255)
+  slug        String   @unique(map: "report_slug_unique") @db.VarChar(255)
+  description String?  @db.VarChar(255)
+  file        String   @db.VarChar(255)
+  createdBy   BigInt   @db.UnsignedBigInt
+  createdAt   DateTime @default(now()) @db.Timestamp(0)
+
+  @@index([createdBy], map: "report_createdby_foreign")
+}
+
+model role_has_permissions {
+  permission_id BigInt @db.UnsignedBigInt
+  role_id       BigInt @db.UnsignedBigInt
+
+  @@id([permission_id, role_id])
+  @@index([role_id], map: "role_has_permissions_role_id_foreign")
+}
+
+model roles {
+  id         BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  name       String    @db.VarChar(255)
+  guard_name String    @db.VarChar(255)
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+
+  @@unique([name, guard_name], map: "roles_name_guard_name_unique")
+}
+
+model ruas {
+  nomorRuas  BigInt   @id @default(autoincrement()) @db.UnsignedBigInt
+  idJalan    String   @db.Char(36)
+  namaRuas   String   @db.VarChar(255)
+  kecamatan  String   @db.VarChar(255)
+  panjangSK  Float
+  lebar      Float
+  keterangan String?  @db.VarChar(255)
+  latitude   Float?
+  longitude  Float?
+  createdAt  DateTime @default(now()) @db.Timestamp(0)
+  jalan      jalan    @relation(fields: [idJalan], references: [id], onDelete: Cascade, map: "ruas_idjalan_foreign")
+
+  @@index([idJalan], map: "ruas_idjalan_foreign")
+}
+
+model ruashistory {
+  id                    String                  @id @db.Char(36)
+  nomorRuas             BigInt
+  namaRuas              String                  @db.VarChar(255)
+  kecamatan             String                  @db.VarChar(255)
+  panjangSK             Float
+  lebar                 Float
+  keterangan            String?                 @db.VarChar(255)
+  latitude              Float?
+  longitude             Float?
+  ruasNomorRuas         BigInt?                 @db.UnsignedBigInt
+  createdAt             DateTime                @default(now()) @db.Timestamp(0)
+  picturesonruashistory picturesonruashistory[]
+
+  @@index([ruasNomorRuas], map: "ruashistory_ruasnomorruas_foreign")
+}
+
+model rule_categories {
+  id         String    @id @db.Char(36)
+  name       String    @db.VarChar(150)
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+  rules      rules[]
+}
+
+model rules {
+  id               String          @id @db.Char(36)
+  rule_category_id String          @db.Char(36)
+  year             Int
+  title            String          @db.VarChar(255)
+  code             String          @db.VarChar(255)
+  file             String          @db.Text
+  created_at       DateTime?       @db.Timestamp(0)
+  updated_at       DateTime?       @db.Timestamp(0)
+  rule_categories  rule_categories @relation(fields: [rule_category_id], references: [id], onDelete: Cascade, map: "rules_rule_category_id_foreign")
+
+  @@index([rule_category_id], map: "rules_rule_category_id_foreign")
+}
+
+model service_provider_projects {
+  id                  String            @id @db.Char(36)
+  executor_project_id String            @db.Char(36)
+  progres             Float
+  date_start          DateTime          @db.Date
+  date_finish         DateTime          @db.Date
+  week                Int
+  file                String?           @db.VarChar(255)
+  description         String            @db.Text
+  created_at          DateTime?         @db.Timestamp(0)
+  updated_at          DateTime?         @db.Timestamp(0)
+  page                Int?
+  type                String?           @db.VarChar(255)
+  days                Int?
+  executor_type       String?           @db.VarChar(255)
+  executor_projects   executor_projects @relation(fields: [executor_project_id], references: [id], onDelete: Cascade, map: "service_provider_projects_executor_project_id_foreign")
+
+  @@index([executor_project_id], map: "service_provider_projects_executor_project_id_foreign")
+}
+
+model service_provider_qualifications {
+  id                    String                                 @id @db.Char(36)
+  sub_classification_id String                                 @db.Char(36)
+  service_provider_id   String                                 @db.Char(36)
+  qualification_id      String                                 @db.Char(36)
+  year                  String                                 @db.Char(4)
+  status                service_provider_qualifications_status
+  resend                String?                                @db.VarChar(255)
+  first_print           DateTime?                              @db.DateTime(0)
+  last_print            DateTime?                              @db.DateTime(0)
+  file                  String                                 @db.VarChar(255)
+  expired_at            DateTime                               @db.Date
+  created_at            DateTime?                              @db.Timestamp(0)
+  updated_at            DateTime?                              @db.Timestamp(0)
+  qualifications        qualifications                         @relation(fields: [qualification_id], references: [id], onDelete: Cascade, map: "service_provider_qualifications_qualification_id_foreign")
+  service_providers     service_providers                      @relation(fields: [service_provider_id], references: [id], onDelete: Cascade, map: "service_provider_qualifications_service_provider_id_foreign")
+  sub_classifications   sub_classifications                    @relation(fields: [sub_classification_id], references: [id], onDelete: Cascade, map: "service_provider_qualifications_sub_classification_id_foreign")
+
+  @@index([qualification_id], map: "service_provider_qualifications_qualification_id_foreign")
+  @@index([service_provider_id], map: "service_provider_qualifications_service_provider_id_foreign")
+  @@index([sub_classification_id], map: "service_provider_qualifications_sub_classification_id_foreign")
+}
+
+model service_providers {
+  id                              String                                     @id @db.Char(36)
+  user_id                         BigInt                                     @db.UnsignedBigInt
+  association_id                  String?                                    @db.Char(36)
+  directur                        String?                                    @db.VarChar(255)
+  address                         String?                                    @db.Text
+  city                            String?                                    @db.VarChar(50)
+  postal_code                     String?                                    @db.Char(10)
+  province                        String?                                    @db.VarChar(255)
+  website                         String?                                    @db.Text
+  fax                             String?                                    @db.VarChar(255)
+  file                            String?                                    @db.VarChar(255)
+  form_of_business_entity         service_providers_form_of_business_entity?
+  type_of_business_entity         service_providers_type_of_business_entity?
+  created_at                      DateTime?                                  @db.Timestamp(0)
+  updated_at                      DateTime?                                  @db.Timestamp(0)
+  logtitude                       Float?
+  latitude                        Float?
+  nomorRuas                       BigInt?                                    @db.UnsignedBigInt
+  nib                             String?                                    @db.VarChar(255)
+  longtitude                      Float?
+  amendment_deeds                 amendment_deeds[]
+  consultant_projects             consultant_projects[]
+  executor_projects               executor_projects[]
+  founding_deeds                  founding_deeds[]
+  officers                        officers[]
+  service_provider_qualifications service_provider_qualifications[]
+  associations                    associations?                              @relation(fields: [association_id], references: [id], onDelete: Restrict, map: "service_providers_association_id_foreign")
+  verifications                   verifications[]
+  workers                         workers[]
+
+  @@index([association_id], map: "service_providers_association_id_foreign")
+  @@index([nomorRuas], map: "service_providers_nomorruas_foreign")
+  @@index([user_id], map: "service_providers_user_id_foreign")
+}
+
+model sta {
+  id            String          @id @db.Char(36)
+  nomorRuas     BigInt          @db.UnsignedBigInt
+  sta           String          @db.VarChar(255)
+  xAwal         Float
+  yAwal         Float
+  xAkhir        Float
+  yAkhir        Float
+  kondisi       String          @db.VarChar(255)
+  perkerasan    String          @db.VarChar(255)
+  coordinates   Json
+  createdAt     DateTime        @default(now()) @db.Timestamp(0)
+  picturesonsta picturesonsta[]
+  stahistory    stahistory[]
+
+  @@index([nomorRuas], map: "sta_nomorruas_foreign")
+}
+
+model stahistory {
+  id                   String                 @id @db.Char(36)
+  idSta                String                 @db.Char(36)
+  nomorRuas            BigInt
+  sta                  String                 @db.VarChar(255)
+  xAwal                Float
+  yAwal                Float
+  xAkhir               Float
+  yAkhir               Float
+  kondisi              String                 @db.VarChar(255)
+  perkerasan           String                 @db.VarChar(255)
+  coordinates          Json
+  createdAt            DateTime               @default(now()) @db.Timestamp(0)
+  picturesonstahistory picturesonstahistory[]
+  stas                 sta                    @relation(fields: [idSta], references: [id], onDelete: Cascade, map: "stahistory_idsta_foreign")
+
+  @@index([idSta], map: "stahistory_idsta_foreign")
+}
+
+model sub_classification_trainings {
+  id                         String                   @id @db.Char(36)
+  classification_training_id String                   @db.Char(36)
+  name                       String                   @db.VarChar(255)
+  created_at                 DateTime?                @db.Timestamp(0)
+  updated_at                 DateTime?                @db.Timestamp(0)
+  classification_trainings   classification_trainings @relation(fields: [classification_training_id], references: [id], onDelete: Cascade, map: "sub_classification_trainings_classification_training_id_foreign")
+  trainings                  trainings[]
+
+  @@index([classification_training_id], map: "sub_classification_trainings_classification_training_id_foreign")
+}
+
+model sub_classifications {
+  id                              String                            @id @db.Char(36)
+  classification_id               String                            @db.Char(36)
+  name                            String                            @db.Text
+  code                            String                            @db.VarChar(255)
+  description                     String                            @db.Text
+  created_at                      DateTime?                         @db.Timestamp(0)
+  updated_at                      DateTime?                         @db.Timestamp(0)
+  service_provider_qualifications service_provider_qualifications[]
+  classifications                 classifications                   @relation(fields: [classification_id], references: [id], onDelete: Cascade, map: "sub_classifications_classification_id_foreign")
+
+  @@index([classification_id], map: "sub_classifications_classification_id_foreign")
+}
+
+model surveys {
+  id                  String            @id @db.Char(36)
+  executor_project_id String            @db.Char(36)
+  name                String?           @db.Text
+  summary             String            @db.Text
+  note                String            @db.Text
+  type                String            @db.VarChar(255)
+  created_at          DateTime?         @db.Timestamp(0)
+  updated_at          DateTime?         @db.Timestamp(0)
+  executor_projects   executor_projects @relation(fields: [executor_project_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "surveys_executor_project_id_foreign")
+
+  @@index([executor_project_id], map: "surveys_executor_project_id_foreign")
+}
+
+model tool_projects {
+  id                  String            @id @db.Char(36)
+  executor_project_id String            @db.Char(36)
+  name                String            @db.VarChar(255)
+  sub_name            String            @db.VarChar(255)
+  merk                String?           @db.VarChar(255)
+  jumlah              Int
+  kuantitas           Float
+  kepemilikan         String            @db.VarChar(255)
+  unit                String?           @db.VarChar(255)
+  is_delete           Int               @default(0) @db.TinyInt
+  created_at          DateTime?         @db.Timestamp(0)
+  updated_at          DateTime?         @db.Timestamp(0)
+  executor_projects   executor_projects @relation(fields: [executor_project_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "tool_projects_executor_project_id_foreign")
+
+  @@index([executor_project_id], map: "tool_projects_executor_project_id_foreign")
+}
+
+model training_members {
+  id                       String                  @id @db.Char(36)
+  training_id              String                  @db.Char(36)
+  name                     String                  @db.VarChar(255)
+  position                 String?                 @db.VarChar(255)
+  address                  String                  @db.Text
+  phone_number             String                  @db.Char(14)
+  decree                   String                  @db.VarChar(255)
+  gender                   training_members_gender
+  file                     String?                 @db.Text
+  national_identity_number String                  @db.Char(18)
+  education                String                  @db.VarChar(255)
+  created_at               DateTime?               @db.Timestamp(0)
+  updated_at               DateTime?               @db.Timestamp(0)
+  certificates             certificates[]
+  trainings                trainings               @relation(fields: [training_id], references: [id], onDelete: Cascade, map: "training_members_training_id_foreign")
+
+  @@index([training_id], map: "training_members_training_id_foreign")
+}
+
+model training_methods {
+  id         String      @id @db.Char(36)
+  name       String      @db.VarChar(255)
+  created_at DateTime?   @db.Timestamp(0)
+  updated_at DateTime?   @db.Timestamp(0)
+  trainings  trainings[]
+}
+
+model trainings {
+  id                              String                        @id @db.Char(36)
+  fund_source_id                  String                        @db.Char(36)
+  training_method_id              String                        @db.Char(36)
+  fiscal_year_id                  String                        @db.Char(36)
+  sub_classification_training_id  String                        @db.Char(36)
+  qualification_training_id       String                        @db.Char(36)
+  qualification_level_training_id String                        @db.Char(36)
+  name                            String                        @db.VarChar(255)
+  organizer                       String                        @db.VarChar(255)
+  start_at                        DateTime                      @db.DateTime(0)
+  end_time                        DateTime                      @db.DateTime(0)
+  lesson_hour                     Int
+  location                        String                        @db.Text
+  description                     String                        @db.Text
+  created_at                      DateTime?                     @db.Timestamp(0)
+  updated_at                      DateTime?                     @db.Timestamp(0)
+  skk                             Int                           @default(1) @db.TinyInt
+  training_members                training_members[]
+  fiscal_years                    fiscal_years                  @relation(fields: [fiscal_year_id], references: [id], onDelete: Cascade, map: "trainings_fiscal_year_id_foreign")
+  fund_sources                    fund_sources                  @relation(fields: [fund_source_id], references: [id], onDelete: Cascade, map: "trainings_fund_source_id_foreign")
+  qualification_level_trainings   qualification_level_trainings @relation(fields: [qualification_level_training_id], references: [id], onDelete: Cascade, map: "trainings_qualification_level_training_id_foreign")
+  qualification_trainings         qualification_trainings       @relation(fields: [qualification_training_id], references: [id], onDelete: Cascade, map: "trainings_qualification_training_id_foreign")
+  sub_classification_trainings    sub_classification_trainings  @relation(fields: [sub_classification_training_id], references: [id], onDelete: Cascade, map: "trainings_sub_classification_training_id_foreign")
+  training_methods                training_methods              @relation(fields: [training_method_id], references: [id], onDelete: Cascade, map: "trainings_training_method_id_foreign")
+
+  @@index([fiscal_year_id], map: "trainings_fiscal_year_id_foreign")
+  @@index([fund_source_id], map: "trainings_fund_source_id_foreign")
+  @@index([qualification_level_training_id], map: "trainings_qualification_level_training_id_foreign")
+  @@index([qualification_training_id], map: "trainings_qualification_training_id_foreign")
+  @@index([sub_classification_training_id], map: "trainings_sub_classification_training_id_foreign")
+  @@index([training_method_id], map: "trainings_training_method_id_foreign")
+}
+
+model types {
+  id         String    @id @db.Char(36)
+  name       String    @db.VarChar(255)
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+}
+
+model users {
+  id                BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  name              String    @db.VarChar(255)
+  profile           String?   @db.VarChar(255)
+  phone_number      String    @db.VarChar(255)
+  decree            String?   @db.VarChar(255)
+  email             String    @unique(map: "users_email_unique") @db.VarChar(255)
+  email_verified_at DateTime? @db.Timestamp(0)
+  password          String    @db.VarChar(255)
+  token             String?   @db.VarChar(60)
+  expired_token     DateTime? @db.Timestamp(0)
+  deleted_at        DateTime? @db.Timestamp(0)
+  remember_token    String?   @db.VarChar(100)
+  created_at        DateTime? @db.Timestamp(0)
+  updated_at        DateTime? @db.Timestamp(0)
+}
+
+model verifications {
+  id                       String            @id @db.Char(36)
+  service_provider_id      String            @db.Char(36)
+  judiciary_number         String            @db.VarChar(255)
+  judiciary_date           DateTime?         @db.Date
+  district_court_number    String            @db.VarChar(255)
+  district_court_date      DateTime?         @db.Date
+  state_institution_number String            @db.VarChar(255)
+  state_institution_date   DateTime?         @db.Date
+  created_at               DateTime?         @db.Timestamp(0)
+  updated_at               DateTime?         @db.Timestamp(0)
+  service_providers        service_providers @relation(fields: [service_provider_id], references: [id], onDelete: Cascade, map: "verifications_service_provider_id_foreign")
+
+  @@index([service_provider_id], map: "verifications_service_provider_id_foreign")
+}
+
+model worker_certificates {
+  id                     String    @id @db.Char(36)
+  worker_id              String    @db.Char(36)
+  qualification_level_id String    @db.Char(36)
+  sub_classification_id  String    @db.Char(36)
+  file                   String    @db.VarChar(255)
+  certificate            String    @db.VarChar(255)
+  registration_number    String    @db.VarChar(255)
+  created_at             DateTime? @db.Timestamp(0)
+  updated_at             DateTime? @db.Timestamp(0)
+  workers                workers   @relation(fields: [worker_id], references: [id], onDelete: Cascade, map: "worker_certificates_worker_id_foreign")
+
+  @@index([worker_id], map: "worker_certificates_worker_id_foreign")
+}
+
+model workers {
+  id                       String                 @id @db.Char(36)
+  service_provider_id      String                 @db.Char(36)
+  national_identity_number String                 @db.Char(18)
+  name                     String                 @db.VarChar(255)
+  birth_date               DateTime               @db.Date
+  gender                   workers_gender
+  address                  String                 @db.Text
+  religion                 workers_religion
+  marital_status           workers_marital_status
+  citizenship              workers_citizenship
+  education                String                 @db.VarChar(255)
+  phone_number             String                 @db.VarChar(255)
+  created_at               DateTime?              @db.Timestamp(0)
+  updated_at               DateTime?              @db.Timestamp(0)
+  worker_certificates      worker_certificates[]
+  service_providers        service_providers      @relation(fields: [service_provider_id], references: [id], onDelete: Cascade, map: "workers_service_provider_id_foreign")
+
+  @@index([service_provider_id], map: "workers_service_provider_id_foreign")
+}
+
+enum images_categories {
+  structure_organitation
+  job_and_function
+  strategic_plan
+}
+
+enum officers_gender {
+  male
+  female
+}
+
+enum service_provider_qualifications_status {
+  pending
+  active
+  reject
+}
+
+enum workers_gender {
+  male
+  female
+}
+
+enum officers_religion {
+  islam
+  kristen
+  katolik
+  hindu
+  budha
+  notfilled
+}
+
+enum training_members_gender {
+  male
+  female
+}
+
+enum workers_religion {
+  islam
+  kristen
+  katolik
+  hindu
+  budha
+  notfilled
+}
+
+enum consultant_projects_characteristic_project {
+  single
+  multiple
+}
+
+enum executor_projects_characteristic_project {
+  single
+  multiple
+}
+
+enum officers_marital_status {
+  marry
+  single
+  divorced
+  death_divorce
+}
+
+enum workers_marital_status {
+  marry
+  single
+  divorced
+  death_divorce
+}
+
+enum workers_citizenship {
+  wna
+  wni
+}
+
+enum service_providers_form_of_business_entity {
+  cv
+  pt
+}
+
+enum service_providers_type_of_business_entity {
+  executor
+  consultant
+}
+
+enum consultant_projects_status {
+  active
+  nonactive
+  canceled
+}
+
+enum executor_projects_status {
+  active
+  nonactive
+  canceled
+}
