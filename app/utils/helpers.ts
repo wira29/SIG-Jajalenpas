@@ -13,3 +13,18 @@ export function swapLngLat(lngLat: number[] | number[][] | number[][][]): number
   export function getCurrentYear() {
     return new Date().getFullYear();
   }
+
+  export function colorFromKondisi(kondisi: string): string | undefined {
+    // kondisi: Baik, Sedang, Rusak Ringan, Rusak Berat
+  
+    switch (kondisi) {
+      case "Baik":
+        return "#00ff00";
+      case "Sedang":
+        return "#ffff00";
+      case "Rusak Ringan":
+        return "#ff9900";
+      case "Rusak Berat":
+        return "#ff0000";
+    }
+  }

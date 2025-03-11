@@ -497,6 +497,7 @@ model picturesonruas {
   idRuas      BigInt  @db.UnsignedBigInt
   description String?
   picture     picture @relation(fields: [idPicture], references: [id], onDelete: Cascade, map: "picturesonruas_idpicture_foreign")
+  ruas        ruas    @relation(fields: [idRuas], references: [nomorRuas], onDelete: Cascade, map: "picturesonruas_idruas_foreign")
 
   @@id([idRuas, idPicture])
   @@index([idPicture], map: "picturesonruas_idpicture_foreign")
@@ -630,6 +631,9 @@ model ruas {
   createdAt  DateTime @default(now()) @db.Timestamp(0)
   jalan      jalan    @relation(fields: [idJalan], references: [id], onDelete: Cascade, map: "ruas_idjalan_foreign")
 
+  sta        sta[]
+  picturesonruas picturesonruas[]
+
   @@index([idJalan], map: "ruas_idjalan_foreign")
 }
 
@@ -754,6 +758,7 @@ model service_providers {
 model sta {
   id            String          @id @db.Char(36)
   nomorRuas     BigInt          @db.UnsignedBigInt
+  ruas          ruas            @relation(fields: [nomorRuas], references: [nomorRuas], map: "sta_nomorruas_foreign")  // Tambah relasi
   sta           String          @db.VarChar(255)
   xAwal         Float
   yAwal         Float
