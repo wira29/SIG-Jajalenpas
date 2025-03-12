@@ -380,6 +380,9 @@ model model_has_roles {
   model_type String @db.VarChar(255)
   model_id   BigInt @db.UnsignedBigInt
 
+  user     users  @relation(fields: [model_id], references: [id])
+  role     roles  @relation(fields: [role_id], references: [id])
+
   @@id([role_id, model_id, model_type])
   @@index([model_id, model_type], map: "model_has_roles_model_id_model_type_index")
 }
@@ -614,6 +617,8 @@ model roles {
   guard_name String    @db.VarChar(255)
   created_at DateTime? @db.Timestamp(0)
   updated_at DateTime? @db.Timestamp(0)
+
+  users      model_has_roles[]
 
   @@unique([name, guard_name], map: "roles_name_guard_name_unique")
 }
@@ -935,6 +940,7 @@ model users {
   remember_token    String?   @db.VarChar(100)
   created_at        DateTime? @db.Timestamp(0)
   updated_at        DateTime? @db.Timestamp(0)
+  roles             model_has_roles[]
 }
 
 model verifications {

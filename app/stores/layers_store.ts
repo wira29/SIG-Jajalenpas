@@ -70,16 +70,20 @@ const useLayersStore = create<LayersStore>((set, get) => ({
     }
   },
   updateLayer: async (layerId, layer) => {
-    const response = await fetch(`/api/layers/${layerId}`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(layer),
-    });
-
-    if (response.ok) {
-      await get().loadLayer(layerId);
+    try {
+      const response = await fetch(`/api/layers/${layerId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(layer),
+      });
+  
+      if (response.ok) {
+        await get().loadLayer(layerId);
+      }
+    } catch (error) {
+      console.log(error);
     }
   },
   loadLayer: async (layerId) => {

@@ -1,4 +1,8 @@
 import useLayersStore, { LayerInformation } from "@/app/stores/layers_store";
+import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from "@headlessui/react";
+import { Fragment, useState } from "react";
+import { IoClose, IoSettings } from "react-icons/io5";
+import AdminOnly from "../middleware/admin_only";
 
 type LayerTileProp = {
     layerInformation: LayerInformation;
@@ -9,6 +13,17 @@ export default function LayerTile({
     layerInformation: information,
     onEdit,
 }: LayerTileProp) {
+
+    // state 
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+    // end state 
+
+    // delete layer 
+    async function confirmDeleteLayer() {
+      setIsDeleteDialogOpen(false);
+      await deleteLayer(information.id);
+    }
+    // end delete layer 
 
       const {
         isLayerVisible: isVisible,
@@ -37,7 +52,7 @@ export default function LayerTile({
         ></span>
       </div>
       <span className="flex-grow text-sm">{information.layer.name}</span>
-      {/* <AdminOnly>
+      <AdminOnly>
         <button
           onClick={() => {
             onEdit(information);
@@ -46,9 +61,9 @@ export default function LayerTile({
         >
           <IoSettings />
         </button>
-      </AdminOnly> */}
+      </AdminOnly>
 
-      {/* <AdminOnly>
+      <AdminOnly>
         <button
           onClick={() => {
             setIsDeleteDialogOpen(true);
@@ -57,9 +72,9 @@ export default function LayerTile({
         >
           <IoClose />
         </button>
-      </AdminOnly> */}
+      </AdminOnly>
 
-      {/* <Transition appear show={isDeleteDialogOpen} as={Fragment}>
+      <Transition appear show={isDeleteDialogOpen} as={Fragment}>
         <Dialog
           as="div"
           className="relative z-[500]"
@@ -67,7 +82,7 @@ export default function LayerTile({
             setIsDeleteDialogOpen(false);
           }}
         >
-          <Transition.Child
+          <TransitionChild
             as={Fragment}
             enter="ease-out duration-300"
             enterFrom="opacity-0"
@@ -77,11 +92,11 @@ export default function LayerTile({
             leaveTo="opacity-0"
           >
             <div className="fixed inset-0 bg-black/25" />
-          </Transition.Child>
+          </TransitionChild>
 
           <div className="fixed inset-0 overflow-y-auto">
             <div className="flex min-h-full items-center justify-center p-4 text-center">
-              <Transition.Child
+              <TransitionChild
                 as={Fragment}
                 enter="ease-out duration-300"
                 enterFrom="opacity-0 scale-95"
@@ -90,13 +105,13 @@ export default function LayerTile({
                 leaveFrom="opacity-100 scale-100"
                 leaveTo="opacity-0 scale-95"
               >
-                <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
-                  <Dialog.Title
+                <DialogPanel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                  <DialogTitle
                     as="h3"
                     className="text-lg font-medium leading-6 text-gray-900"
                   >
                     Hapus Layer?
-                  </Dialog.Title>
+                  </DialogTitle>
                   <div className="mt-2">
                     <p className="text-sm text-gray-500">
                       Apakah Anda yakin ingin menghapus layer berikut:
@@ -131,12 +146,12 @@ export default function LayerTile({
                       Hapus
                     </button>
                   </div>
-                </Dialog.Panel>
-              </Transition.Child>
+                </DialogPanel>
+              </TransitionChild>
             </div>
           </div>
         </Dialog>
-      </Transition> */}
+      </Transition>
     </li>
     )
 }

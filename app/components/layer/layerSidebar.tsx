@@ -1,6 +1,7 @@
 import { JalanInformation } from "@/app/stores/jalan_store";
 import useLayersStore, { LayerInformation } from "@/app/stores/layers_store";
 import { useState } from "react";
+import EditForm from "./editForm";
 import LayerList from "./layerList";
 
 
@@ -30,11 +31,25 @@ export default function LayerSidebar() {
                 Tutup
             </button>
 
-            <LayerList
-                onRoadEdit={setIsRoadEditing}
-                onLayerEdit={setIsLayerEditing}
-                onImporting={setIsImporting}
-            />
+            {
+                isLayerEditing ? (
+                    <EditForm
+                        layerInformation={isLayerEditing}
+                        onSuccess={() => {
+                            setIsLayerEditing(null);
+                        }}
+                        onClose={() => {
+                            setIsLayerEditing(null);
+                        }}
+                    />
+                ) : (
+                    <LayerList
+                        onRoadEdit={setIsRoadEditing}
+                        onLayerEdit={setIsLayerEditing}
+                        onImporting={setIsImporting}
+                    />
+                )
+            }
         </aside>   
     )
 }

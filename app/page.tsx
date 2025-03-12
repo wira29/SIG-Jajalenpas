@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import { useEffect, useMemo } from "react";
 import { Puff } from "react-loader-spinner";
-import FeatureSidebar from "./components/feature/feature_sidebar";
+import FeatureSidebar from "./components/feature/featureSidebar";
 import LayerSidebar from "./components/layer/layerSidebar";
 import { NavbarWidget } from './components/navbar';
 import RoadConditionSidebar from "./components/roadCondition/road_condition_sidebar";

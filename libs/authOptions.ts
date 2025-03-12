@@ -1,9 +1,13 @@
+import { User } from "@/app/types";
 import prisma from "@/libs/prismadb";
 import bcrypt from "bcryptjs";
 import CredentialsProvider from "next-auth/providers/credentials";
 
 export const authOptions = {
     debug: false,
+    session: {
+      strategy: "jwt",
+    },
     providers: [
         CredentialsProvider({
             name: "",
@@ -20,10 +24,17 @@ export const authOptions = {
               }
 
               // Add logic here to look up the user from the credentials supplied
-              const user = await prisma.users.findUnique({
+              const user : User|null = await prisma.users.findUnique({
                 where: {
                   email: credentials.username,
                 },
+                include: {
+                  roles: {
+                    include: {
+                      role: true,
+                    }
+                  }
+                }
               });
 
               // jika user tidak ditemukan 
@@ -43,6 +54,7 @@ export const authOptions = {
                 id: user.id.toString(),
                 name: user.name,
                 email: user.email,
+                role: user.roles[0]?.role.name,
               }   
             }
           }),
@@ -54,6 +66,7 @@ export const authOptions = {
                 user: {
                     ...session.user,
                     id: token.id,
+                    role: token.role,
                 },
             }
         },
@@ -63,13 +76,21 @@ export const authOptions = {
                 return {
                     ...token,
                     id: u.id,
+                    role: u.role,
                 }
             }
 
-            const currentUser = await prisma.users.findUnique({
-                where: {
-                    id: token.id,
-                },
+            const currentUser : User|null = await prisma.users.findUnique({
+              where: {
+                id: token.id,
+              },
+              include: {
+                roles: {
+                  include: {
+                    role: true,
+                  }
+                }
+              }
             });
 
             if (currentUser) {
@@ -78,6 +99,7 @@ export const authOptions = {
                 id: currentUser.id + "",
                 name: currentUser.name,
                 email: currentUser.email,
+                role: currentUser.roles[0].role.name,
               }
             }
 

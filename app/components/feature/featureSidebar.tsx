@@ -6,10 +6,11 @@ import { IoClose } from "react-icons/io5";
 import { useState } from "react";
 import { Oval } from "react-loader-spinner";
 // import { updateFeatureProperty } from "../../actions";
+import { useSession } from "next-auth/react";
 import useLayersStore from "../../stores/layers_store";
 import useSelectedFeatureStore from "../../stores/selected_feature_store";
-import FeaturePropertyDetail from "./feature_property_detail";
-// import AdminOnly from "../AdminOnly";
+import AdminOnly from "../middleware/admin_only";
+import FeaturePropertyDetail from "./featurePropertyDetail";
 // import AuthenticatedOnly from "../AuthenticatedOnly";
 // import FeaturePropertiesHistory from "./FeaturePropertiesHistory";
 // import FeaturePropertyDetail from "./FeaturePropertyDetail";
@@ -19,6 +20,7 @@ function classNames(...classes: any[]) {
 }
 
 export default function FeatureSidebar() {
+  const { data, status } = useSession();
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -40,6 +42,8 @@ export default function FeatureSidebar() {
 
   const titleCandidates = Object.values(property);
   const title = property?.Jdl ?? titleCandidates[0] ?? "Feature";
+
+  console.log(data)
 
   return (
     <aside
@@ -110,7 +114,7 @@ export default function FeatureSidebar() {
               leaveFrom="opacity-100"
               leaveTo="opacity-0"
             >
-              {/* <AdminOnly> */}
+              <AdminOnly>
                 <button
                   className={`mb-4 w-full py-2 pl-4 pr-2 rounded  flex justify-between items-center ${
                     isEditing ? "bg-red-500" : "bg-green-700"
@@ -139,7 +143,7 @@ export default function FeatureSidebar() {
                     )}
                   </div>
                 </button>
-              {/* </AdminOnly> */}
+              </AdminOnly>
 
               <FeaturePropertyDetail
                 key={selectedFeature?.id}

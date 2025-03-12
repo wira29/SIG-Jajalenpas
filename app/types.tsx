@@ -3,6 +3,21 @@ import { Prisma } from "@prisma/client";
 
 export type FeatureCollectionType = "road" | "bridge" | "area";
 
+type Role = {
+  role_id: number;
+  model_type: string;
+  model_id: number;
+  role: { name: string }; // Pastikan ada properti `name`
+};
+
+export type User = {
+  id: bigint;
+  name: string;
+  email: string;
+  password: string;
+  roles: Role[];
+};
+
 export type FeatureWithProperties = Prisma.FeatureGetPayload<{
   include: {
     properties: {

@@ -14,7 +14,7 @@ import useSelectedRuasStore from '../stores/selected_ruas_store';
 import useSelectedStaStore from '../stores/selected_sta_store';
 import { colorFromKondisi, swapLngLat } from '../utils/helpers';
 import { AutoLocateControl } from './autoLocateControl';
-import FeaturePropertyDetailPopup from './feature/feature_property_popup';
+import FeaturePropertyDetailPopup from './feature/featurePropertyPopup';
 
 
 // healt road icon 
