@@ -1,10 +1,10 @@
-import L, { Icon } from 'leaflet';
+import L, { Icon, latLng } from 'leaflet';
 import 'leaflet-defaulticon-compatibility';
 import 'leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.webpack.css';
 import 'leaflet/dist/leaflet.css';
 import { useEffect, useMemo, useState } from 'react';
 import { MdClose, MdLayers, MdLayersClear } from 'react-icons/md';
-import { CircleMarker, MapContainer, Marker, Pane, Polygon, Polyline, TileLayer, Tooltip, useMap, ZoomControl } from "react-leaflet";
+import { CircleMarker, MapContainer, Marker, Pane, Polygon, Polyline, Popup, TileLayer, Tooltip, useMap, ZoomControl } from "react-leaflet";
 import MarkerClusterGroup from 'react-leaflet-markercluster';
 import seedColor from 'seed-color';
 import useJalanStore, { JalanInformation } from '../stores/jalan_store';
@@ -14,6 +14,7 @@ import useSelectedRuasStore from '../stores/selected_ruas_store';
 import useSelectedStaStore from '../stores/selected_sta_store';
 import { colorFromKondisi, swapLngLat } from '../utils/helpers';
 import { AutoLocateControl } from './autoLocateControl';
+import FeaturePropertyDetailPopup from './feature/feature_property_popup';
 
 
 // healt road icon 
@@ -43,6 +44,10 @@ const AutoboundToRuas = () => {
             duration: 1,
           });
         }, 500);
+      } else {
+        setTimeout(() => {
+            map.flyTo(latLng(-7.786, 112.8582), 11);
+          }, 500);
       }
     }, [selectedRuas, map]);
     return null;
@@ -95,6 +100,8 @@ export default function Map() {
     const setSelectedRuas = useSelectedRuasStore((state) => state.set);
     const selectedSta = useSelectedStaStore((state) => state.selected);
     const setSelectedSta = useSelectedStaStore((state) => state.set);
+    const selectedFeature = useSelectedFeatureStore((state) => state.selectedFeature);
+    const setSelectedFeature = useSelectedFeatureStore((state) => state.setSelectedFeature);
     // end selected state 
 
     // create marker data kondisi jalan 
@@ -211,16 +218,6 @@ export default function Map() {
                         key={`sta-marker-${sta.id}`}
                         position={[lastCoordinate[1], lastCoordinate[0]]}
                         icon={healthIcon}
-                        // icon={
-                        //   // new Icon({
-                        //   //   iconUrl:
-                        //   //     "https://static.vecteezy.com/system/resources/previews/009/267/136/non_2x/location-icon-design-free-png.png",
-                        //   //   iconSize: [25, 35], // size of the icon
-                        //   //   iconAnchor: [12, 35], // point of the icon which will correspond to marker's location,
-                        //   //   tooltipAnchor: [0, -35 - 4],
-                        //   // })
-                        //   // dynamic color based on
-                        // }
                         eventHandlers={{
                             click: (e) => {
                             setSelectedSta(sta);
@@ -274,25 +271,23 @@ export default function Map() {
                                 ) as any
                                 }
                                 pathOptions={{
-                                color: information.layer.color,
-                                // color: selectedFeature == road ? "red" : "black",
-                                // weight:
-                                    // selectedFeature?.id == feature.id
-                                    // ? information.layer.weight! + 2
-                                    // : information.layer.weight!,
-                                weight: 2,
+                                color: information.layer.color ? information.layer.color : "black",
+                                weight:
+                                    selectedFeature?.id == feature.id
+                                    ? information.layer.weight! + 2
+                                    : information.layer.weight!,
                                 dashArray: information.layer.dashed ? [7, 7] : [],
                                 dashOffset: information.layer.dashed ? "10" : "15",
                                 }}
                             >
-                                {/* <Popup> */}
-                                {/* <FeaturePropertyDetailPopup
+                                <Popup>
+                                <FeaturePropertyDetailPopup
                                     feature={feature}
                                     onDetail={() => {
                                     setSelectedFeature(feature);
                                     }}
-                                /> */}
-                                {/* </Popup> */}
+                                />
+                                </Popup>
                             </Polyline>
                             ));
                         case "bridge":
@@ -321,7 +316,7 @@ export default function Map() {
                                 }}
                                 eventHandlers={{
                                 click: () => {
-                                    // setSelectedFeature(feature);
+                                    setSelectedFeature(feature);
                                 },
                                 }}
                             ></CircleMarker>
@@ -348,7 +343,7 @@ export default function Map() {
                                 }}
                                 eventHandlers={{
                                 click: () => {
-                                    // setSelectedFeature(feature);
+                                    setSelectedFeature(feature);
                                 },
                                 }}
                             ></Polygon>

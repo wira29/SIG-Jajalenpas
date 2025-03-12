@@ -3,8 +3,10 @@
 import dynamic from "next/dynamic";
 import { useEffect, useMemo } from "react";
 import { Puff } from "react-loader-spinner";
+import FeatureSidebar from "./components/feature/feature_sidebar";
 import LayerSidebar from "./components/layer/layerSidebar";
 import { NavbarWidget } from './components/navbar';
+import RoadConditionSidebar from "./components/roadCondition/road_condition_sidebar";
 import useJalanStore from "./stores/jalan_store";
 import useLayersStore from "./stores/layers_store";
 import useYearStore from "./stores/year_store";
@@ -57,6 +59,10 @@ export default function Home() {
       className="flex flex-row flex-grow w-full items-stretch sm:items-stretch overflow-x-hidden"
       // minus the height of the navbar
       style={{ height: "calc(100vh - 4rem)" }}>
+
+        <FeatureSidebar />
+        <RoadConditionSidebar />
+
         <div className="flex-grow bg-slate-100 w-full relative flex justify-center items-center">
           <DynamicMap />
         </div>

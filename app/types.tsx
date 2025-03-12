@@ -12,6 +12,15 @@ export type FeatureWithProperties = Prisma.FeatureGetPayload<{
   };
 }>;
 
+export type FeatureProperty = Prisma.PropertiesGetPayload<{
+  include: { photos: true };
+}>;
+
+export type NewPhoto = {
+  file: File;
+  description: string;
+};
+
 export type JalanWithRuas = Prisma.JalanGetPayload<{
     include: {
         ruas: true
