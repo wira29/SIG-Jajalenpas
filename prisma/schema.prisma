@@ -246,8 +246,8 @@ model faqs {
 }
 
 model feature {
-  id                  String            @id @db.Char(36)
-  featureCollectionId String            @db.Char(36)
+  id                  BigInt            @id @default(autoincrement()) @db.UnsignedBigInt
+  featureCollectionId BigInt            @db.UnsignedBigInt
   type                String            @db.VarChar(255)
   createdAt           DateTime          @default(now()) @db.Timestamp(3)
   featurecollection   featurecollection @relation(fields: [featureCollectionId], references: [id], onDelete: Cascade, map: "feature_featurecollectionid_foreign")
@@ -258,7 +258,7 @@ model feature {
 }
 
 model featurecollection {
-  id        String    @id @db.Char(36)
+  id        BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
   name      String    @db.VarChar(255)
   type      String    @db.VarChar(255)
   color     String    @db.VarChar(255)
@@ -307,8 +307,8 @@ model fund_sources {
 }
 
 model geometry {
-  id          String   @id @db.Char(36)
-  featureId   String   @db.Char(36)
+  id          BigInt   @id @default(autoincrement()) @db.UnsignedBigInt
+  featureId   BigInt   @db.UnsignedBigInt
   type        String   @db.VarChar(255)
   coordinates Json
   createdAt   DateTime @default(now()) @db.Timestamp(0)
@@ -336,7 +336,7 @@ model images {
 }
 
 model jalan {
-  id         String    @id @db.Char(36)
+  id         BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
   nama       String    @unique(map: "jalan_nama_unique") @db.VarChar(255)
   tahun      Int       @default(2023)
   created_at DateTime? @db.Timestamp(0)
@@ -379,9 +379,8 @@ model model_has_roles {
   role_id    BigInt @db.UnsignedBigInt
   model_type String @db.VarChar(255)
   model_id   BigInt @db.UnsignedBigInt
-
-  user     users  @relation(fields: [model_id], references: [id])
-  role     roles  @relation(fields: [role_id], references: [id])
+  user       users  @relation(fields: [model_id], references: [id])
+  role       roles  @relation(fields: [role_id], references: [id])
 
   @@id([role_id, model_id, model_type])
   @@index([model_id, model_type], map: "model_has_roles_model_id_model_type_index")
@@ -474,8 +473,8 @@ model personal_access_tokens {
 }
 
 model photo {
-  id          String     @id @db.Char(36)
-  propertyId  String     @db.Char(36)
+  id          BigInt     @id @default(autoincrement()) @db.UnsignedBigInt
+  propertyId  BigInt     @db.UnsignedBigInt
   path        String?    @db.VarChar(255)
   url         String?    @db.VarChar(255)
   description String?    @db.VarChar(255)
@@ -486,7 +485,7 @@ model photo {
 }
 
 model picture {
-  id                    String                  @id @db.Char(36)
+  id                    BigInt                  @id @default(autoincrement()) @db.UnsignedBigInt
   path                  String                  @db.VarChar(255)
   createdAt             DateTime                @default(now()) @db.Timestamp(0)
   picturesonruas        picturesonruas[]
@@ -496,19 +495,19 @@ model picture {
 }
 
 model picturesonruas {
-  idPicture   String  @db.Char(36)
+  idPicture   BigInt  @db.UnsignedBigInt
   idRuas      BigInt  @db.UnsignedBigInt
   description String?
   picture     picture @relation(fields: [idPicture], references: [id], onDelete: Cascade, map: "picturesonruas_idpicture_foreign")
-  ruas        ruas    @relation(fields: [idRuas], references: [nomorRuas], onDelete: Cascade, map: "picturesonruas_idruas_foreign")
+  ruas        ruas    @relation(fields: [idRuas], references: [id], onDelete: Cascade, map: "picturesonruas_idruas_foreign")
 
   @@id([idRuas, idPicture])
   @@index([idPicture], map: "picturesonruas_idpicture_foreign")
 }
 
 model picturesonruashistory {
-  idPicture     String      @db.Char(36)
-  idRuasHistory String      @db.Char(36)
+  idPicture     BigInt      @db.UnsignedBigInt
+  idRuasHistory BigInt      @db.UnsignedBigInt
   description   String?     @db.VarChar(255)
   picture       picture     @relation(fields: [idPicture], references: [id], onDelete: Cascade, map: "picturesonruashistory_idpicture_foreign")
   ruashistory   ruashistory @relation(fields: [idRuasHistory], references: [id], onDelete: Cascade, map: "picturesonruashistory_idruashistory_foreign")
@@ -518,8 +517,8 @@ model picturesonruashistory {
 }
 
 model picturesonsta {
-  idPicture   String  @db.Char(36)
-  idSta       String  @db.Char(36)
+  idPicture   BigInt  @db.UnsignedBigInt
+  idSta       BigInt  @db.UnsignedBigInt
   description String? @db.VarChar(255)
   picture     picture @relation(fields: [idPicture], references: [id], onDelete: Cascade, map: "picturesonsta_idpicture_foreign")
   sta         sta     @relation(fields: [idSta], references: [id], onDelete: Cascade, map: "picturesonsta_idsta_foreign")
@@ -529,8 +528,8 @@ model picturesonsta {
 }
 
 model picturesonstahistory {
-  idStaHistory String     @db.Char(36)
-  idPicture    String     @db.Char(36)
+  idStaHistory BigInt     @db.UnsignedBigInt
+  idPicture    BigInt     @db.UnsignedBigInt
   description  String?    @db.VarChar(255)
   picture      picture    @relation(fields: [idPicture], references: [id], onDelete: Cascade, map: "picturesonstahistory_idpicture_foreign")
   stahistory   stahistory @relation(fields: [idStaHistory], references: [id], onDelete: Cascade, map: "picturesonstahistory_idstahistory_foreign")
@@ -540,9 +539,9 @@ model picturesonstahistory {
 }
 
 model properties {
-  id        String   @id @db.Char(36)
+  id        BigInt   @id @default(autoincrement()) @db.UnsignedBigInt
   data      Json
-  featureId String   @db.Char(36)
+  featureId BigInt   @db.UnsignedBigInt
   createdAt DateTime @default(now()) @db.Timestamp(0)
   photo     photo[]
   feature   feature  @relation(fields: [featureId], references: [id], onDelete: Cascade, map: "properties_featureid_foreign")
@@ -617,33 +616,33 @@ model roles {
   guard_name String    @db.VarChar(255)
   created_at DateTime? @db.Timestamp(0)
   updated_at DateTime? @db.Timestamp(0)
-
-  users      model_has_roles[]
+  mmodel_has_roles      model_has_roles[]
 
   @@unique([name, guard_name], map: "roles_name_guard_name_unique")
 }
 
 model ruas {
-  nomorRuas  BigInt   @id @default(autoincrement()) @db.UnsignedBigInt
-  idJalan    String   @db.Char(36)
-  namaRuas   String   @db.VarChar(255)
-  kecamatan  String   @db.VarChar(255)
-  panjangSK  Float
-  lebar      Float
-  keterangan String?  @db.VarChar(255)
-  latitude   Float?
-  longitude  Float?
-  createdAt  DateTime @default(now()) @db.Timestamp(0)
-  jalan      jalan    @relation(fields: [idJalan], references: [id], onDelete: Cascade, map: "ruas_idjalan_foreign")
-
-  sta        sta[]
+  id             BigInt           @id @default(autoincrement()) @db.UnsignedBigInt
+  nomorRuas      BigInt
+  idJalan        BigInt           @db.UnsignedBigInt
+  namaRuas       String           @db.VarChar(255)
+  kecamatan      String           @db.VarChar(255)
+  panjangSK      Float
+  lebar          Float
+  keterangan     String?          @db.VarChar(255)
+  latitude       Float?
+  longitude      Float?
+  createdAt      DateTime         @default(now()) @db.Timestamp(0)
   picturesonruas picturesonruas[]
+  jalan          jalan            @relation(fields: [idJalan], references: [id], onDelete: Cascade, map: "ruas_idjalan_foreign")
+  ruashistory    ruashistory[]
+  sta            sta[]
 
   @@index([idJalan], map: "ruas_idjalan_foreign")
 }
 
 model ruashistory {
-  id                    String                  @id @db.Char(36)
+  id                    BigInt                  @id @default(autoincrement()) @db.UnsignedBigInt
   nomorRuas             BigInt
   namaRuas              String                  @db.VarChar(255)
   kecamatan             String                  @db.VarChar(255)
@@ -652,11 +651,12 @@ model ruashistory {
   keterangan            String?                 @db.VarChar(255)
   latitude              Float?
   longitude             Float?
-  ruasNomorRuas         BigInt?                 @db.UnsignedBigInt
+  ruasId                BigInt?                 @db.UnsignedBigInt
   createdAt             DateTime                @default(now()) @db.Timestamp(0)
   picturesonruashistory picturesonruashistory[]
+  ruas                  ruas?                   @relation(fields: [ruasId], references: [id], map: "ruashistory_ruasid_foreign")
 
-  @@index([ruasNomorRuas], map: "ruashistory_ruasnomorruas_foreign")
+  @@index([ruasId], map: "ruashistory_ruasid_foreign")
 }
 
 model rule_categories {
@@ -761,9 +761,8 @@ model service_providers {
 }
 
 model sta {
-  id            String          @id @db.Char(36)
-  nomorRuas     BigInt          @db.UnsignedBigInt
-  ruas          ruas            @relation(fields: [nomorRuas], references: [nomorRuas], map: "sta_nomorruas_foreign")  // Tambah relasi
+  id            BigInt          @id @default(autoincrement()) @db.UnsignedBigInt
+  ruasId        BigInt          @db.UnsignedBigInt
   sta           String          @db.VarChar(255)
   xAwal         Float
   yAwal         Float
@@ -774,14 +773,15 @@ model sta {
   coordinates   Json
   createdAt     DateTime        @default(now()) @db.Timestamp(0)
   picturesonsta picturesonsta[]
+  ruas          ruas            @relation(fields: [ruasId], references: [id], onDelete: Cascade, map: "sta_ruasid_foreign")
   stahistory    stahistory[]
 
-  @@index([nomorRuas], map: "sta_nomorruas_foreign")
+  @@index([ruasId], map: "sta_ruasid_foreign")
 }
 
 model stahistory {
-  id                   String                 @id @db.Char(36)
-  idSta                String                 @db.Char(36)
+  id                   BigInt                 @id @default(autoincrement()) @db.UnsignedBigInt
+  idSta                BigInt                 @db.UnsignedBigInt
   nomorRuas            BigInt
   sta                  String                 @db.VarChar(255)
   xAwal                Float

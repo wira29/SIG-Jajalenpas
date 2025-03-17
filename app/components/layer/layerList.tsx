@@ -5,6 +5,7 @@ import { getCurrentYear } from "@/app/utils/helpers";
 import { Label, Select } from "flowbite-react";
 import { UploadCloud } from "lucide-react";
 import Loading from "../loading";
+import AdminOnly from "../middleware/admin_only";
 import LayerTile from "./layerTile";
 import { RoadTile } from "./roadTile";
 
@@ -41,11 +42,11 @@ export default function LayerList(props: LayerListProps) {
         <>
             <h1 className="text-xl font-bold p-4 flex justify-between items-center">
                 Legenda
-                {/* <AdminOnly> */}
-                <button>
+                <AdminOnly>
+                <button onClick={() => props.onImporting(true)}>
                     <UploadCloud />
                 </button>
-                {/* </AdminOnly> */}
+                </AdminOnly>
             </h1>
 
             <hr />

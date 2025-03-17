@@ -1,7 +1,9 @@
-import { JalanInformation } from "@/app/stores/jalan_store";
+import useJalanStore, { JalanInformation } from "@/app/stores/jalan_store";
 import useLayersStore, { LayerInformation } from "@/app/stores/layers_store";
+import useYearStore from "@/app/stores/year_store";
 import { useState } from "react";
 import EditForm from "./editForm";
+import ImportForm from "./importForm";
 import LayerList from "./layerList";
 
 
@@ -11,10 +13,14 @@ export default function LayerSidebar() {
     const [isLayerEditing, setIsLayerEditing] = useState<LayerInformation | null>(null);
     const [isRoadEditing, setIsRoadEditing] = useState<JalanInformation | null>(null);
 
+    const { selectedYear, setSelectedYear } = useYearStore();
     const {
         isVisible,
         toggleVisibility,
+        loadLayers
     } = useLayersStore();
+
+    const {fetchData: loadCondition} = useJalanStore()
 
     return (
         <aside className={`
@@ -32,6 +38,21 @@ export default function LayerSidebar() {
             </button>
 
             {
+                isImporting ? (
+                    <ImportForm
+                        onLayerSuccess={() => {
+                            setIsImporting(false);
+                            loadLayers(selectedYear);
+                        }}
+                        onConditionSuccess={() => {
+                            setIsImporting(false);
+                            loadCondition(selectedYear);
+                        }}
+                        onClose={() => {
+                            setIsImporting(false)
+                        }}
+                    />
+                ) :
                 isLayerEditing ? (
                     <EditForm
                         layerInformation={isLayerEditing}
