@@ -1,5 +1,9 @@
 import useJalanStore, { JalanInformation } from "@/app/stores/jalan_store";
+import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from "@headlessui/react";
+import { Fragment, useState } from "react";
+import { IoClose, IoSettings } from "react-icons/io5";
 import seedColor from "seed-color";
+import AdminOnly from "../middleware/admin_only";
 
 type LayerTileProp = {
     jalanInformation: JalanInformation;
@@ -11,10 +15,19 @@ export function RoadTile({
     onEdit,
 }: LayerTileProp) {
 
+  // state 
+  const [isDeleteDialogOpen ,setIsDeleteDialogOpen] = useState(false)
+
     const {
         isJalanVisible: isVisible,
         toggleJalanVisibility: toggleVisibility,
+        deleteRoad
     } = useJalanStore();
+
+    async function confirmDeleteRoad() {
+      setIsDeleteDialogOpen(false);
+      await deleteRoad(information.id);
+    }
 
     const color = seedColor(information.road.id.toString()).toHex();
 
@@ -43,7 +56,7 @@ export function RoadTile({
         ></span>
       </div>
       <span className="flex-grow text-sm">{information.road.nama}</span>
-      {/* <AdminOnly>
+      <AdminOnly>
         <button
           onClick={() => {
             onEdit(information);
@@ -63,9 +76,9 @@ export function RoadTile({
         >
           <IoClose />
         </button>
-      </AdminOnly> */}
+      </AdminOnly>
 
-      {/* <Transition appear show={isDeleteDialogOpen} as={Fragment}>
+      <Transition appear show={isDeleteDialogOpen} as={Fragment}>
         <Dialog
           as="div"
           className="relative z-[500]"
@@ -73,7 +86,7 @@ export function RoadTile({
             setIsDeleteDialogOpen(false);
           }}
         >
-          <Transition.Child
+          <TransitionChild
             as={Fragment}
             enter="ease-out duration-300"
             enterFrom="opacity-0"
@@ -83,11 +96,11 @@ export function RoadTile({
             leaveTo="opacity-0"
           >
             <div className="fixed inset-0 bg-black/25" />
-          </Transition.Child>
+          </TransitionChild>
 
           <div className="fixed inset-0 overflow-y-auto">
             <div className="flex min-h-full items-center justify-center p-4 text-center">
-              <Transition.Child
+              <TransitionChild
                 as={Fragment}
                 enter="ease-out duration-300"
                 enterFrom="opacity-0 scale-95"
@@ -96,13 +109,13 @@ export function RoadTile({
                 leaveFrom="opacity-100 scale-100"
                 leaveTo="opacity-0 scale-95"
               >
-                <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
-                  <Dialog.Title
+                <DialogPanel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                  <DialogTitle
                     as="h3"
                     className="text-lg font-medium leading-6 text-gray-900"
                   >
                     Hapus Layer?
-                  </Dialog.Title>
+                  </DialogTitle>
                   <div className="mt-2">
                     <p className="text-sm text-gray-500">
                       Apakah Anda yakin ingin menghapus layer berikut:
@@ -137,12 +150,12 @@ export function RoadTile({
                       Hapus
                     </button>
                   </div>
-                </Dialog.Panel>
-              </Transition.Child>
+                </DialogPanel>
+              </TransitionChild>
             </div>
           </div>
         </Dialog>
-      </Transition> */}
+      </Transition>
     </li>
     )
 }

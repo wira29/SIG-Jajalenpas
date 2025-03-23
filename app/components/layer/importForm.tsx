@@ -1,3 +1,4 @@
+import useYearStore from "@/app/stores/year_store";
 import { FeatureCollectionType } from "@/app/types";
 import { getCurrentYear } from "@/app/utils/helpers";
 import { Label, TextInput } from "flowbite-react";
@@ -63,16 +64,20 @@ export default function ImportForm({
     saveRuasGeoJSON,
     initialSaveRuasState
   );
+
+  const { setSelectedYear } = useYearStore();
   
   useEffect(() => {
     if (state.success) {
       onLayerSuccess();
+      setSelectedYear(inputYear.current) 
     }
   }, [state.success, onLayerSuccess]);
   
   useEffect(() => {
     if (ruasState.success) {
       onConditionSuccess();
+      setSelectedYear(inputYear.current)
     }
   }, [ruasState.success, onConditionSuccess]);
   
@@ -111,9 +116,12 @@ export default function ImportForm({
           <div className="mb-4">
             <Label className="mb-3">Tahun</Label>
             <TextInput name="tahun" value={inputYear.current.toString()} onChange={(e) =>  inputYear.current = parseInt(e.target.value)} />
+            {state.error?.tahun && (
+              <p style={{ color: "red" }}>{state.error.tahun[0]}</p>
+            )}
           </div>
           <div className="mb-4">
-            <label
+            <label  
               htmlFor="file"
               className="text-gray-700 text-sm font-bold block mb-2"
             >
@@ -162,7 +170,10 @@ export default function ImportForm({
         >
           <div className="mb-4">
             <Label className="mb-3">Tahun</Label>
-            <TextInput name="tahun" value={inputYear.current.toString()} onChange={(e) =>  inputYear.current = parseInt(e.target.value)} />
+            <TextInput name="tahun" defaultValue={inputYear.current.toString()} onChange={(e) =>  inputYear.current = parseInt(e.target.value)} />
+            {state.error?.tahun && (
+              <p className="text-red-500 text-sm">{state.error.tahun}</p>
+            )}
           </div>
           <div className="mb-4">
             <label

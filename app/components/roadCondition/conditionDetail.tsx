@@ -356,7 +356,7 @@ export default function ConditionDetail({ ruas }: ConditionDetailProps) {
                     return (
                       <TableRow key={sta.id} className="text-xs sm:text-md">
                         <TableCell className="text-gray-500">
-                          {sta.nomorRuas}
+                          {sta.ruas.nomorRuas}
                         </TableCell>
                         <TableCell className="text-gray-500">
                           {sta.sta}

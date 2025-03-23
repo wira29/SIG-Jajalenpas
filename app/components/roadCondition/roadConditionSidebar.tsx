@@ -3,7 +3,8 @@ import useSelectedRuasStore from "@/app/stores/selected_ruas_store";
 import useSelectedStaStore from "@/app/stores/selected_sta_store";
 import clsx from "clsx";
 import { useState } from "react";
-import RoadCondition from "./road_condition";
+import RoadCondition from "./roadCondition";
+import Sta from "./sta";
 
 export default function RoadConditionSidebar() {
   const [isStaDetail, setIsStaDetail] = useState(false);
@@ -34,8 +35,7 @@ export default function RoadConditionSidebar() {
     >
       <div>
         {selectedSta ? (
-        //   <Sta />
-        null
+          <Sta />
         ) : (
           <RoadCondition
             selectedRuas={selectedRuas}

@@ -15,7 +15,7 @@ type LayersStore = {
   loadLayers: (selectedYear: number) => void;
   addLayer: (layer: FeatureCollectionFull) => void;
   deleteLayer: (layerId: number) => void;
-  updateLayer: (layerId: number, layer: Record<string, any>) => void;
+  updateLayer: (layerId: number, layer: Record<string, any>, year: number) => void;
   loadLayer: (layerId: number) => Promise<FeatureCollectionFull>;
   toggleLayerVisibility: (layerId: number) => void;
   isLayerVisible: (layerId: number) => boolean;
@@ -69,7 +69,7 @@ const useLayersStore = create<LayersStore>((set, get) => ({
       }));
     }
   },
-  updateLayer: async (layerId, layer) => {
+  updateLayer: async (layerId, layer, year) => {
     try {
       const response = await fetch(`/api/layers/${layerId}`, {
         method: "PATCH",
@@ -80,7 +80,7 @@ const useLayersStore = create<LayersStore>((set, get) => ({
       });
   
       if (response.ok) {
-        await get().loadLayer(layerId);
+        await get().loadLayers(year);
       }
     } catch (error) {
       console.log(error);

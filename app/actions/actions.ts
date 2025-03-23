@@ -168,6 +168,10 @@ const ruasSchema = z.object({
       required_error: "Name is required.",
     })
     .min(3, "Name must be at least 3 characters."),
+  tahun: z.preprocess(
+    (value) => isNaN(parseInt(value as string)) ? getCurrentYear() : parseInt(value as string),
+    z.number()
+  ),
 });
 
 export type SaveRuasFormState = {
@@ -181,6 +185,7 @@ export async function saveRuasGeoJSON(
   const data = ruasSchema.safeParse({
     file: formData.getAll("file"),
     name: formData.get("name"),
+    tahun: formData.get("tahun")
   });
 
   if (!data.success) {
@@ -209,6 +214,7 @@ export async function saveRuasGeoJSON(
 
   // import geojson
   await importer.importGeoJSON(json, {
+    tahun: data.data.tahun,
     name: data.data.name,
   });
 
@@ -261,33 +267,4 @@ export async function updateFeatureProperty(
   }
 
   return property;
-
-  // // add photos (upload first)
-  // for (const photo of newPhotos) {
-  //   const file = photo.file;
-  //   const bytes = await file.arrayBuffer();
-  //   const fileBuffer = Buffer.from(bytes);
-
-  //   const fileExtension = file.name.split(".").pop();
-  //   const fileName = `${Date.now()}.${fileExtension}`;
-
-  //   const path = `./public/uploads/${fileName}`;
-
-  //   // write file to public folder
-  //   await writeFile(path, fileBuffer, (err: any) => {
-  //     if (err) {
-  //       console.error(err);
-  //     }
-  //   });
-
-  //   // save file to database
-  //   await prisma.photo.create({
-  //     data: {
-  //       propertyId: property.id,
-  //       path: path,
-  //       url: path.replace("./public", ""),
-  //       description: photo.description,
-  //     },
-  //   });
-  // }
 }

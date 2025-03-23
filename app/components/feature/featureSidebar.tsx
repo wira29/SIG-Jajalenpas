@@ -6,11 +6,13 @@ import { IoClose } from "react-icons/io5";
 import { useState } from "react";
 import { Oval } from "react-loader-spinner";
 // import { updateFeatureProperty } from "../../actions";
+import { updateFeatureProperty } from "@/app/actions/actions";
 import { useSession } from "next-auth/react";
 import useLayersStore from "../../stores/layers_store";
 import useSelectedFeatureStore from "../../stores/selected_feature_store";
 import AdminOnly from "../middleware/admin_only";
 import FeaturePropertyDetail from "./featurePropertyDetail";
+import FeaturePropertiesHistory from "./featurePropertyHistory";
 // import AuthenticatedOnly from "../AuthenticatedOnly";
 // import FeaturePropertiesHistory from "./FeaturePropertiesHistory";
 // import FeaturePropertyDetail from "./FeaturePropertyDetail";
@@ -158,13 +160,13 @@ export default function FeatureSidebar() {
                   setIsEditing(false);
 
                   setIsLoading(true);
-                //   const property = await updateFeatureProperty(
-                //     selectedFeature?.id!,
-                //     data,
-                //     selectedFeature?.properties[0]?.photos ?? [],
-                //     updatedPhotos,
-                //     deletedPhotos
-                //   );
+                  const property = await updateFeatureProperty(
+                    selectedFeature?.id!,
+                    data,
+                    selectedFeature?.properties[0]?.photos ?? [],
+                    updatedPhotos,
+                    deletedPhotos
+                  );
 
                   for (const photo of newPhotos) {
                     const formData = new FormData();
@@ -189,7 +191,7 @@ export default function FeatureSidebar() {
                   );
 
                   setSelectedFeature(
-                    newLayer.features.find((f: any) => f.id === selectedFeature?.id)!
+                    newLayer.feature.find((f: any) => f.id === selectedFeature?.id)!
                   );
                   setIsLoading(false);
                 }}
@@ -200,6 +202,7 @@ export default function FeatureSidebar() {
           {/* <AuthenticatedOnly> */}
             <TabPanel key="tab_riwayat" className="py-4">
               <Transition
+              as={"div"}
                 appear
                 show={true}
                 enter="transition-opacity duration-500"
@@ -209,10 +212,9 @@ export default function FeatureSidebar() {
                 leaveFrom="opacity-100"
                 leaveTo="opacity-0"
               >
-                <h1>Riwayat</h1>
-                {/* {selectedFeature && (
+                {selectedFeature && (
                   <FeaturePropertiesHistory feature={selectedFeature!} />
-                )} */}
+                )}
               </Transition>
             </TabPanel>
           {/* </AuthenticatedOnly> */}

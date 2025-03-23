@@ -85,3 +85,9 @@ export type FeatureCollectionFull = Prisma.FeatureCollectionGetPayload<{
       }
     };
   }>;
+
+  export type StaPicture = Prisma.PicturesOnStaGetPayload<{
+    include: {
+      picture: true;
+    };
+  }>;

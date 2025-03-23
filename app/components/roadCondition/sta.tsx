@@ -1,41 +1,40 @@
 /* eslint-disable @next/next/no-img-element */
+import useSelectedStaStore from "@/app/stores/selected_sta_store";
 import { Tab, TabGroup, TabList, TabPanel, TabPanels, Transition } from "@headlessui/react";
 import clsx from "clsx";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FaPencilAlt } from "react-icons/fa";
 import { IoClose } from "react-icons/io5";
-import ConditionDetail from "./condition_detail";
-// import AdminOnly from "../AdminOnly";
-// import AuthenticatedOnly from "../AuthenticatedOnly";
-// import ConditionDetail from "./ConditionDetail";
-// import ConditionEditor from "./ConditionEditior";
-// import ConditionHistory from "./ConditionHistory";
+import AdminOnly from "../middleware/admin_only";
+import StaDetail from "./staDetail";
+import StaEditor from "./staEditor";
 
-export default function RoadCondition({
-  selectedRuas,
-  setSelectedRuas,
-}: {
-  selectedRuas: any;
-  setSelectedRuas: (value: any) => void;
-}) {
+export default function Sta() {
+  const {selected: selectedSta, set: setSelectedSta} = useSelectedStaStore()
+
   const [isEditing, setIsEditing] = useState(false);
 
+  useEffect(() => {
+    if (selectedSta) {
+      setIsEditing(false);
+    }
+  }, [selectedSta]);
+
   return (
-    <>
+    <div>
       <div className="flex flex-row justify-between items-center pb-4">
-        <h1 className="text-md sm:text-lg md:text-xl font-bold">
-          {selectedRuas && selectedRuas.namaRuas}
-        </h1>
+        <h1 className="font-bold text-md sm:text-xl">Detail STA</h1>
 
         <button
           className="text-xl font-bold"
           onClick={() => {
-            setSelectedRuas(null);
+            setSelectedSta(null);
           }}
         >
           <IoClose />
         </button>
       </div>
+
       <TabGroup>
         <TabList className="flex space-x-1  p-1">
           <Tab
@@ -70,26 +69,25 @@ export default function RoadCondition({
           {/* </AuthenticatedOnly> */}
         </TabList>
         <TabPanels>
-          <TabPanel key="tab_data" className="py-4">
-            <Transition
-            as={"div"}
-              appear
-              show={true}
-              enter="transition-opacity duration-500"
-              enterFrom="opacity-0"
-              enterTo="opacity-100"
-              leave="transition-opacity duration-500"
-              leaveFrom="opacity-100"
-              leaveTo="opacity-0"
-            >
-              {/* <AdminOnly> */}
+          <Transition
+            appear
+            show={true}
+            enter="transition-opacity duration-500"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="transition-opacity duration-500"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <TabPanel key="tab_data" className="py-4">
+              <AdminOnly>
                 <button
                   className={`mb-4 w-full py-2 pl-4 pr-2 rounded  flex justify-between items-center ${
                     isEditing ? "bg-red-500" : "bg-green-700"
                   } transition-all duration-300`}
                   onClick={() => setIsEditing(!isEditing)}
                 >
-                  <p className="text-white text-md sm:text-lg md:text-lg font-bold">
+                  <p className="text-white text-md sm:text-lg font-bold">
                     {isEditing ? "Batal" : "Edit"}
                   </p>
                   <div className="p-2 bg-white rounded">
@@ -100,35 +98,32 @@ export default function RoadCondition({
                     )}
                   </div>
                 </button>
-              {/* </AdminOnly> */}
+              </AdminOnly>
               {isEditing ? (
-                // <ConditionEditor onDoneEditing={() => setIsEditing(false)} />
-                null
+                <StaEditor onDoneEditing={() => setIsEditing(false)} />
               ) : (
-                <ConditionDetail ruas={selectedRuas} />
+                <StaDetail sta={selectedSta!} />
               )}
-            </Transition>
-          </TabPanel>
-          {/* <AuthenticatedOnly> */}
-            <TabPanel key="tab_riwayat" className="py-4">
-              <Transition
-              as={"div"}
-                appear
-                show={true}
-                enter="transition-opacity duration-500"
-                enterFrom="opacity-0"
-                enterTo="opacity-100"
-                leave="transition-opacity duration-500"
-                leaveFrom="opacity-100"
-                leaveTo="opacity-0"
-              >
-                <h1>Riwayat History</h1>
-                {/* <ConditionHistory /> */}
-              </Transition>
             </TabPanel>
+          </Transition>
+          {/* <AuthenticatedOnly> */}
+            <Transition
+              appear
+              show={true}
+              enter="transition-opacity duration-500"
+              enterFrom="opacity-0"
+              enterTo="opacity-100"
+              leave="transition-opacity duration-500"
+              leaveFrom="opacity-100"
+              leaveTo="opacity-0"
+            >
+              <TabPanel key="tab_riwayat" className="py-4">
+                {/* <StaHistory /> */}
+              </TabPanel>
+            </Transition>
           {/* </AuthenticatedOnly> */}
         </TabPanels>
       </TabGroup>
-    </>
+    </div>
   );
 }

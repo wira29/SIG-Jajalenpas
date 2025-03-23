@@ -11,6 +11,7 @@ type JalanStore  = {
     data: JalanWithRuas[];
     roads: JalanInformation[];
     loading: boolean;
+    deleteRoad: (roadId: number) => void;
     fetchData: (selectedYear: number) => Promise<void>;
     toggleJalanVisibility: (jalanId: number) => void;
     isJalanVisible: (jalanId: number) => boolean;
@@ -20,6 +21,17 @@ const useJalanStore = create<JalanStore>()((set, get) => ({
     data: [],
     roads: [],
     loading: false,
+    deleteRoad: async (roadId: number) => {
+      const response = await fetch(`/api/roads/${roadId}`, {
+        method: "DELETE",
+      });
+  
+      if (response.ok) {
+        set((state) => ({
+          roads: state.roads.filter((l) => l.id !== roadId),
+        }));
+      }
+    },
     fetchData: async (selectedYear: number) => {
         const response = await fetch(`/api/roads?year=${selectedYear}`);
         const data = await response.json();

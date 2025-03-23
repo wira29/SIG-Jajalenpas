@@ -161,7 +161,10 @@ export default function Map() {
                 {/* button tutup selected ruas / sta  */}
                 {selectedRuas && (
                 <button
-                    onClick={() => setSelectedRuas(null)}
+                    onClick={() => {
+                        setSelectedRuas(null)
+                        setSelectedSta(null)
+                    }}
                     className="float-right z-[500] relative p-4 rounded-lg bg-slate-200 text-xl text-green-900 shadow-lg border-green-900 border-2 hover:bg-slate-300 hover:text-slate-800 mt-4"
                     >
                         <MdClose />

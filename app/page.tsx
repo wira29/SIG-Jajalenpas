@@ -6,7 +6,7 @@ import { Puff } from "react-loader-spinner";
 import FeatureSidebar from "./components/feature/featureSidebar";
 import LayerSidebar from "./components/layer/layerSidebar";
 import { NavbarWidget } from './components/navbar';
-import RoadConditionSidebar from "./components/roadCondition/road_condition_sidebar";
+import RoadConditionSidebar from "./components/roadCondition/roadConditionSidebar";
 import useJalanStore from "./stores/jalan_store";
 import useLayersStore from "./stores/layers_store";
 import useYearStore from "./stores/year_store";
@@ -36,12 +36,14 @@ export default function Home() {
   const loadRoads = useJalanStore((state) => state.fetchData);
   const getYears = useYearStore((state) => state.getYears);
   const { selectedYear } = useYearStore();
+  const { layers } = useLayersStore();
+  const { years } = useYearStore()
   
   useEffect(() => { 
     getYears();
-  }, [getYears]);
+  }, [layers]);
 
-  useEffect(() => { 
+  useEffect(() => {
     loadLayers(selectedYear);
   }, [loadLayers, selectedYear]);
 

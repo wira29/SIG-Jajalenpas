@@ -10,7 +10,7 @@ export async function GET(request: Request, { params }: { params: LayerRoutePara
   
     const feature = await prisma.featurecollection.findUnique({
       where: {
-        id: layer,
+        id: parseInt(layer),
       },
       include: {
         feature: {
@@ -39,7 +39,7 @@ export async function DELETE(request: Request, { params }: { params: LayerRouteP
   
     const feature = await prisma.featurecollection.delete({
       where: {
-        id: layer,
+        id: parseInt(layer),
       },
     });
   
@@ -52,7 +52,7 @@ export async function DELETE(request: Request, { params }: { params: LayerRouteP
     
     const feature = await prisma.featurecollection.update({
       where: {
-        id: layer,
+        id: parseInt(layer),
       },
       data: {
         ...body,

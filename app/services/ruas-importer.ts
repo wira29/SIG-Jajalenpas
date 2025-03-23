@@ -34,6 +34,7 @@ function tryParseInt(value: any, defaultValue?: number | null) {
 }
 
 export type ImportRuasDetail = {
+  tahun: number,
   name: string;
 };
 
@@ -166,6 +167,7 @@ export class RuasImporter {
 
     const jalan = await this.client.jalan.create({
       data: {
+        tahun: detail.tahun,
         nama: detail.name,
         ruas: {
           create: ruas.map((ruas) => ({

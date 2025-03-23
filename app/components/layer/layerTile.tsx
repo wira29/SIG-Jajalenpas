@@ -1,4 +1,6 @@
 import useLayersStore, { LayerInformation } from "@/app/stores/layers_store";
+import useYearStore from "@/app/stores/year_store";
+import { getCurrentYear } from "@/app/utils/helpers";
 import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from "@headlessui/react";
 import { Fragment, useState } from "react";
 import { IoClose, IoSettings } from "react-icons/io5";
@@ -14,6 +16,8 @@ export default function LayerTile({
     onEdit,
 }: LayerTileProp) {
 
+    const { setSelectedYear, getYears, years } = useYearStore()
+
     // state 
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     // end state 
@@ -22,6 +26,20 @@ export default function LayerTile({
     async function confirmDeleteLayer() {
       setIsDeleteDialogOpen(false);
       await deleteLayer(information.id);
+      
+      // perbarui tahun aktif 
+      await getYears();
+      const newYears = useYearStore.getState().years;
+
+      // cek apakah masih ada item di tahun yang dipilih 
+      if (!newYears.includes(information.layer.tahun)){
+        const currentYear = newYears.length > 0 ? newYears[0].tahun : getCurrentYear();
+        newYears.map(thn => {
+          console.log("thn: " + thn.tahun)
+        })
+        console.log("ketrigger " + currentYear) 
+        setSelectedYear(currentYear)
+      }
     }
     // end delete layer 
 
@@ -29,7 +47,7 @@ export default function LayerTile({
         isLayerVisible: isVisible,
         toggleLayerVisibility: toggleVisibility,
         deleteLayer,
-      } = useLayersStore();
+      } = useLayersStore(); 
 
       const classByType: Record<string, string> = {
         road: "w-4 h-1",
