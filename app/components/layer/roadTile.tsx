@@ -2,7 +2,6 @@ import useJalanStore, { JalanInformation } from "@/app/stores/jalan_store";
 import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from "@headlessui/react";
 import { Fragment, useState } from "react";
 import { IoClose, IoSettings } from "react-icons/io5";
-import seedColor from "seed-color";
 import AdminOnly from "../middleware/admin_only";
 
 type LayerTileProp = {
@@ -29,7 +28,7 @@ export function RoadTile({
       await deleteRoad(information.id);
     }
 
-    const color = seedColor(information.road.id.toString()).toHex();
+    // const color = seedColor(information.road.id.toString()).toHex();
 
     return (
         <li key={information.id} className="flex flex-row items-center py-1">
@@ -43,19 +42,11 @@ export function RoadTile({
       />
       <div className="w-8 flex items-center justify-center">
         <span
-          style={{
-            backgroundColor: color,
-            width: "16px",
-            height: "16px",
-            display: "block",
-            position: "relative",
-            borderRadius: "3rem 3rem 0",
-            transform: "rotate(45deg)",
-            border: "1px solid #FFFFFF",
-          }}
+          className="w-4 h-1"
+          style={{ backgroundColor: information.color }}
         ></span>
       </div>
-      <span className="flex-grow text-sm">{information.road.nama}</span>
+      <span className="flex-grow text-sm">{information.road?.namaJalan ?? "test"}</span>
       <AdminOnly>
         <button
           onClick={() => {

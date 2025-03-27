@@ -1,9 +1,22 @@
 import { create } from "zustand";
-import { JalanWithRuas } from "../types";
+import { JalanWithRuas, JalanWithRuasExtended, RuasWithSta } from "../types";
+
+export type SimpleRuas = {
+  idJalan: number,
+  namaJalan: string,
+  tahun: number,
+  idRuas: number,
+  nomorRuas: number,
+  namaRuas: string,
+  kecamatan: string,
+  coordinates: Array<number>
+}
 
 export type JalanInformation = {
     id: number;
-    road: JalanWithRuas;
+    // road: JalanWithRuas;
+    road: JalanWithRuasExtended;
+    color: string;
     visible: boolean;
   };
 
@@ -35,11 +48,23 @@ const useJalanStore = create<JalanStore>()((set, get) => ({
     fetchData: async (selectedYear: number) => {
         const response = await fetch(`/api/roads?year=${selectedYear}`);
         const data = await response.json();
-
-        console.log(data)
+        
+        const result = data.flatMap((jalan: JalanWithRuas) =>
+          {
+            return {
+              id: jalan.id,
+              color: jalan.color,
+              visible: true,
+              road: jalan.ruas.map((ruas: RuasWithSta) => ({
+                ...ruas,
+                coordinates: ruas.sta.flatMap((sta: any) => sta.coordinates)
+              }))
+            } 
+          }
+        );
 
         
-        set({ data: data, roads: data.map((jalan: JalanWithRuas) => ({ id: jalan.id, road: jalan, visible: true })) });
+        set({ data: data, roads: result });
     },
     toggleJalanVisibility: (layerId) =>
         set((state) => ({

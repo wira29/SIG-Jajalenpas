@@ -172,6 +172,7 @@ const ruasSchema = z.object({
     (value) => isNaN(parseInt(value as string)) ? getCurrentYear() : parseInt(value as string),
     z.number()
   ),
+  color: z.string(),
 });
 
 export type SaveRuasFormState = {
@@ -185,7 +186,8 @@ export async function saveRuasGeoJSON(
   const data = ruasSchema.safeParse({
     file: formData.getAll("file"),
     name: formData.get("name"),
-    tahun: formData.get("tahun")
+    tahun: formData.get("tahun"),
+    color: formData.get("color")
   });
 
   if (!data.success) {
@@ -216,6 +218,7 @@ export async function saveRuasGeoJSON(
   await importer.importGeoJSON(json, {
     tahun: data.data.tahun,
     name: data.data.name,
+    color: data.data.color,
   });
 
   return {

@@ -38,9 +38,19 @@ export type NewPhoto = {
 
 export type JalanWithRuas = Prisma.JalanGetPayload<{
     include: {
-        ruas: true
+        ruas: {
+          include: {
+            sta: true
+          }
+        }
     };
 }>;
+
+export type JalanWithRuasExtended = JalanWithRuas & {
+  ruas: (JalanWithRuas["ruas"][number] & {
+    coordinates: Array<number>
+  })
+}
 
 export type FeatureCollectionFull = Prisma.FeatureCollectionGetPayload<{
     include: {

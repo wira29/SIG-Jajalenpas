@@ -9,7 +9,11 @@ export async function GET(request: Request) {
 
     const roads = await prisma.jalan.findMany({
         include: {
-            ruas: true
+            ruas: {
+                include: {
+                    sta: true,
+                }
+            }
         },
         where: {
             tahun: year ? parseInt(year) : getCurrentYear()

@@ -4,18 +4,16 @@ import 'leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility
 import 'leaflet/dist/leaflet.css';
 import { useEffect, useMemo, useState } from 'react';
 import { MdClose, MdLayers, MdLayersClear } from 'react-icons/md';
-import { CircleMarker, MapContainer, Marker, Pane, Polygon, Polyline, Popup, TileLayer, Tooltip, useMap, ZoomControl } from "react-leaflet";
-import MarkerClusterGroup from 'react-leaflet-markercluster';
+import { CircleMarker, MapContainer, Marker, Pane, Polygon, Polyline, TileLayer, Tooltip, useMap, ZoomControl } from "react-leaflet";
 import seedColor from 'seed-color';
 import useJalanStore, { JalanInformation } from '../stores/jalan_store';
 import useLayersStore from '../stores/layers_store';
 import useSelectedFeatureStore from '../stores/selected_feature_store';
 import useSelectedRuasStore from '../stores/selected_ruas_store';
 import useSelectedStaStore from '../stores/selected_sta_store';
+import { JalanWithRuasExtended } from '../types';
 import { colorFromKondisi, swapLngLat } from '../utils/helpers';
 import { AutoLocateControl } from './autoLocateControl';
-import FeaturePropertyDetailPopup from './feature/featurePropertyPopup';
-
 
 // healt road icon 
 const healthIcon = new Icon({
@@ -109,7 +107,7 @@ export default function Map() {
         const result: Record<number, L.DivIcon> = {};
 
         for (let jalan of dataKondisiJalan) {
-        const color = seedColor(jalan.road.id.toString()).toHex();
+        const color = seedColor(jalan.road.id).toHex();
         const markerHtmlStyles = `
             background-color: ${color};
             width: 16px;
@@ -238,8 +236,59 @@ export default function Map() {
                 {/* jika tidak ada ruas dipilih  */}
                 {!selectedRuas && (
                     <>
+                    {
+                        
+                        dataKondisiJalan.map((jalan: JalanInformation, i: number) => {
+
+                            console.log(jalan)
+                            if (!jalan.visible) 
+                                return null 
+
+                            return jalan.road.map((ruas: JalanWithRuasExtended, idx: number) => {
+                                return <Polyline
+                                                key={`road-line-${idx}`}
+                                                pane="road"
+                                                positions={swapLngLat(ruas.coordinates as any) as any}
+                                                pathOptions={{
+                                                    color: jalan.color,
+                                                    // color: selectedFeature == road ? "red" : "black",
+                                                    weight: 3,
+                                                }}
+                                                eventHandlers={{
+                                                    click: (e) => {
+                                                    setSelectedRuas(ruas);
+                                                    },
+                                                }}
+                                                ></Polyline>
+                            })
+                        })
+                        // ==== WORKS ==== 
+                        // dataKondisiJalan.map((jalan: JalanInformation, i : number) => {
+                        //     return jalan.road.ruas.map((ruas: JalanWithRuas, idx: number) => {
+                        //         return ruas.sta.map((sta:any) => {
+                        //             return (
+                        //                 <Polyline
+                        //                 key={`road-line-${sta.id}`}
+                        //                 pane="road"
+                        //                 positions={swapLngLat(sta.coordinates as any) as any}
+                        //                 pathOptions={{
+                        //                     color: colorFromKondisi(sta.kondisi),
+                        //                     // color: selectedFeature == road ? "red" : "black",
+                        //                     weight: selectedSta?.id == sta.id ? 10 : 3,
+                        //                 }}
+                        //                 eventHandlers={{
+                        //                     click: (e) => {
+                        //                     setSelectedRuas(ruas);
+                        //                     },
+                        //                 }}
+                        //                 ></Polyline>
+                        //             );
+                        //             })
+                        //     })
+                        // })
+                    }
                     {/* menampilkan marker kondisi jalan  */}
-                    <MarkerClusterGroup key={markerClusterKey}>
+                    {/* <MarkerClusterGroup key={markerClusterKey}>
                         {
                             
                             dataKondisiJalan.map((jalan: JalanInformation) => {
@@ -256,43 +305,43 @@ export default function Map() {
                                 });
                             })
                         }
-                    </MarkerClusterGroup>
+                    </MarkerClusterGroup> */}
 
                     {/* menampilkan layers  */}
                     {layersInformation.map((information, i) => {
                         if (!isLayerVisible(information.id)) return null;
                         switch (information.layer.type) {
-                        case "road":
-                            return information.layer.feature.map((feature:any, i:any) => (
-                            <Polyline
-                                key={i}
-                                pane="road"
-                                positions={
-                                    // [112.861319, -7.657763] as any
-                                swapLngLat(
-                                    feature?.geometry[0]?.coordinates as any
-                                ) as any
-                                }
-                                pathOptions={{
-                                color: information.layer.color ? information.layer.color : "black",
-                                weight:
-                                    selectedFeature?.id == feature.id
-                                    ? information.layer.weight! + 2
-                                    : information.layer.weight!,
-                                dashArray: information.layer.dashed ? [7, 7] : [],
-                                dashOffset: information.layer.dashed ? "10" : "15",
-                                }}
-                            >
-                                <Popup>
-                                <FeaturePropertyDetailPopup
-                                    feature={feature}
-                                    onDetail={() => {
-                                    setSelectedFeature(feature);
-                                    }}
-                                />
-                                </Popup>
-                            </Polyline>
-                            ));
+                        // case "road":
+                        //     return information.layer.feature.map((feature:any, i:any) => (
+                            // <Polyline
+                            //     key={i}
+                            //     pane="road"
+                            //     positions={
+                            //         // [112.861319, -7.657763] as any
+                            //     swapLngLat(
+                            //         feature?.geometry[0]?.coordinates as any
+                            //     ) as any
+                            //     }
+                            //     pathOptions={{
+                            //     color: information.layer.color ? information.layer.color : "black",
+                            //     weight:
+                            //         selectedFeature?.id == feature.id
+                            //         ? information.layer.weight! + 2
+                            //         : information.layer.weight!,
+                            //     dashArray: information.layer.dashed ? [7, 7] : [],
+                            //     dashOffset: information.layer.dashed ? "10" : "15",
+                            //     }}
+                            // >
+                            //     <Popup>
+                            //     <FeaturePropertyDetailPopup
+                            //         feature={feature}
+                            //         onDetail={() => {
+                            //         setSelectedFeature(feature);
+                            //         }}
+                            //     />
+                            //     </Popup>
+                            // </Polyline>
+                            // ));
                         case "bridge":
                             return information.layer.feature.map((feature:any, i:any) => (
                             <CircleMarker
