@@ -8,13 +8,12 @@ import { CircleMarker, MapContainer, Marker, Pane, Polygon, Polyline, Tooltip, u
 import MarkerClusterGroup from "react-leaflet-markercluster";
 import seedColor from 'seed-color';
 import useCurrentPositionStore from '../stores/current_position_store';
-import useJalanStore, { JalanInformation } from '../stores/jalan_store';
+import useJalanStore from '../stores/jalan_store';
 import useLayersStore from '../stores/layers_store';
 import useProjectStore from '../stores/project_store';
 import useSelectedFeatureStore from '../stores/selected_feature_store';
 import useSelectedRuasStore from '../stores/selected_ruas_store';
 import useSelectedStaStore from '../stores/selected_sta_store';
-import { JalanWithRuasExtended } from '../types';
 import { colorFromKondisi, swapLngLat } from '../utils/helpers';
 import { AutoLocateControl } from './autoLocateControl';
 import BaseLayer from './baseLayer';
@@ -264,13 +263,13 @@ export default function Map() {
                     <>
                     {
                         
-                        dataKondisiJalan.map((jalan: JalanInformation, i: number) => {
+                        dataKondisiJalan.map((jalan: any, i: number) => {
 
                             console.log(jalan)
                             if (!jalan.visible) 
                                 return null 
 
-                            return jalan.road.map((ruas: JalanWithRuasExtended, idx: number) => {
+                            return jalan.road.map((ruas: any, idx: number) => {
                                 return <Polyline
                                                 key={`road-line-${idx}`}
                                                 pane="road"
