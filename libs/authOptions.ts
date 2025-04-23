@@ -4,7 +4,6 @@ import bcrypt from "bcryptjs";
 import CredentialsProvider from "next-auth/providers/credentials";
 
 export const authOptions = {
-    debug: false,
     session: {
       strategy: "jwt",
     },
@@ -108,6 +107,7 @@ export const authOptions = {
     },
     pages: {
       signIn: '/auth/signin',
+      signUp: '/auth/signup',
     }
 };
 

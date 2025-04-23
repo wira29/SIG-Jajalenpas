@@ -104,7 +104,7 @@ export default function ImportForm({
           className="text-sm border focus:border-green-500 w-full focus:outline-none rounded-lg px-3 py-2 transition-all duration-300"
         >
           <option value="condition">Jalan dengan Kondisi</option>
-          <option value="feature">Feature (Jalan, Jembatan, Area)</option>
+          <option value="feature">Feature (Jembatan, Area)</option>
         </select>
       </div>
 

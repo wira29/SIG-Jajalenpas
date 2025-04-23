@@ -8,6 +8,7 @@ import { IoClose } from "react-icons/io5";
 import AdminOnly from "../middleware/admin_only";
 import StaDetail from "./staDetail";
 import StaEditor from "./staEditor";
+import StaHistory from "./staHistory";
 
 export default function Sta() {
   const {selected: selectedSta, set: setSelectedSta} = useSelectedStaStore()
@@ -118,7 +119,7 @@ export default function Sta() {
               leaveTo="opacity-0"
             >
               <TabPanel key="tab_riwayat" className="py-4">
-                {/* <StaHistory /> */}
+                <StaHistory />
               </TabPanel>
             </Transition>
           {/* </AuthenticatedOnly> */}

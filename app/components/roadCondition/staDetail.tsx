@@ -13,7 +13,6 @@ type StaDetailProps = {
   sta: StaWithPictures;
 };
 export default function StaDetail({ sta }: StaDetailProps) {
-  console.log(sta)
   return (
     <>
       {sta?.picturesonsta.length > 0 && (

@@ -46,7 +46,7 @@ export function RoadTile({
           style={{ backgroundColor: information.color }}
         ></span>
       </div>
-      <span className="flex-grow text-sm">{information.road?.namaJalan ?? "test"}</span>
+      <span className="flex-grow text-sm">{information.name ?? "test"}</span>
       <AdminOnly>
         <button
           onClick={() => {

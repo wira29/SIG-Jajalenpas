@@ -86,9 +86,9 @@ export type FeatureCollectionFull = Prisma.FeatureCollectionGetPayload<{
     };
   }>;
 
-  export type StaWithPictures = Prisma.StaGetPayload<{
+  export type StaWithPictures = Prisma.staGetPayload<{
     include: {
-      pictures: {
+      picturesonsta: {
         include: {
           picture: true;
         };
@@ -99,5 +99,31 @@ export type FeatureCollectionFull = Prisma.FeatureCollectionGetPayload<{
   export type StaPicture = Prisma.PicturesOnStaGetPayload<{
     include: {
       picture: true;
+    };
+  }>;
+
+  export type RuasPicture = Prisma.PicturesOnRuasGetPayload<{
+    include: {
+      picture: true;
+    };
+  }>;
+
+  export type RuasHistoryWithPictures = Prisma.RuasHistoryGetPayload<{
+    include: {
+      pictures: {
+        include: {
+          picture: true;
+        };
+      };
+    };
+  }>;
+
+  export type StaHistoryWithPictures = Prisma.StaHistoryGetPayload<{
+    include: {
+      pictures: {
+        include: {
+          picture: true;
+        };
+      };
     };
   }>;

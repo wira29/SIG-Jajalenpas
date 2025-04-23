@@ -3,8 +3,14 @@ import { Tab, TabGroup, TabList, TabPanel, TabPanels, Transition } from "@headle
 import clsx from "clsx";
 import { useState } from "react";
 import { FaPencilAlt } from "react-icons/fa";
+import { FiAlertTriangle } from "react-icons/fi";
 import { IoClose } from "react-icons/io5";
+import AdminOnly from "../middleware/admin_only";
+import GuestOnly from "../middleware/guest_only";
 import ConditionDetail from "./conditionDetail";
+import ConditionEditor from "./conditionEditor";
+import ConditionHistory from "./conditionHistory";
+import FormPengaduan from "./formPengaduan";
 // import AdminOnly from "../AdminOnly";
 // import AuthenticatedOnly from "../AuthenticatedOnly";
 // import ConditionDetail from "./ConditionDetail";
@@ -19,6 +25,7 @@ export default function RoadCondition({
   setSelectedRuas: (value: any) => void;
 }) {
   const [isEditing, setIsEditing] = useState(false);
+  const [isPengaduan, setIsPengaduan] = useState(false);
 
   return (
     <>
@@ -82,7 +89,7 @@ export default function RoadCondition({
               leaveFrom="opacity-100"
               leaveTo="opacity-0"
             >
-              {/* <AdminOnly> */}
+              <AdminOnly>
                 <button
                   className={`mb-4 w-full py-2 pl-4 pr-2 rounded  flex justify-between items-center ${
                     isEditing ? "bg-red-500" : "bg-green-700"
@@ -100,11 +107,31 @@ export default function RoadCondition({
                     )}
                   </div>
                 </button>
-              {/* </AdminOnly> */}
+              </AdminOnly>
+
+              <GuestOnly>
+                <button
+                  className={`mb-4 w-full py-2 pl-4 pr-2 rounded  flex justify-between items-center bg-red-500
+                  transition-all duration-300`}
+                  onClick={() => setIsPengaduan(!isPengaduan)}
+                >
+                  <p className="text-white text-md sm:text-lg md:text-lg font-bold">
+                    {isPengaduan ? "Batal" : "Adukan Jalan"}
+                  </p>
+                  <div className="p-2 bg-white rounded">
+                    {isPengaduan ? (
+                      <IoClose className="text-red-500" />
+                    ) : (
+                      <FiAlertTriangle className="text-red-500" />
+                    )}
+                  </div>
+                </button>
+                </GuestOnly>
+
               {isEditing ? (
-                // <ConditionEditor onDoneEditing={() => setIsEditing(false)} />
-                null
-              ) : (
+                <ConditionEditor onDoneEditing={() => setIsEditing(false)} />
+              ) : isPengaduan ?(<FormPengaduan onDoneAduan={() => setIsPengaduan(false)} />)
+              : (
                 <ConditionDetail ruas={selectedRuas} />
               )}
             </Transition>
@@ -122,8 +149,7 @@ export default function RoadCondition({
                 leaveFrom="opacity-100"
                 leaveTo="opacity-0"
               >
-                <h1>Riwayat History</h1>
-                {/* <ConditionHistory /> */}
+                <ConditionHistory />
               </Transition>
             </TabPanel>
           {/* </AuthenticatedOnly> */}

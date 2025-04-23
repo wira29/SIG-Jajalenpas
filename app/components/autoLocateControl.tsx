@@ -33,7 +33,16 @@ Control.AutoLocate = Control.extend({
 
     // onClick
     img.onclick = function () {
-      map.locate({ setView: true });
+      map.locate();
+
+      map.once("locationfound", function (e: any) {
+        // Set view manual ke lokasi user, dengan zoom tetap 11
+        map.setView(e.latlng, 11);
+      });
+
+      map.once("locationerror", function (e: any) {
+        console.error("Gagal mendapatkan lokasi:", e.message);
+      });
     };
 
     return img;

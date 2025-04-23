@@ -15,6 +15,7 @@ export type SimpleRuas = {
 export type JalanInformation = {
     id: number;
     // road: JalanWithRuas;
+    name: string;
     road: JalanWithRuasExtended;
     color: string;
     visible: boolean;
@@ -22,18 +23,24 @@ export type JalanInformation = {
 
 type JalanStore  = {
     data: JalanWithRuas[];
+    road: JalanWithRuas | null;
     roads: JalanInformation[];
     loading: boolean;
+    error: string | null; 
     deleteRoad: (roadId: number) => void;
+    updateRoad: (roadId: number, road: Record<string, any>) => void;
     fetchData: (selectedYear: number) => Promise<void>;
+    loadRoad: (id: number) => void;
     toggleJalanVisibility: (jalanId: number) => void;
     isJalanVisible: (jalanId: number) => boolean;
 }
 
 const useJalanStore = create<JalanStore>()((set, get) => ({
     data: [],
+    road: null,
     roads: [],
     loading: false,
+    error: null,
     deleteRoad: async (roadId: number) => {
       const response = await fetch(`/api/roads/${roadId}`, {
         method: "DELETE",
@@ -45,15 +52,30 @@ const useJalanStore = create<JalanStore>()((set, get) => ({
         }));
       }
     },
+    updateRoad: async (roadId, road) => {
+      const response = await fetch(`/api/jalan/${roadId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(road),
+      });
+  
+      if (response.ok) {
+        await get().loadRoad(roadId);
+      }
+    },
     fetchData: async (selectedYear: number) => {
         const response = await fetch(`/api/roads?year=${selectedYear}`);
         const data = await response.json();
+        
         
         const result = data.flatMap((jalan: JalanWithRuas) =>
           {
             return {
               id: jalan.id,
               color: jalan.color,
+              name: jalan.nama,
               visible: true,
               road: jalan.ruas.map((ruas: RuasWithSta) => ({
                 ...ruas,
@@ -65,6 +87,29 @@ const useJalanStore = create<JalanStore>()((set, get) => ({
 
         
         set({ data: data, roads: result });
+    },
+    loadRoad: async (id: number) => {
+      set({ loading: true });
+      try {
+        const response = await fetch(`/api/roads/${id}`);
+        const road = await response.json();
+        set((state) => {
+          const newRoads = state.roads.map((l) => {
+            if (l.id === id) {
+              return { ...l, road };
+            }
+            return l;
+          });
+  
+          return {
+            roads: newRoads,
+            road,
+            loading: false,
+          };
+        });
+      } catch (error) {
+        set({ error: "Gagal memuat data kondisi jalan", loading: false });
+      }
     },
     toggleJalanVisibility: (layerId) =>
         set((state) => ({

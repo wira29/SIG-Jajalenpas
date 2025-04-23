@@ -5,10 +5,11 @@ import { useEffect, useMemo } from "react";
 import { Puff } from "react-loader-spinner";
 import FeatureSidebar from "./components/feature/featureSidebar";
 import LayerSidebar from "./components/layer/layerSidebar";
-import { NavbarWidget } from './components/navbar';
+import NavbarWidget from "./components/navbar";
 import RoadConditionSidebar from "./components/roadCondition/roadConditionSidebar";
 import useJalanStore from "./stores/jalan_store";
 import useLayersStore from "./stores/layers_store";
+import useProjectStore from "./stores/project_store";
 import useYearStore from "./stores/year_store";
 
 export default function Home() {
@@ -37,6 +38,7 @@ export default function Home() {
   const getYears = useYearStore((state) => state.getYears);
   const { selectedYear } = useYearStore();
   const { layers } = useLayersStore();
+  const { loadProject } = useProjectStore();
   const { years } = useYearStore()
   
   useEffect(() => { 
@@ -46,6 +48,10 @@ export default function Home() {
   useEffect(() => {
     loadLayers(selectedYear);
   }, [loadLayers, selectedYear]);
+
+  useEffect(() => {
+    loadProject(selectedYear)
+  }, [loadProject, selectedYear])
 
   useEffect(() => {
     loadRoads(selectedYear);

@@ -2,18 +2,23 @@ import L, { Icon, latLng } from 'leaflet';
 import 'leaflet-defaulticon-compatibility';
 import 'leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.webpack.css';
 import 'leaflet/dist/leaflet.css';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { MdClose, MdLayers, MdLayersClear } from 'react-icons/md';
-import { CircleMarker, MapContainer, Marker, Pane, Polygon, Polyline, TileLayer, Tooltip, useMap, ZoomControl } from "react-leaflet";
+import { CircleMarker, MapContainer, Marker, Pane, Polygon, Polyline, Tooltip, useMap, ZoomControl } from "react-leaflet";
+import MarkerClusterGroup from "react-leaflet-markercluster";
 import seedColor from 'seed-color';
+import useCurrentPositionStore from '../stores/current_position_store';
 import useJalanStore, { JalanInformation } from '../stores/jalan_store';
 import useLayersStore from '../stores/layers_store';
+import useProjectStore from '../stores/project_store';
 import useSelectedFeatureStore from '../stores/selected_feature_store';
 import useSelectedRuasStore from '../stores/selected_ruas_store';
 import useSelectedStaStore from '../stores/selected_sta_store';
 import { JalanWithRuasExtended } from '../types';
 import { colorFromKondisi, swapLngLat } from '../utils/helpers';
 import { AutoLocateControl } from './autoLocateControl';
+import BaseLayer from './baseLayer';
+import ProjectDialog from './dialog/projectDialog';
 
 // healt road icon 
 const healthIcon = new Icon({
@@ -76,8 +81,22 @@ const AutoInvalidateMapSize = () => {
 
 export default function Map() {
 
-    // state 
+    // state
+    const [map, setMap] = useState<any>(null); 
     const [markerClusterKey, setMarkerClusterKey] = useState(0);
+    const [currentZoom, setCurrentZoom] = useState(11);
+    const [projectDialog, setProjectDialog] = useState(false);
+    const [project, setProject] = useState<any>(null);
+
+    const onZoom = useCallback(() => {
+        setCurrentZoom(map.getZoom());
+      }, [map]);
+    
+      useEffect(() => {
+        if (map) {
+          map.on("zoom", onZoom);
+        }
+      }, [map, onZoom]);
 
     // stores 
     const {
@@ -88,10 +107,17 @@ export default function Map() {
       } = useLayersStore();
     const { roads: dataKondisiJalan } = useJalanStore();
 
+    const { projects, isProjectVisible } = useProjectStore();
+    const { position, updatePosition } = useCurrentPositionStore();
+
     // end stores
     useEffect(() => {
         setMarkerClusterKey(markerClusterKey + 1);
     }, [dataKondisiJalan]);
+
+    useEffect(() => {
+        updatePosition();
+      }, [updatePosition]);
 
     // selected state 
     const selectedRuas = useSelectedRuasStore((state) => state.selected);
@@ -103,37 +129,40 @@ export default function Map() {
     // end selected state 
 
     // create marker data kondisi jalan 
-    const icons = useMemo(() => {
-        const result: Record<number, L.DivIcon> = {};
-
-        for (let jalan of dataKondisiJalan) {
-        const color = seedColor(jalan.road.id).toHex();
-        const markerHtmlStyles = `
-            background-color: ${color};
+    const markerHtmlStyles = `
+            background-color: yellow;
             width: 16px;
             height: 16px;
             display: block;
             left: -8px;
             top: -8px;
             position: relative;
-            border-radius: 3rem 3rem 0;
+            border-radius: 3rem 3rem 0;  
             transform: rotate(45deg);
             border: 1px solid #FFFFFF`;
-
-        const icon = new L.DivIcon({
-            className: "my-custom-pin",
-            iconAnchor: [-8, 0],
-            html: `<span style="${markerHtmlStyles}" />`,
-        });
-
-        result[jalan.road.id] = icon;
-        }
-        return result;
-    }, [dataKondisiJalan]);
     // end create marker data kondisi jalan
+
+    const projectIcon = new L.DivIcon({
+        className: "my-custom-pin",
+        iconAnchor: [-8, 0],
+        html: `<span style="${markerHtmlStyles}" />`,
+    })
+
+    const projectMarkers = useMemo(() => {
+        return projects.map((project: any, index: number) => {
+            const offset = 0.0001 * index;
+            return <Marker eventHandlers={{ 
+                    click: () => {
+                        setProjectDialog(true);
+                        setProject(project);
+                    }
+                 }} key={"project-" + project.id} position={[project.latitude! + offset, project.longtitude! + offset]} icon={projectIcon}/>
+        })
+    }, [projects])
 
     return (
         <MapContainer
+            ref={setMap}
             center={[-7.786, 112.8582]}
             zoom={11}
             className="h-full w-full absolute bg-white"
@@ -142,10 +171,7 @@ export default function Map() {
             renderer={L.canvas({
             tolerance: 500,
             })}>
-                <TileLayer
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                    />
+                <BaseLayer />
 
                 {/* button legenda  */}
                 <button
@@ -252,7 +278,7 @@ export default function Map() {
                                                 pathOptions={{
                                                     color: jalan.color,
                                                     // color: selectedFeature == road ? "red" : "black",
-                                                    weight: 3,
+                                                    weight: 3 + (currentZoom - 11),
                                                 }}
                                                 eventHandlers={{
                                                     click: (e) => {
@@ -287,6 +313,20 @@ export default function Map() {
                         //     })
                         // })
                     }
+                    {/* menampilkan projek  */}
+                    {
+                        (isProjectVisible) ? (
+                            <>
+                            <MarkerClusterGroup>
+                                {
+                                    projectMarkers
+                                }
+                            </MarkerClusterGroup>
+                            <ProjectDialog isOpen={projectDialog} setOpen={setProjectDialog} project={project}/>
+                            </>
+                        ) : null
+                    }
+                    {/* end menampilkan projek  */}
                     {/* menampilkan marker kondisi jalan  */}
                     {/* <MarkerClusterGroup key={markerClusterKey}>
                         {
@@ -408,6 +448,23 @@ export default function Map() {
                     </>
                 )}
                 {/* end jika tidak ada ruas dipilih  */}
+
+                {/* current position  */}
+                {position && (
+                    <CircleMarker
+                    center={[position.coords.latitude, position.coords.longitude]}
+                    radius={5}
+                    pathOptions={{
+                        color: "blue",
+                        weight: 2,
+                        fill: true,
+                        fillColor: "#0000FF",
+                        fillOpacity: 0.7,
+                        stroke: true,
+                    }}
+                    ></CircleMarker>
+                )}
+                {/* end current position   */}
         </MapContainer>
     )
 }
