@@ -1,9 +1,9 @@
-import { User } from "@/app/types";
 import prisma from "@/libs/prismadb";
 import bcrypt from "bcryptjs";
+import { AuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 
-export const authOptions = {
+export const authOptions : AuthOptions = {
     session: {
       strategy: "jwt",
     },
@@ -23,7 +23,7 @@ export const authOptions = {
               }
 
               // Add logic here to look up the user from the credentials supplied
-              const user : User|null = await prisma.users.findUnique({
+              const user : any|null = await prisma.users.findUnique({
                 where: {
                   email: credentials.username,
                 },
@@ -79,7 +79,7 @@ export const authOptions = {
                 }
             }
 
-            const currentUser : User|null = await prisma.users.findUnique({
+            const currentUser : any|null = await prisma.users.findUnique({
               where: {
                 id: token.id,
               },
@@ -106,8 +106,7 @@ export const authOptions = {
         },
     },
     pages: {
-      signIn: '/auth/signin',
-      signUp: '/auth/signup',
+      signIn: '/auth/signin'
     }
 };
 

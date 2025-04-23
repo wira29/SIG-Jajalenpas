@@ -45,7 +45,7 @@ export async function POST(request: Request)
             created_by: parseInt((session?.user as any)?.id),
             keluhan: keluhan,
             photo: path.replace("./public", ""),
-            status: "pending"
+            status: "pending",
         },
     });
 
