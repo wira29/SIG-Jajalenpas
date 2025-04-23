@@ -161,9 +161,9 @@ export default function FeatureSidebar() {
 
                   setIsLoading(true);
                   const property = await updateFeatureProperty(
-                    selectedFeature?.id!,
+                    Number(selectedFeature?.id!),
                     data,
-                    selectedFeature?.properties[0]?.photos ?? [],
+                    selectedFeature?.properties[0]?.photo ?? [],
                     updatedPhotos,
                     deletedPhotos
                   );
@@ -187,7 +187,7 @@ export default function FeatureSidebar() {
                   }
 
                   const newLayer = await loadLayer(
-                    selectedFeature?.featureCollectionId!
+                    Number(selectedFeature?.featureCollectionId!)
                   );
 
                   setSelectedFeature(

@@ -6,7 +6,7 @@ import "moment/locale/id";
 import { Fragment, useEffect, useState } from "react";
 import { IoEye } from "react-icons/io5";
 import { Oval } from "react-loader-spinner";
-import { FeatureProperty, FeatureWithProperties } from "../../types";
+import { FeatureWithProperties } from "../../types";
 import FeaturePropertyDetail from "./featurePropertyDetail";
 
 moment.locale("id");
@@ -23,11 +23,11 @@ export default function FeaturePropertiesHistory({
     useFeaturePropertiesStore();
 
   useEffect(() => {
-    fetchProperties(feature.id);
+    fetchProperties(Number(feature.id));
   }, [feature.id, fetchProperties]);
 
-  const properties = propertiesOf(feature.id);
-  const isLoading = isLoadingPropertiesOf(feature.id);
+  const properties = propertiesOf(Number(feature.id));
+  const isLoading = isLoadingPropertiesOf(Number(feature.id));
 
   return (
     <div className="flex flex-col">
@@ -54,7 +54,7 @@ export default function FeaturePropertiesHistory({
   );
 }
 
-function PropertyTile({ property }: { property: FeatureProperty }) {
+function PropertyTile({ property }: { property: any }) {
   const [isOpen, setIsOpen] = useState(false);
 
   function openModal() {

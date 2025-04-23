@@ -41,7 +41,7 @@ export default function ConditionEditor({
   }, [ruas, convert]);
 
   const [pictures, setPictures] = useState<Array<RuasPicture | NewPicture>>(
-    ruas?.pictures || []
+    ruas?.picturesonruas || []
   );
 
   const deletedPictures = useRef<Array<RuasPicture>>([]);

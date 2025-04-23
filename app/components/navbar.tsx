@@ -71,12 +71,15 @@ export default function NavbarWidget() {
                 <a href="/statistik">Statistik</a>
               </DropdownMenuItem>
             {/* </AuthenticatedOnly> */}
-            <DropdownMenuItem>
+            {/* <DropdownMenuItem>
               <a href="https://www.lapor.go.id/" target="_blank">
                 Pengaduan
               </a>
-            </DropdownMenuItem>
-            {(data?.user as any)?.role === "ADMIN" && (
+            </DropdownMenuItem> */}
+              <DropdownMenuItem>
+                <a href="/aduan">Aduan Masyarakat</a>
+              </DropdownMenuItem>
+            {(data?.user as any)?.role === "superadmin" && (
               <DropdownMenuItem>
                 <a href="/users">Akun</a>
               </DropdownMenuItem>

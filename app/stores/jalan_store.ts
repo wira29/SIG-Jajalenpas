@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { JalanWithRuas, JalanWithRuasExtended, RuasWithSta } from "../types";
+import { JalanWithRuas, JalanWithRuasExtended } from "../types";
 
 export type SimpleRuas = {
   idJalan: number,
@@ -77,7 +77,7 @@ const useJalanStore = create<JalanStore>()((set, get) => ({
               color: jalan.color,
               name: jalan.nama,
               visible: true,
-              road: jalan.ruas.map((ruas: RuasWithSta) => ({
+              road: jalan.ruas.map((ruas: any) => ({
                 ...ruas,
                 coordinates: ruas.sta.flatMap((sta: any) => sta.coordinates)
               }))

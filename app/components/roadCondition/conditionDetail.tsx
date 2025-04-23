@@ -143,7 +143,7 @@ export default function ConditionDetail({ ruas }: ConditionDetailProps) {
 
   return (
     <>
-      {ruas && ruas?.pictures?.length > 0 && (
+      {ruas && ruas?.picturesonruas?.length > 0 && (
         <Carousel
           opts={{
             align: "end",
@@ -151,7 +151,7 @@ export default function ConditionDetail({ ruas }: ConditionDetailProps) {
           className="w-full"
         >
           <CarouselContent>
-            {ruas?.pictures.map((picture: any, index: number) => (
+            {ruas?.picturesonruas.map((picture: any, index: number) => (
               <CarouselItem key={index} className="">
                 <div className="p-1">
                   <ImageDialog image={"/api/picture/" + picture.picture.id} desc={picture.description ?? ""} data={ruas} >

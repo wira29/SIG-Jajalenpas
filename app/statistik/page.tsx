@@ -28,7 +28,7 @@ export default function Statistik() {
   const selectedRoad = useMemo(() => {
     if (!selectedRoadId) return null;
 
-    return roads.find((road) => road.id === parseInt(selectedRoadId));
+    return roads.find((road) => Number(road.id) === parseInt(selectedRoadId));
   }, [roads, selectedRoadId]);
 
   const jumlahSta = useMemo(() => {
@@ -89,7 +89,7 @@ export default function Statistik() {
         >
           <option value="">Pilih Jalan</option>
           {roads.map((road) => (
-            <option key={road.id} value={road.id}>
+            <option key={road.id} value={Number(road.id)}>
               {road.nama}
             </option>
           ))}

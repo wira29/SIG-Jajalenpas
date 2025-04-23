@@ -60,7 +60,7 @@ export default function LayerTile({
       <input
         type="checkbox"
         className="text-sm font-medium text-green-500 dark:text-gray-300 rounded-sm"
-        checked={isVisible(information.layer.id)}
+        checked={isVisible(Number(information.layer.id))}
         onChange={() => toggleVisibility(information.id)}
       />
       <div className="w-8 flex items-center justify-center">

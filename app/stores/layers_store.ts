@@ -55,7 +55,7 @@ const useLayersStore = create<LayersStore>((set, get) => ({
   },
   addLayer: (layer) => {
     set((state) => ({
-      layers: [...state.layers, { id: layer.id, layer, visible: true }],
+      layers: [...state.layers, { id: Number(layer.id), layer, visible: true }],
     }));
   },
   deleteLayer: async (layerId: number) => {

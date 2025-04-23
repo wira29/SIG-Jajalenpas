@@ -18,17 +18,17 @@ export type User = {
   roles: Role[];
 };
 
-export type FeatureWithProperties = Prisma.FeatureGetPayload<{
+export type FeatureWithProperties = Prisma.featureGetPayload<{
   include: {
     properties: {
-      include: { photos: true };
+      include: { photo: true };
     };
     geometry: true;
   };
 }>;
 
-export type FeatureProperty = Prisma.PropertiesGetPayload<{
-  include: { photos: true };
+export type FeatureProperty = Prisma.propertiesGetPayload<{
+  include: { photo: true };
 }>;
 
 export type NewPhoto = {
@@ -36,7 +36,7 @@ export type NewPhoto = {
   description: string;
 };
 
-export type JalanWithRuas = Prisma.JalanGetPayload<{
+export type JalanWithRuas = Prisma.jalanGetPayload<{
     include: {
         ruas: {
           include: {
@@ -52,13 +52,13 @@ export type JalanWithRuasExtended = JalanWithRuas & {
   })
 }
 
-export type FeatureCollectionFull = Prisma.FeatureCollectionGetPayload<{
+export type FeatureCollectionFull = Prisma.featurecollectionGetPayload<{
     include: {
       feature: {
         include: {
           properties: {
             include: {
-              photos: true;
+              photo: true;
             };
           };
           geometry: true;
@@ -67,16 +67,16 @@ export type FeatureCollectionFull = Prisma.FeatureCollectionGetPayload<{
     };
   }>;
 
-  export type RuasWithSta = Prisma.RuasGetPayload<{
+  export type RuasWithSta = Prisma.ruasGetPayload<{
     include: {
-      pictures: {
+      picturesonruas: {
         include: {
           picture: true;
         };
-      };
+      }
       sta: {
         include: {
-          pictures: {
+          picturesonsta: {
             include: {
               picture: true;
             };
@@ -91,26 +91,27 @@ export type FeatureCollectionFull = Prisma.FeatureCollectionGetPayload<{
       picturesonsta: {
         include: {
           picture: true;
-        };
-      }
+        }
+      },
+      ruas: true
     };
   }>;
 
-  export type StaPicture = Prisma.PicturesOnStaGetPayload<{
+  export type StaPicture = Prisma.picturesonstaGetPayload<{
     include: {
       picture: true;
     };
   }>;
 
-  export type RuasPicture = Prisma.PicturesOnRuasGetPayload<{
+  export type RuasPicture = Prisma.picturesonruasGetPayload<{
     include: {
       picture: true;
     };
   }>;
 
-  export type RuasHistoryWithPictures = Prisma.RuasHistoryGetPayload<{
+  export type RuasHistoryWithPictures = Prisma.ruashistoryGetPayload<{
     include: {
-      pictures: {
+      picturesonruashistory: {
         include: {
           picture: true;
         };
@@ -118,9 +119,9 @@ export type FeatureCollectionFull = Prisma.FeatureCollectionGetPayload<{
     };
   }>;
 
-  export type StaHistoryWithPictures = Prisma.StaHistoryGetPayload<{
+  export type StaHistoryWithPictures = Prisma.stahistoryGetPayload<{
     include: {
-      pictures: {
+      picturesonstahistory: {
         include: {
           picture: true;
         };

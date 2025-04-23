@@ -112,7 +112,7 @@ export default function FeaturePropertyDetail({
             <h1 className="text-sm font-bold mt-4 mb-2">Foto</h1>
 
             <div className="grid grid-cols-2 gap-1">
-              {property?.photos?.length === 0 && (
+              {property?.photo?.length === 0 && (
                 <div className="w-full p-1">
                   <span className="text-xs text-gray-500">Tidak ada foto</span>
                 </div>
