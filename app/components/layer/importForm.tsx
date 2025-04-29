@@ -54,6 +54,7 @@ export default function ImportForm({
   
   const [layerType, setLayerType] = useState<FeatureCollectionType>("road");
   const [isRoadCondition, setIsRoadCondition] = useState(false);
+  const [isRoadDashed, setIsRoadDashed] = useState(false);
   
   const isRoad = () => layerType === "road";
   const isBridge = () => layerType === "bridge";
@@ -161,6 +162,91 @@ export default function ImportForm({
           </div>
 
           <div className="mb-4">
+              <label
+                htmlFor="weight"
+                className="text-gray-700 text-sm font-bold block mb-2"
+              >
+                Ketebalan Garis
+              </label>
+              <input
+                type="range"
+                name="weight"
+                id="weight"
+                className="text-sm border focus:border-green-500 w-full focus:outline-none rounded-lg px-3 mt-2 transition-all duration-300"
+                min={1}
+                max={5}
+                step={1}
+              />
+
+              {state.error?.weight && (
+                <p className="text-red-500 text-sm">{state.error.weight}</p>
+              )}
+            </div>
+
+          <div className="mb-4">
+              <label
+                htmlFor="dashed"
+                className="text-gray-700 text-sm font-bold block mb-2"
+              >
+                Putus-putus
+              </label>
+              <input
+                type="checkbox"
+                name="dashed"
+                id="dashed"
+                className="border border-gray-200 rounded-sm px-2 py-1"
+                onChange={(e) => setIsRoadDashed(e.target.checked)}
+              />
+            </div>
+
+            {isRoadDashed && (
+              <>
+              <div className="mb-4">
+              <label
+                htmlFor="weight"
+                className="text-gray-700 text-sm font-bold block mb-2"
+              >
+                Spasi Garis
+              </label>
+              <input
+                type="range"
+                name="weight"
+                id="weight"
+                className="text-sm border focus:border-green-500 w-full focus:outline-none rounded-lg px-3 mt-2 transition-all duration-300"
+                min={1}
+                max={5}
+                step={1}
+              />
+
+              {state.error?.weight && (
+                <p className="text-red-500 text-sm">{state.error.weight}</p>
+              )}
+            </div>
+            <div className="mb-4">
+              <label
+                htmlFor="weight"
+                className="text-gray-700 text-sm font-bold block mb-2"
+              >
+                Panjang Garis
+              </label>
+              <input
+                type="range"
+                name="weight"
+                id="weight"
+                className="text-sm border focus:border-green-500 w-full focus:outline-none rounded-lg px-3 mt-2 transition-all duration-300"
+                min={1}
+                max={5}
+                step={2}
+              />
+
+              {state.error?.weight && (
+                <p className="text-red-500 text-sm">{state.error.weight}</p>
+              )}
+            </div>
+              </>
+            )}
+
+          {/* <div className="mb-4">
             <label
               htmlFor="color"
               className="text-gray-700 text-sm font-bold block mb-2"
@@ -177,7 +263,7 @@ export default function ImportForm({
             {state.error?.color && (
               <p className="text-red-500 text-sm">{state.error.color}</p>
             )}
-          </div>
+          </div> */}
 
           <SubmitButton />
         </form>
@@ -279,27 +365,6 @@ export default function ImportForm({
 
               {state.error?.weight && (
                 <p className="text-red-500 text-sm">{state.error.weight}</p>
-              )}
-            </div>
-          )}
-
-          {isRoad() && (
-            <div className="mb-4">
-              <label
-                htmlFor="dashed"
-                className="text-gray-700 text-sm font-bold block mb-2"
-              >
-                Putus-putus
-              </label>
-              <input
-                type="checkbox"
-                name="dashed"
-                id="dashed"
-                className="border border-gray-200 rounded-sm px-2 py-1"
-              />
-
-              {state.error?.dashed && (
-                <p className="text-red-500 text-sm">{state.error.dashed}</p>
               )}
             </div>
           )}

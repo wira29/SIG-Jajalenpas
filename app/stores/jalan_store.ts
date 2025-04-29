@@ -68,25 +68,27 @@ const useJalanStore = create<JalanStore>()((set, get) => ({
     fetchData: async (selectedYear: number) => {
         const response = await fetch(`/api/roads?year=${selectedYear}`);
         const data = await response.json();
+
+        set({ data: data, roads: data.map((jalan: JalanWithRuas) => ({ id: jalan.id, weight: jalan.weight, dash: jalan.dash, dashLength: jalan.dashLength, road: jalan, visible: true })) });
         
         
-        const result = data.flatMap((jalan: JalanWithRuas) =>
-          {
-            return {
-              id: jalan.id,
-              color: jalan.color,
-              name: jalan.nama,
-              visible: true,
-              road: jalan.ruas.map((ruas: any) => ({
-                ...ruas,
-                coordinates: ruas.sta.flatMap((sta: any) => sta.coordinates)
-              }))
-            } 
-          }
-        );
+        // const result = data.flatMap((jalan: JalanWithRuas) =>
+        //   {
+        //     return {
+        //       id: jalan.id,
+        //       color: jalan.color,
+        //       name: jalan.nama,
+        //       visible: true,
+        //       road: jalan.ruas.map((ruas: any) => ({
+        //         ...ruas,
+        //         coordinates: ruas.sta.flatMap((sta: any) => sta.coordinates)
+        //       }))
+        //     } 
+        //   }
+        // );
 
         
-        set({ data: data, roads: result });
+        // set({ data: data, roads: result });
     },
     loadRoad: async (id: number) => {
       set({ loading: true });

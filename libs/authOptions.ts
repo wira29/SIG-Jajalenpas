@@ -38,15 +38,19 @@ export const authOptions : AuthOptions = {
 
               // jika user tidak ditemukan 
               if (!user) {
-                console.log("user tidak ditemukan");
-                return null;
+                throw new Error("Pengguna tidak ditemukan");
+              }
+
+              // user unverified 
+              if (!user.email_verified_at) {
+                
+                throw new Error("Email anda belum diverifikasi");
               }
         
               // jika password salah
               const isValidPassword = await bcrypt.compare(credentials.password, user.password);
               if (!isValidPassword) {
-                console.log("password salah");
-                return null;
+                throw new Error("Password salah");
               }
 
               return {
@@ -106,7 +110,8 @@ export const authOptions : AuthOptions = {
         },
     },
     pages: {
-      signIn: '/auth/signin'
+      signIn: '/auth/signin',
+      error: '/auth/signin'
     }
 };
 

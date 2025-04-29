@@ -1,3 +1,4 @@
+import { Card } from 'flowbite-react';
 import L, { Icon, latLng } from 'leaflet';
 import 'leaflet-defaulticon-compatibility';
 import 'leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.webpack.css';
@@ -159,6 +160,12 @@ export default function Map() {
         })
     }, [projects])
 
+    const classByType: Record<string, string> = {
+        road: "w-4 h-1",
+        bridge: "w-2 h-2 rounded-full",
+        area: "w-4 h-4 rounded-sm",
+      };
+
     return (
         <MapContainer
             ref={setMap}
@@ -205,6 +212,88 @@ export default function Map() {
                 <AutoboundToRuas />
                 <AutoInvalidateMapSize />
                 {/* end auto bound to ruas  */}
+
+                <Card className="absolute bottom-0 left-0 z-[500] rounded-lg bg-white text-xl text-green-900 shadow-lg  m-4">
+                    <div className="flex flex-col">
+                        <h6 className="text-sm py-1">Legenda</h6>
+
+                        <ul className="">
+                            {dataKondisiJalan.map((road: any) => {
+                                return  (
+                                    <li key={road.id} className="flex flex-row items-center">
+                                        
+                                        <div className="w-8 flex items-center justify-center">
+                                        <svg width="100" height="4">
+                                            <line
+                                                x1="0"
+                                                y1="2"
+                                                x2="100"
+                                                y2="2"
+                                                stroke={road.road.color}
+                                                strokeWidth="2"
+                                                strokeDasharray={[road.dashLength, road.dash]} // 10px dash, 5px gap
+                                            />
+                                            </svg>
+                                        </div>
+                                        <span className="ms-4 flex-grow text-xs">{road.road.nama}</span>
+                                    </li>
+                                )
+                            })}
+                            {layersInformation.map((layer) => {
+                                return (
+                                    <li key={layer.layer.id} className="flex flex-row items-center">
+                                        <div className="w-8 flex items-center justify-center">
+                                            <span
+                                            className={`inline-block mx-2 ${classByType[layer.layer.type]}`}
+                                            style={{ backgroundColor: layer.layer.color }}
+                                            ></span>
+                                        </div>
+                                        <span className="ms-4 flex-grow text-xs">{layer.layer.name}</span>
+                                    </li>
+                                )
+                            })}
+
+                            <hr className="my-2" />
+
+                            <li className="flex flex-row items-center">
+                                <div className="w-8 flex items-center justify-center">
+                                    <span
+                                    className="w-4 h-1"
+                                    style={{ backgroundColor: colorFromKondisi("Baik") }}
+                                    ></span>
+                                </div>
+                                <span className="ms-4 flex-grow text-xs">{ "Kondisi Baik"}</span>
+                            </li>
+                            <li className="flex flex-row items-center">
+                                <div className="w-8 flex items-center justify-center">
+                                    <span
+                                    className="w-4 h-1"
+                                    style={{ backgroundColor: colorFromKondisi("Sedang") }}
+                                    ></span>
+                                </div>
+                                <span className="ms-4 flex-grow text-xs">{ "Kondisi Sedang"}</span>
+                            </li>
+                            <li className="flex flex-row items-center">
+                                <div className="w-8 flex items-center justify-center">
+                                    <span
+                                    className="w-4 h-1"
+                                    style={{ backgroundColor: colorFromKondisi("Rusak Ringan") }}
+                                    ></span>
+                                </div>
+                                <span className="ms-4 flex-grow text-xs">{ "Kondisi Rusak Ringan"}</span>
+                            </li>
+                            <li className="flex flex-row items-center">
+                                <div className="w-8 flex items-center justify-center">
+                                    <span
+                                    className="w-4 h-1"
+                                    style={{ backgroundColor: colorFromKondisi("Rusak Berat") }}
+                                    ></span>
+                                </div>
+                                <span className="ms-4 flex-grow text-xs">{ "Kondisi Rusak Berat"}</span>
+                            </li>
+                        </ul>
+                    </div>
+                </Card>
 
                 {/* Pane  */}
                 <Pane name="sta" style={{ zIndex: 504 }} />
@@ -263,54 +352,57 @@ export default function Map() {
                     <>
                     {
                         
-                        dataKondisiJalan.map((jalan: any, i: number) => {
+                        // dataKondisiJalan.map((jalan: any, i: number) => {
 
-                            console.log(jalan)
-                            if (!jalan.visible) 
-                                return null 
+                        //     console.log(jalan)
+                        //     if (!jalan.visible) 
+                        //         return null 
 
-                            return jalan.road.map((ruas: any, idx: number) => {
-                                return <Polyline
-                                                key={`road-line-${idx}`}
-                                                pane="road"
-                                                positions={swapLngLat(ruas.coordinates as any) as any}
-                                                pathOptions={{
-                                                    color: jalan.color,
-                                                    // color: selectedFeature == road ? "red" : "black",
-                                                    weight: 3 + (currentZoom - 11),
-                                                }}
-                                                eventHandlers={{
-                                                    click: (e) => {
-                                                    setSelectedRuas(ruas);
-                                                    },
-                                                }}
-                                                ></Polyline>
-                            })
-                        })
-                        // ==== WORKS ==== 
-                        // dataKondisiJalan.map((jalan: JalanInformation, i : number) => {
-                        //     return jalan.road.ruas.map((ruas: JalanWithRuas, idx: number) => {
-                        //         return ruas.sta.map((sta:any) => {
-                        //             return (
-                        //                 <Polyline
-                        //                 key={`road-line-${sta.id}`}
-                        //                 pane="road"
-                        //                 positions={swapLngLat(sta.coordinates as any) as any}
-                        //                 pathOptions={{
-                        //                     color: colorFromKondisi(sta.kondisi),
-                        //                     // color: selectedFeature == road ? "red" : "black",
-                        //                     weight: selectedSta?.id == sta.id ? 10 : 3,
-                        //                 }}
-                        //                 eventHandlers={{
-                        //                     click: (e) => {
-                        //                     setSelectedRuas(ruas);
-                        //                     },
-                        //                 }}
-                        //                 ></Polyline>
-                        //             );
-                        //             })
+                        //     return jalan.road.map((ruas: any, idx: number) => {
+                        //         return <Polyline
+                        //                         key={`road-line-${idx}`}
+                        //                         pane="road"
+                        //                         positions={swapLngLat(ruas.coordinates as any) as any}
+                        //                         pathOptions={{
+                        //                             // color: jalan.color,
+                        //                             color: colorFromKondisi(ruas.kondisi),
+                        //                             // color: selectedFeature == road ? "red" : "black",
+                        //                             weight: 3 + (currentZoom - 11),
+                        //                         }}
+                        //                         eventHandlers={{
+                        //                             click: (e) => {
+                        //                             setSelectedRuas(ruas);
+                        //                             },
+                        //                         }}
+                        //                         ></Polyline>
                         //     })
                         // })
+                        // ==== WORKS ==== 
+                        dataKondisiJalan.map((jalan: any, i : number) => {
+                            return jalan.road.ruas.map((ruas: any, idx: number) => {
+                                return ruas.sta.map((sta:any) => {
+                                    return (
+                                        <Polyline
+                                        key={`road-line-${sta.id}`}
+                                        pane="road"
+                                        positions={swapLngLat(sta.coordinates as any) as any}
+                                        pathOptions={{
+                                            color: colorFromKondisi(sta.kondisi),
+                                            // color: selectedFeature == road ? "red" : "black",
+                                            weight: jalan.weight! + (currentZoom - 11),
+                                            // dashArray: jalan.dash != null ? [jalan.dashLength, jalan.dash] : [],
+                                            dashArray: [5,10]
+                                        }}
+                                        eventHandlers={{
+                                            click: (e) => {
+                                            setSelectedRuas(ruas);
+                                            },
+                                        }}
+                                        ></Polyline>
+                                    );
+                                    })
+                            })
+                        })
                     }
                     {/* menampilkan projek  */}
                     {

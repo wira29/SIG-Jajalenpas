@@ -5,6 +5,7 @@ import { useState } from "react";
 import EditForm from "./editForm";
 import ImportForm from "./importForm";
 import LayerList from "./layerList";
+import RoadEditForm from "./roadEditForm";
 
 
 export default function LayerSidebar() {
@@ -63,7 +64,17 @@ export default function LayerSidebar() {
                             setIsLayerEditing(null);
                         }}
                     />
-                ) : (
+                ) : isRoadEditing ? (
+                    <RoadEditForm
+                      roadInformation={isRoadEditing}
+                      onClose={() => {
+                        setIsRoadEditing(null);
+                      }}
+                      onSuccess={() => {
+                        setIsRoadEditing(null);
+                      }}
+                    />
+                  ) : (
                     <LayerList
                         onRoadEdit={setIsRoadEditing}
                         onLayerEdit={setIsLayerEditing}

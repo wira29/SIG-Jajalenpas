@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@radix-ui/react-label";
 import { XCircle } from "lucide-react";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 
 type Props = {
   searchParams?: Record<"callbackUrl" | "error", string>;
@@ -16,10 +16,12 @@ export default function SignUp(props: Props) {
     const password = useRef("");
     const email = useRef("");
     const confirmPassword = useRef("");
+    const [loading, setLoading] = useState(false);
 
   
     const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
+      setLoading(true);
 
       if (password.current !== confirmPassword.current) {
         alert("password tidak sama");
@@ -30,7 +32,8 @@ export default function SignUp(props: Props) {
         name: name.current,
         email: email.current,
         password: password.current,
-        role: "guest"
+        role: "guest",
+        from: "register"
       };
 
       const res = await fetch("/api/users", {
@@ -40,6 +43,8 @@ export default function SignUp(props: Props) {
         },
         body: JSON.stringify(data),
       });
+
+      setLoading(false);
 
       if (res.status === 200) {
         alert("user berhasil dibuat");
@@ -117,11 +122,15 @@ export default function SignUp(props: Props) {
                     onChange={(e) => (confirmPassword.current = e.target.value)}
                   />
                 </div>
+                <p>Sudah punya akun? <a className="text-green-700 font-bold" href="/api/auth/signin">Masuk</a></p>
                 <button
+                  disabled={loading}
                   type="submit"
                   className="bg-green-800 text-white py-2 px-4 rounded-md mt-5"
                 >
-                  Daftar
+                  {
+                    loading ? <span className="text-white">Memproses...</span> : <span className="text-white">Daftar</span>
+                  }
                 </button>
               </div>
             </form>

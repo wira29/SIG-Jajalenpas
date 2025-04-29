@@ -54,7 +54,7 @@ export default function SignIn(props: Props) {
                 <XCircle className="h-4 w-4" color="white" />
                 <AlertTitle>Gagal Masuk!</AlertTitle>
                 <AlertDescription>
-                  Username atau password anda salah.
+                  { props.searchParams?.error ?? "Username atau password anda salah." }
                 </AlertDescription>
               </Alert>
             )}
@@ -78,6 +78,7 @@ export default function SignIn(props: Props) {
                     onChange={(e) => (password.current = e.target.value)}
                   />
                 </div>
+                <p>Belum punya akun? <a className="text-green-700 font-bold" href="/auth/signup">Daftar</a></p>
                 <button
                   type="submit"
                   className="bg-green-800 text-white py-2 px-4 rounded-md mt-5"
