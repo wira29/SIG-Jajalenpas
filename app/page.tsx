@@ -64,7 +64,7 @@ export default function Home() {
     <div className="flex flex-col items-stretch h-screen">
       <NavbarWidget />
       <main
-      className="flex flex-row flex-grow w-full items-stretch sm:items-stretch overflow-x-hidden"
+      className="flex flex-row flex-grow w-full items-stretch sm:items-stretch overflow-x-hidden overflow-y-hidden"
       // minus the height of the navbar
       style={{ height: "calc(100vh - 4rem)" }}>
 

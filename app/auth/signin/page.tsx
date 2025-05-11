@@ -3,21 +3,28 @@
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Toaster } from "@/components/ui/toaster";
+import { useToast } from "@/hooks/use-toast";
 import { Label } from "@radix-ui/react-label";
 import { XCircle } from "lucide-react";
 import { signIn } from "next-auth/react";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 
 type Props = {
   searchParams?: Record<"callbackUrl" | "error", string>;
 };
 
 export default function SignIn(props: Props) {
-  const username = useRef("");
+    const {toast} = useToast();
+
+    const username = useRef("");
     const password = useRef("");
+
+    const [loading, setLoading] = useState(false);
   
     const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
+      setLoading(true);
   
       await signIn("credentials", {
         username: username.current,
@@ -25,7 +32,50 @@ export default function SignIn(props: Props) {
         redirect: true,
         callbackUrl: props.searchParams?.callbackUrl ?? "/",
       });
+
+      setLoading(false);
     };
+
+    const resetPassword = async () => {
+      if (username.current === "") {
+        setLoading(false);
+        toast({
+          variant: "destructive",
+          title: "Gagal",
+          description: "Silakan isi semua email terlebih dahulu!",
+        })
+        return;
+      }
+
+      setLoading(true);
+      let res : any = await fetch("/api/forgot-password", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: username.current,
+        }),
+      });
+
+      res = await res.json();
+
+      if (res.status) {
+        toast({
+          title: "Berhasil",
+          description: res.message ?? "",
+        })
+        // window.location.href = "/api/auth/signin";
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Gagal",
+          description: res.message ?? "",
+        })
+      }
+
+      setLoading(false);
+    }
 
   return (
     <main className="bg-auth flex justify-center items-center py-8 px-8 md:py-12 md:px-36 bg-green-800">
@@ -65,6 +115,7 @@ export default function SignIn(props: Props) {
                   <Label htmlFor="name">Email</Label>
                   <Input
                     id="name"
+                    type="email"
                     placeholder="masukkan email anda"
                     onChange={(e) => (username.current = e.target.value)}
                   />
@@ -78,18 +129,25 @@ export default function SignIn(props: Props) {
                     onChange={(e) => (password.current = e.target.value)}
                   />
                 </div>
-                <p>Belum punya akun? <a className="text-green-700 font-bold" href="/auth/signup">Daftar</a></p>
+                <div className="flex flex-row justify-between">
+                  <p className="inline-block">Belum punya akun? <a className="text-green-700 font-bold" href="/auth/signup">Daftar</a></p>
+                  <a className="text-green-700 font-bold text-end text-sm" href="#" onClick={() => resetPassword()}>Lupa Password</a>
+                </div>
                 <button
+                  disabled={loading}
                   type="submit"
-                  className="bg-green-800 text-white py-2 px-4 rounded-md mt-5"
+                  className="bg-green-800 text-white py-2 px-4 rounded-md mt-5 disabled:bg-green-600"
                 >
-                  Masuk
+                  {
+                    loading ? <span className="text-white">Loading...</span> : <span className="text-white">Masuk</span>
+                  }
                 </button>
               </div>
             </form>
           </div>
         </CardContent>
       </Card>
+      <Toaster />
     </main>
   );
 }

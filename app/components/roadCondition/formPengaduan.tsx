@@ -1,3 +1,4 @@
+import useSelectedRuasStore from "@/app/stores/selected_ruas_store";
 import { FileInput, Label, Textarea } from "flowbite-react";
 import { useState } from "react";
 import { z } from "zod";
@@ -21,6 +22,7 @@ const schema = z.object({
 
 export default function FormPengaduan({ onDoneAduan }: FormPengaduanProps) {
     const [errors, setErrors] = useState<{ keluhan?: string; photo?: string }>({});
+    const { selected: selectedRuas } = useSelectedRuasStore();
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -39,10 +41,10 @@ export default function FormPengaduan({ onDoneAduan }: FormPengaduanProps) {
             photo: formatted.photo?._errors[0],
           });
         } else {
-          console.log("Form valid:", result.data);
           setErrors({});
 
           const data = new FormData(e.currentTarget);
+          data.append("ruas_id", selectedRuas?.id.toString() ?? "");
 
           const response = await fetch(`/api/aduan`, {
             method: "POST",

@@ -29,7 +29,7 @@ export async function GET(request: Request) {
                 some: {
                     role: {
                         'name': {
-                            in: ['superadmin', 'admin', 'guest']
+                            in: ['superadmin', 'operator', 'opd', 'guest']
                         }
                     }
                 }
@@ -57,6 +57,7 @@ export async function POST(request: Request) {
             data: {
                 name: body.name,
                 email: body.email,
+                email_verified_at: from === "register" ? null : new Date(),
                 password: password,
                 phone_number: "",
                 profile: null,
@@ -71,8 +72,8 @@ export async function POST(request: Request) {
             }
         });
 
-        console.log(from)
-        console.log("kirim email")
+        if (from == "register")
+        {
             const userId = user!.id;
             const token = jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: '1d' });
 
@@ -90,9 +91,6 @@ export async function POST(request: Request) {
                 `
             });
             console.log("email sent")
-        if (from == "register")
-        {
-            
         }
 
         return Response.json({

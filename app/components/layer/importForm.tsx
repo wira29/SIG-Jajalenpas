@@ -55,6 +55,7 @@ export default function ImportForm({
   const [layerType, setLayerType] = useState<FeatureCollectionType>("road");
   const [isRoadCondition, setIsRoadCondition] = useState(false);
   const [isRoadDashed, setIsRoadDashed] = useState(false);
+  const [isKewenangan, setIsKewenangan] = useState(false);
   
   const isRoad = () => layerType === "road";
   const isBridge = () => layerType === "bridge";
@@ -183,6 +184,25 @@ export default function ImportForm({
               )}
             </div>
 
+            <div className="mb-4">
+            <label
+              htmlFor="color"
+              className="text-gray-700 text-sm font-bold block mb-2"
+            >
+              {isRoad() || isBridge() ? "Warna" : "Warna Garis"}
+            </label>
+            <input
+              type="color"
+              name="color"
+              id="color"
+              className="border focus:border-green-500 focus:outline-none rounded transition-all duration-300"
+            />
+
+            {state.error?.color && (
+              <p className="text-red-500 text-sm">{state.error.color}</p>
+            )}
+          </div>
+
           <div className="mb-4">
               <label
                 htmlFor="dashed"
@@ -203,48 +223,80 @@ export default function ImportForm({
               <>
               <div className="mb-4">
               <label
-                htmlFor="weight"
+                htmlFor="dash"
                 className="text-gray-700 text-sm font-bold block mb-2"
               >
                 Spasi Garis
               </label>
               <input
                 type="range"
-                name="weight"
-                id="weight"
+                name="dash"
+                id="dash"
                 className="text-sm border focus:border-green-500 w-full focus:outline-none rounded-lg px-3 mt-2 transition-all duration-300"
                 min={1}
-                max={5}
+                max={10}
                 step={1}
               />
 
-              {state.error?.weight && (
-                <p className="text-red-500 text-sm">{state.error.weight}</p>
+              {state.error?.dash && (
+                <p className="text-red-500 text-sm">{state.error.dash}</p>
               )}
             </div>
             <div className="mb-4">
               <label
-                htmlFor="weight"
+                htmlFor="dashLength"
                 className="text-gray-700 text-sm font-bold block mb-2"
               >
                 Panjang Garis
               </label>
               <input
                 type="range"
-                name="weight"
-                id="weight"
+                name="dashLength"
+                id="dashLength"
                 className="text-sm border focus:border-green-500 w-full focus:outline-none rounded-lg px-3 mt-2 transition-all duration-300"
                 min={1}
-                max={5}
-                step={2}
+                max={10}
+                step={1}
               />
 
-              {state.error?.weight && (
-                <p className="text-red-500 text-sm">{state.error.weight}</p>
+              {state.error?.dashLength && (
+                <p className="text-red-500 text-sm">{state.error.dashLength}</p>
               )}
             </div>
               </>
             )}
+
+<div className="mb-4">
+              <label
+                htmlFor="is_kewenangan"
+                className="text-gray-700 text-sm font-bold block mb-2"
+              >
+                Apakah jalan ini kewenangan kabupaten?
+              </label>
+              <input
+                type="checkbox"
+                name="is_kewenangan"
+                id="is_kewenangan"
+                checked={isKewenangan}
+                className="border border-gray-200 rounded-sm px-2 py-1"
+                onChange={(e) => setIsKewenangan(e.target.checked)}
+              />
+            </div>
+
+            <div className="mb-4">
+              <label
+                htmlFor="desc_kewenangan"
+                className="text-gray-700 text-sm font-bold block mb-2"
+              >
+                Deskripsi Kewenangan
+              </label>
+              <textarea
+                name="desc_kewenangan"
+                id="desc_kewenangan"
+                className="text-sm border focus:border-green-500 w-full focus:outline-none rounded-lg px-3 py-2 transition-all duration-300"
+                placeholder="Jalan ini merupakan kewenangan pemerintah kabupaten"
+              />
+            </div>
 
           {/* <div className="mb-4">
             <label

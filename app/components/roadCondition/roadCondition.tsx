@@ -1,9 +1,10 @@
 /* eslint-disable @next/next/no-img-element */
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Tab, TabGroup, TabList, TabPanel, TabPanels, Transition } from "@headlessui/react";
 import clsx from "clsx";
 import { useState } from "react";
 import { FaPencilAlt } from "react-icons/fa";
-import { FiAlertTriangle } from "react-icons/fi";
+import { FiAlertTriangle, FiInfo } from "react-icons/fi";
 import { IoClose } from "react-icons/io5";
 import AdminOnly from "../middleware/admin_only";
 import GuestOnly from "../middleware/guest_only";
@@ -110,7 +111,24 @@ export default function RoadCondition({
               </AdminOnly>
 
               <GuestOnly>
-                <button
+                <div className="w-full">
+                <Alert className="mt-3 mb-3 bg-blue-400 text-white">
+                  <FiInfo className="h-4 w-4" color="white" />
+                  <AlertTitle>Informasi!</AlertTitle>
+                  <AlertDescription>
+                    {selectedRuas?.jalan.desc_kewenangan ?? ""}
+                    {!selectedRuas?.jalan.is_kewenangan ? (
+                      <>
+                        <br />
+                        Laporkan disini <a href="https://www.lapor.go.id/" className="underline underline-offset-1" target="_blank" rel="noreferrer">Lapor.go.id</a>
+                      </>
+                    ) : null}
+                  </AlertDescription>
+                </Alert>
+                </div>
+                {
+                  (selectedRuas?.jalan.is_kewenangan) ? (
+                    <button
                   className={`mb-4 w-full py-2 pl-4 pr-2 rounded  flex justify-between items-center bg-red-500
                   transition-all duration-300`}
                   onClick={() => setIsPengaduan(!isPengaduan)}
@@ -126,6 +144,8 @@ export default function RoadCondition({
                     )}
                   </div>
                 </button>
+                  ) : null
+                }
                 </GuestOnly>
 
               {isEditing ? (

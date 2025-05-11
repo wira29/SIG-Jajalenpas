@@ -27,7 +27,7 @@ export default function LayerSidebar() {
         <aside className={`
             ${isVisible ? "md:w-1/3 xl:w-1/4 2xl:w-1/5 w-full shrink-0" :"w-0 p-0"}
             transition-all duration-300 ease-in-out
-            h-full border-l bg-white`}>
+            h-full border-l bg-white overflow-y-auto`}>
             <button
                 className="md:hidden text-red-500
                 w-full text-lg p-4 flex justify-center items-center"
@@ -59,6 +59,7 @@ export default function LayerSidebar() {
                         layerInformation={isLayerEditing}
                         onSuccess={() => {
                             setIsLayerEditing(null);
+                            loadLayers(selectedYear);
                         }}
                         onClose={() => {
                             setIsLayerEditing(null);
@@ -72,6 +73,7 @@ export default function LayerSidebar() {
                       }}
                       onSuccess={() => {
                         setIsRoadEditing(null);
+                        loadCondition(selectedYear);
                       }}
                     />
                   ) : (

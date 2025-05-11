@@ -1,12 +1,11 @@
 import { ArcElement, Chart as ChartJS, Legend, Tooltip } from "chart.js";
 import { useMemo } from "react";
 import { Pie } from "react-chartjs-2";
-import { JalanWithRuas } from "../types";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 type PieKondisiJalanProps = {
-  road: JalanWithRuas;
+  road: any;
 };
 
 export default function PieKondisiJalan({ road }: PieKondisiJalanProps) {

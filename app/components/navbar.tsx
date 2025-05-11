@@ -26,6 +26,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Menu } from "lucide-react";
 import Link from "next/link";
+import AdminOnly from "./middleware/admin_only";
+import AuthenticatedOnly from "./middleware/authenticated_only";
 // import AdminOnly from "./AdminOnly";
 
 export default function NavbarWidget() {
@@ -59,18 +61,18 @@ export default function NavbarWidget() {
           </DropdownMenuTrigger>
           <DropdownMenuContent className="z-[500]">
             <DropdownMenuItem>
-              <a href="/">Home</a>
+              <a href="/">Beranda</a>
             </DropdownMenuItem>
-            {/* <AdminOnly> */}
+            <AdminOnly>
               <DropdownMenuItem>
                 <a href="/laporan">Laporan</a>
               </DropdownMenuItem>
-            {/* </AdminOnly> */}
-            {/* <AuthenticatedOnly> */}
+            </AdminOnly>
+            <AuthenticatedOnly>
               <DropdownMenuItem>
                 <a href="/statistik">Statistik</a>
               </DropdownMenuItem>
-            {/* </AuthenticatedOnly> */}
+            </AuthenticatedOnly>
             {/* <DropdownMenuItem>
               <a href="https://www.lapor.go.id/" target="_blank">
                 Pengaduan
@@ -108,9 +110,9 @@ export default function NavbarWidget() {
           }`}
           href="/"
         >
-          Home
+          Beranda
         </a>
-        {/* <AdminOnly> */}
+        <AdminOnly>
         <a
           className={`p-4 ${
             currentPath === "/laporan"
@@ -121,8 +123,8 @@ export default function NavbarWidget() {
         >
           Laporan
         </a>
-        {/* </AdminOnly> */}
-        {/* <AuthenticatedOnly> */}
+        </AdminOnly>
+        <AuthenticatedOnly>
           <a
             className={`p-4 ${
               currentPath === "/statistik"
@@ -133,7 +135,7 @@ export default function NavbarWidget() {
           >
             Statistik
           </a>
-        {/* </AuthenticatedOnly> */}
+        </AuthenticatedOnly>
         <a
           className={`p-4 ${"text-sm text-gray-300"}`}
           href="/aduan"

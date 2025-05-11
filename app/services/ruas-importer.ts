@@ -36,7 +36,12 @@ function tryParseInt(value: any, defaultValue?: number | null) {
 export type ImportRuasDetail = {
   tahun: number,
   name: string,
-  color: string 
+  color: string,
+  weight: number,
+  dash: number|null,
+  dashLength: number|null,
+  is_kewenangan: boolean,
+  desc_kewenangan: string|null,
 };
 
 export class RuasImporter {
@@ -171,6 +176,11 @@ export class RuasImporter {
         tahun: detail.tahun,
         nama: detail.name,
         color: detail.color,
+        weight: detail.weight,
+        dash: detail.dash,
+        dashLength: detail.dashLength,
+        is_kewenangan: detail.is_kewenangan,
+        desc_kewenangan: detail.desc_kewenangan,
         ruas: {
           create: ruas.map((ruas) => ({
             nomorRuas: ruas.nomorRuas,

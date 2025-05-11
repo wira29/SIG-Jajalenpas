@@ -18,7 +18,7 @@ const schema = z.object({
     name: z.string().min(3),
     email: z.string().email(),
     password: z.nullable(z.string().min(6)).optional(),
-    role: z.enum(["superadmin", "admin", "guest"]),
+    role: z.enum(["superadmin", "operator", "opd", "guest"]),
   });
   
   export type CreateUserFormState = {

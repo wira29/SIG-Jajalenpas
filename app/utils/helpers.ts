@@ -36,3 +36,15 @@ export function swapLngLat(lngLat: number[] | number[][] | number[][][]): number
       minimumFractionDigits: 0,
     }).format(value);
   };
+
+  export function formatDate(isoString: string): string {
+    const tanggal = new Date(isoString);
+  
+    const options: Intl.DateTimeFormatOptions = {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    };
+  
+    return tanggal.toLocaleDateString('id-ID', options);
+  }

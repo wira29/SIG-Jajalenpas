@@ -1,19 +1,18 @@
 type BarPerkerasanJalanProps = {
-    road: JalanWithRuas;
+    road: any;
   };
   
   import {
-    BarElement,
-    CategoryScale,
-    Chart as ChartJS,
-    Legend,
-    LinearScale,
-    Title,
-    Tooltip,
+  BarElement,
+  CategoryScale,
+  Chart as ChartJS,
+  Legend,
+  LinearScale,
+  Title,
+  Tooltip,
 } from "chart.js";
 import { useMemo } from "react";
 import { Bar } from "react-chartjs-2";
-import { JalanWithRuas } from "../types";
   
   ChartJS.register(
     CategoryScale,

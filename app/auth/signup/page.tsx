@@ -3,6 +3,8 @@
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Toaster } from "@/components/ui/toaster";
+import { useToast } from "@/hooks/use-toast";
 import { Label } from "@radix-ui/react-label";
 import { XCircle } from "lucide-react";
 import { useRef, useState } from "react";
@@ -12,6 +14,8 @@ type Props = {
 };
 
 export default function SignUp(props: Props) {
+    const {toast} = useToast();
+
     const name = useRef("");
     const password = useRef("");
     const email = useRef("");
@@ -23,8 +27,23 @@ export default function SignUp(props: Props) {
       e.preventDefault();
       setLoading(true);
 
+      if (name.current === "" || email.current === "" || password.current === "" || confirmPassword.current === "") {
+        setLoading(false);
+        toast({
+          variant: "destructive",
+          title: "Gagal",
+          description: "Silakan isi semua inputan!",
+        })
+        return;
+      }
+
       if (password.current !== confirmPassword.current) {
-        alert("password tidak sama");
+        setLoading(false);
+        toast({
+          variant: "destructive",
+          title: "Gagal",
+          description: "Konfirmasi password tidak sama!",
+        })
         return;
       }
 
@@ -36,7 +55,7 @@ export default function SignUp(props: Props) {
         from: "register"
       };
 
-      const res = await fetch("/api/users", {
+      let res : any = await fetch("/api/users", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -45,12 +64,19 @@ export default function SignUp(props: Props) {
       });
 
       setLoading(false);
+      res = await res.json();
 
-      if (res.status === 200) {
-        alert("user berhasil dibuat");
+      if (res.status) {
+        toast({
+          title: "Berhasil",
+          description: "user berhasil dibuat, silakan cek email anda untuk melakukan verifikasi!",
+        })
+
+        window.location.href = "/api/auth/signin";
       } else {
         alert("user gagal dibuat");
       }
+
     };
 
   return (
@@ -126,7 +152,7 @@ export default function SignUp(props: Props) {
                 <button
                   disabled={loading}
                   type="submit"
-                  className="bg-green-800 text-white py-2 px-4 rounded-md mt-5"
+                  className="bg-green-800 text-white py-2 px-4 rounded-md mt-5 disabled:bg-green-600"
                 >
                   {
                     loading ? <span className="text-white">Memproses...</span> : <span className="text-white">Daftar</span>
@@ -137,6 +163,7 @@ export default function SignUp(props: Props) {
           </div>
         </CardContent>
       </Card>
+      <Toaster />
     </main>
   );
 }

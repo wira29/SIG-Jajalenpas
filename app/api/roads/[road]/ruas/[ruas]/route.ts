@@ -12,6 +12,7 @@ export async function GET(request: Request, { params }: { params: JalanRuasRoute
       nomorRuas: parseInt(params.ruas),
     },
     include: {
+      jalan: true,
       picturesonruas: {
         include: {
           picture: true,

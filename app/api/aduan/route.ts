@@ -10,7 +10,8 @@ export async function GET(request: Request)
 
     const aduans = await prisma.aduans.findMany({
         include: {
-            createdBy: true
+            createdBy: true,
+            ruas: true
         }
     });
 
@@ -24,6 +25,7 @@ export async function POST(request: Request)
 
     const keluhan = body.get("keluhan") as string;
     const photo = body.get("photo") as File;
+    const ruasId = body.get("ruas_id") as string;
     
     const bytes = await photo.arrayBuffer();
     const fileBuffer = Buffer.from(bytes);
@@ -43,9 +45,11 @@ export async function POST(request: Request)
     const aduan = await prisma.aduans.create({
         data: {
             created_by: parseInt((session?.user as any)?.id),
+            ruas_id: parseInt(ruasId),
             keluhan: keluhan,
             photo: path.replace("./public", ""),
             status: "pending",
+            created_at: new Date(),
         },
     });
 

@@ -53,7 +53,7 @@ const useJalanStore = create<JalanStore>()((set, get) => ({
       }
     },
     updateRoad: async (roadId, road) => {
-      const response = await fetch(`/api/jalan/${roadId}`, {
+      const response = await fetch(`/api/roads/${roadId}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -69,7 +69,7 @@ const useJalanStore = create<JalanStore>()((set, get) => ({
         const response = await fetch(`/api/roads?year=${selectedYear}`);
         const data = await response.json();
 
-        set({ data: data, roads: data.map((jalan: JalanWithRuas) => ({ id: jalan.id, weight: jalan.weight, dash: jalan.dash, dashLength: jalan.dashLength, road: jalan, visible: true })) });
+        set({ data: data, roads: data.map((jalan: JalanWithRuas) => ({ id: jalan.id, weight: jalan.weight, dash: jalan.dash, dashLength: jalan.dashLength, road: jalan, visible: true, name: jalan.nama, color: jalan.color, is_kewenagan: jalan.is_kewenangan, desc_kewenangan: jalan.desc_kewenangan })) });
         
         
         // const result = data.flatMap((jalan: JalanWithRuas) =>

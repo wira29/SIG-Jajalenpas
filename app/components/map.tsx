@@ -1,9 +1,11 @@
+import { Tooltip as ComponentTooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Card } from 'flowbite-react';
 import L, { Icon, latLng } from 'leaflet';
 import 'leaflet-defaulticon-compatibility';
 import 'leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.webpack.css';
 import 'leaflet/dist/leaflet.css';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { FiHelpCircle } from "react-icons/fi";
 import { MdClose, MdLayers, MdLayersClear } from 'react-icons/md';
 import { CircleMarker, MapContainer, Marker, Pane, Polygon, Polyline, Tooltip, useMap, ZoomControl } from "react-leaflet";
 import MarkerClusterGroup from "react-leaflet-markercluster";
@@ -130,7 +132,7 @@ export default function Map() {
 
     // create marker data kondisi jalan 
     const markerHtmlStyles = `
-            background-color: yellow;
+            background-color: orange;
             width: 16px;
             height: 16px;
             display: block;
@@ -216,7 +218,7 @@ export default function Map() {
                 <Card className="absolute bottom-0 left-0 z-[500] rounded-lg bg-white text-xl text-green-900 shadow-lg  m-4">
                     <div className="flex flex-col">
                         <h6 className="text-sm py-1">Legenda</h6>
-
+                        <TooltipProvider>
                         <ul className="">
                             {dataKondisiJalan.map((road: any) => {
                                 return  (
@@ -235,7 +237,17 @@ export default function Map() {
                                             />
                                             </svg>
                                         </div>
-                                        <span className="ms-4 flex-grow text-xs">{road.road.nama}</span>
+                                        <div className="d-flex flex-row items-center gap-2">
+                                            <span className="ms-4 me-2 flex-grow text-xs">{road.road.nama}</span>
+                                            <ComponentTooltip>
+                                                <TooltipTrigger>
+                                                    <FiHelpCircle className="text-sm" />
+                                                </TooltipTrigger>
+                                                <TooltipContent>
+                                                    <p>{road.desc_kewenangan ?? ""}</p>
+                                                </TooltipContent>
+                                            </ComponentTooltip>
+                                        </div>
                                     </li>
                                 )
                             })}
@@ -249,9 +261,11 @@ export default function Map() {
                                             ></span>
                                         </div>
                                         <span className="ms-4 flex-grow text-xs">{layer.layer.name}</span>
+                                        
                                     </li>
                                 )
                             })}
+                           
 
                             <hr className="my-2" />
 
@@ -292,6 +306,7 @@ export default function Map() {
                                 <span className="ms-4 flex-grow text-xs">{ "Kondisi Rusak Berat"}</span>
                             </li>
                         </ul>
+                        </TooltipProvider>
                     </div>
                 </Card>
 
@@ -390,8 +405,8 @@ export default function Map() {
                                             color: colorFromKondisi(sta.kondisi),
                                             // color: selectedFeature == road ? "red" : "black",
                                             weight: jalan.weight! + (currentZoom - 11),
-                                            // dashArray: jalan.dash != null ? [jalan.dashLength, jalan.dash] : [],
-                                            dashArray: [5,10]
+                                            dashArray: jalan.dash != null ? [jalan.dashLength, jalan.dash] : [],
+                                            // dashArray: [5,10]
                                         }}
                                         eventHandlers={{
                                             click: (e) => {

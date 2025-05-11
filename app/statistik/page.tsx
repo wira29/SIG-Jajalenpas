@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Circles } from "react-loader-spinner";
 import NavbarWidget from "../components/navbar";
 import useJalanStore from "../stores/jalan_store";
 import useYearStore from "../stores/year_store";
@@ -24,26 +23,39 @@ export default function Statistik() {
     useJalanStore();
 
   const [selectedRoadId, setSelectedRoadId] = useState<string | null>(null);
+  const [kecamatan, setKecamatan] = useState<string | null>(null);
 
   const selectedRoad = useMemo(() => {
     if (!selectedRoadId) return null;
 
-    return roads.find((road) => Number(road.id) === parseInt(selectedRoadId));
-  }, [roads, selectedRoadId]);
+    const r = roads.find((road) => Number(road.id) === parseInt(selectedRoadId));
+    
+    if (kecamatan) {
+      const filteredRuas = r?.ruas.filter((ruas: any) => ruas.kecamatan == kecamatan);
+      return {
+        ...r,
+        ruas: filteredRuas
+      };
+    }
+    console.log(r)
+    
+    return r;
+  }, [roads, selectedRoadId, kecamatan]);
 
   const jumlahSta = useMemo(() => {
-    if (!road) return 0;
+    if (!selectedRoad) return 0;
 
-    const r: any = road;
+    const r: any = selectedRoad;
 
     return r.ruas.reduce((acc: any, ruas: any) => {
       return acc + ruas.sta.length;
     }, 0);
-  }, [road]);
+  }, [selectedRoad]);
 
   const { selectedYear, years, getYears, setSelectedYear } = useYearStore();
 
   useEffect(() => {
+    setSelectedRoadId(null)
     loadRoads(selectedYear);
   }, [loadRoads, selectedYear]);
 
@@ -58,12 +70,20 @@ export default function Statistik() {
   }, [selectedRoadId, loadRoad, selectedYear]);
 
   const jumlahPanjang = useMemo(() => {
-    return selectedRoad?.ruas.reduce((acc: any, ruas: any) => {
+    if (!selectedRoad) return 0;
+
+    return selectedRoad.ruas!.reduce((acc: any, ruas: any) => {
       const panjang = parseFloat(ruas.panjangSK ?? 0);
 
       return acc + panjang;
     }, 0);
+
   }, [selectedRoad]);
+
+  const listKecamatan : Set<string> = useMemo(() => {
+    return new Set(road?.ruas.map((ruas: any) => ruas.kecamatan));
+  }, [road]);
+
 
   return (
     <div className="flex flex-col items-stretch h-screen ">
@@ -96,6 +116,18 @@ export default function Statistik() {
         </select>
         <select
           className="p-2 my-4 border rounded-md flex-1"
+          value={kecamatan ?? ""}
+          onChange={(e) => setKecamatan(e.target.value)}
+        >
+          <option value="">Semua Kecamatan</option>
+          {Array.from(listKecamatan).map((kec) => (
+            <option key={kec} value={kec}>
+              {kec}
+            </option>
+          ))}
+        </select>
+        <select
+          className="p-2 my-4 border rounded-md flex-1"
           onChange={(e) => setSelectedYear(parseInt(e.target.value))}
         >
           {years.map((year) => (
@@ -106,19 +138,22 @@ export default function Statistik() {
         </select>
         </div>
 
-        {roadLoading ? (
+        {!selectedRoad ? (
+          // <div className="flex items-center justify-center h-full">
+          //   <Circles
+          //     height="35"
+          //     width="35"
+          //     color="#4fa94d"
+          //     ariaLabel="circles-loading"
+          //     wrapperStyle={{}}
+          //     wrapperClass=""
+          //     visible={true}
+          //   />
+          // </div>
           <div className="flex items-center justify-center h-full">
-            <Circles
-              height="35"
-              width="35"
-              color="#4fa94d"
-              ariaLabel="circles-loading"
-              wrapperStyle={{}}
-              wrapperClass=""
-              visible={true}
-            />
+            <p className="text-gray-500 text-sm">Pilih Jalan</p>
           </div>
-        ) : road ? (
+        ) : selectedRoad ? (
           <div className="flex flex-col justify-stretch">
             <table className="border-collapse border border-slate-200 mb-4">
               <tbody>
@@ -127,7 +162,7 @@ export default function Statistik() {
                     Jumlah Ruas
                   </th>
                   <td className="border border-slate-300 p-2">
-                    {selectedRoad?.ruas.length} Ruas ({jumlahSta} STA)
+                    {selectedRoad?.ruas!.length} Ruas ({jumlahSta} STA)
                   </td>
                 </tr>
                 <tr>
@@ -143,10 +178,10 @@ export default function Statistik() {
 
             <div className="flex w-full overflow-x-auto">
               <div className="w-1/2 flex-grow shrink-0 pr-4">
-                <BarPerkerasanJalan road={road} />
+                <BarPerkerasanJalan road={selectedRoad} />
               </div>
               <div className="w-1/2 flex-grow shrink-0 ml-1">
-                <PieKondisiJalan road={road} />
+                <PieKondisiJalan road={selectedRoad} />
               </div>
             </div>
           </div>
