@@ -233,7 +233,7 @@ export default function Map() {
                                                 y2="2"
                                                 stroke={road.color}
                                                 strokeWidth="2"
-                                                strokeDasharray={[road.dashLength, road.dash]} // 10px dash, 5px gap
+                                                strokeDasharray={[road.dashLength , road.dash].join(",")} // 10px dash, 5px gap
                                             />
                                             </svg>
                                         </div>
