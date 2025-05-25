@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 
 export default function VerifyEmail() {
   const searchParams = useSearchParams();
@@ -29,7 +29,8 @@ export default function VerifyEmail() {
     }
   }, [token]);
 
-  return (status == 'loading' ? (
+  return <Suspense fallback={<Loading />}>
+    {(status == 'loading' ? (
         <div className="text-center">
       <p>Memverifikasi email Anda...</p>
     </div>
@@ -106,5 +107,6 @@ export default function VerifyEmail() {
       </div>
     </div>
     )
-    )
+    )}
+  </Suspense>
 }

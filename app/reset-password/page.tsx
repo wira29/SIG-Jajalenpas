@@ -6,7 +6,8 @@ import { Label } from "@/components/ui/label";
 import { Toaster } from "@/components/ui/toaster";
 import { useToast } from "@/hooks/use-toast";
 import { useSearchParams } from "next/navigation";
-import { useRef, useState } from "react";
+import { Suspense, useRef, useState } from "react";
+import Loading from "../components/loading";
 
 
 export default function ResetPassword() {
@@ -77,7 +78,8 @@ export default function ResetPassword() {
     };
 
     return (
-        <main className="bg-auth flex justify-center items-center py-8 px-8 md:py-12 md:px-36 bg-green-800">
+        <Suspense fallback={<Loading />}>
+          <main className="bg-auth flex justify-center items-center py-8 px-8 md:py-12 md:px-36 bg-green-800">
           <Card className="h-full w-full rounded-3xl">
             <CardContent className="flex gap-6 p-0 h-full">
               <div className="basis-1/2 h-full bg-card-auth rounded-s-3xl p-8 lg:flex flex-col justify-center items-center hidden">
@@ -134,5 +136,6 @@ export default function ResetPassword() {
           </Card>
           <Toaster />
         </main>
+        </Suspense>
       );
 }
