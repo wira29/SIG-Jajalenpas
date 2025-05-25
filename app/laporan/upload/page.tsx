@@ -1,6 +1,8 @@
 "use client";
 
 import NavbarWidget from "@/app/components/navbar";
+import { Toaster } from "@/components/ui/toaster";
+import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { navigateLaporan } from "../actions";
@@ -16,6 +18,7 @@ export default function UploadReport() {
     file: { message: string };
   }>();
   const [uploading, setUploading] = useState(false);
+  const { toast } = useToast();
 
   const onSubmit = async (data: any) => {
     // Display loading indicator while uploading
@@ -39,11 +42,19 @@ export default function UploadReport() {
         navigateLaporan();
       } else {
         // Handle error
-        alert("Error uploading report. Please try again.");
+        toast({
+        variant: "destructive",
+        title: "Gagal",
+        description: "Gagal memperbarui laporan. Silakan coba lagi!",
+      })
       }
     } catch (error) {
       console.error("Error uploading report:", error);
-      alert("Error uploading report. Please try again.");
+      toast({
+        variant: "destructive",
+        title: "Gagal",
+        description: "Gagal memperbarui laporan. Silakan coba lagi!",
+      })
     } finally {
       // Reset loading indicator after the API call is complete
       setUploading(false);
@@ -59,10 +70,10 @@ export default function UploadReport() {
 
         <form onSubmit={handleSubmit(onSubmit)} className="max-w-3xl mx-auto">
           <div className="flex flex-col">
-            <label className="block mb-2">Title:</label>
+            <label className="block mb-2">Judul:</label>
             <input
               type="text"
-              {...register("title", { required: "Title is required" })}
+              {...register("title", { required: "Judul wajib diisi" })}
               className="w-full p-2 mb-4 border border-gray-300 rounded"
             />
             {/* Display error message if title is not provided */}
@@ -72,10 +83,10 @@ export default function UploadReport() {
               </span>
             )}
 
-            <label className="block mb-2">Description:</label>
+            <label className="block mb-2">Deskripsi:</label>
             <textarea
               {...register("description", {
-                required: "Description is required",
+                required: "Deskripsi wajib diisi",
               })}
               className="w-full p-2 mb-4 border border-gray-300 rounded"
             />
@@ -89,7 +100,11 @@ export default function UploadReport() {
             <label className="block mb-2">PDF File:</label>
             <input
               type="file"
-              {...register("file", { required: "PDF file is required" })}
+              {...register("file", { required: "PDF file wajib diisi", validate: {
+                isPdf: (fileList: any) =>
+                  fileList[0]?.type === "application/pdf" || "Hanya file PDF yang diperbolehkan"
+              }
+             })}
               className="mb-4"
             />
             {/* Display error message if PDF file is not provided */}
@@ -108,6 +123,7 @@ export default function UploadReport() {
             {uploading ? "Mengunggah..." : "Unggah Laporan"}
           </button>
         </form>
+        <Toaster />
       </main>
     </div>
   );

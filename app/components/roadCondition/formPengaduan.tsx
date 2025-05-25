@@ -1,4 +1,5 @@
 import useSelectedRuasStore from "@/app/stores/selected_ruas_store";
+import { useToast } from "@/hooks/use-toast";
 import { FileInput, Label, Textarea } from "flowbite-react";
 import { useState } from "react";
 import { z } from "zod";
@@ -23,6 +24,7 @@ const schema = z.object({
 export default function FormPengaduan({ onDoneAduan }: FormPengaduanProps) {
     const [errors, setErrors] = useState<{ keluhan?: string; photo?: string }>({});
     const { selected: selectedRuas } = useSelectedRuasStore();
+    const {toast} = useToast();
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -55,7 +57,10 @@ export default function FormPengaduan({ onDoneAduan }: FormPengaduanProps) {
             return null;
           }
 
-          alert("Berhasil mengadukan kondisi jalan");
+          toast({
+            title: "Berhasil",
+            description: "Berhasil mengadukan kondisi jalan",
+          })
           onDoneAduan();
         }
       };

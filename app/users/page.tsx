@@ -6,7 +6,8 @@
 // import AddUserForm from "./components/AddUserForm";
 // import DeleteUserForm from "./components/DeleteUserForm";
 
-import { useEffect, useState } from "react";
+import { Pagination } from "flowbite-react";
+import { useEffect, useRef, useState } from "react";
 import NavbarWidget from "../components/navbar";
 import { getUsers } from "./actions";
 import AddUserForm from "./components/addUserForm";
@@ -16,12 +17,73 @@ import DeleteUserForm from "./components/deleteUserForm";
 export default function Users() {
 
     const [users, setUsers] = useState<any[]>([]);
+    const totalPages = useRef(0);
+    const totalItems = useRef(0);
+    const allItems = useRef([]);
+    const page = useRef(1);
+    const pageSize = 5;
+    const role = useRef("");
+    
+    const paginate = (items: any) => {
+      console.log(page)
+      const startIndex = (page.current - 1) * pageSize;
+      setUsers(items.slice(startIndex, startIndex + pageSize));
+      totalPages.current = Math.ceil(items.length / pageSize);
+      totalItems.current = items.length;
+    }
+
+    const roleChange = (e: any) => {
+        page.current = 1;
+        role.current = e.target.value;
+
+        if (e.target.value === "") {
+            paginate(allItems.current);
+            return;
+        }
+
+        let items = allItems.current;
+        items = items.filter((item: any) => item.roles[0].role.name === e.target.value);
+        paginate(items);
+    }
+
+    const handleInputChange = (e: any) => {
+        page.current = 1;
+
+        let items = allItems.current;
+        
+        if (e.target.value === "") {
+            paginate(items);
+            return;
+        }
+
+        setTimeout(() => {
+            items = items.filter((item: any) => item.name.toLowerCase().includes(e.target.value.toLowerCase()));
+            paginate(items);
+        }, 1000);
+    }
+
+    const handlePageChange = (newPage: number) => {
+        
+        page.current = newPage;
+        let items = allItems.current;
+
+        if (role.current != "") {
+            items = items.filter((item: any) => item.roles[0].role.name === role.current);
+            
+        }
+
+        paginate(items);
+    };
 
     useEffect(() => {
-        console.log("users");
         const getUsersData = async () => {
             const data = await getUsers();
-            setUsers(data);
+            // setUsers(data);
+            paginate(data);
+            allItems.current = data;
+            // setUsers(data.slice(startIndex, startIndex + pageSize));
+            // totalPages.current = Math.ceil(data.length / pageSize);
+            // totalItems.current = data.length;
         }
         getUsersData();
     }, []);
@@ -36,7 +98,26 @@ export default function Users() {
         style={{ height: "calc(100vh - 4rem)" }}
       >
         <div className="flex justify-between items-center pb-4 mx-auto">
-          <p className="text-lg font-semibold">Akun</p>
+          <div className="flex gap-4">
+          <input
+              type="text"
+              name="name"
+              id="username"
+              className="p-2 my-4 border rounded-md flex-1"
+              onChange={handleInputChange}
+              placeholder="Cari nama"
+            />
+            <select
+          className="p-2 my-4 border rounded-md flex-1"
+          onChange={roleChange}
+        >
+          <option value="">Semua Role</option>
+          <option value="superadmin">Superadmin</option>
+          <option value="operator">Operator</option>
+          <option value="opd">OPD</option>
+          <option value="guest">Guest</option>
+        </select>
+          </div>
           <div className="flex items-center space-x-2">
             {/* <button className="px-4 py-2 text-sm font-medium text-white bg-green-500 rounded-md hover:bg-green-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75">
               Tambah
@@ -62,7 +143,7 @@ export default function Users() {
                 key={user.id}
                 className="hover:bg-gray-100 border-b border-gray-200"
               >
-                <td className="px-4 py-3 text-center">{idx + 1}</td>
+                <td className="px-4 py-3 text-center">{(idx + 1) + ((page.current - 1) * pageSize)}</td>
                 <td className="px-4 py-3 text-center">{user.name}</td>
                 <td className="px-4 py-3 text-center">{user.email}</td>
                 <td className="px-4 py-3 text-center">{user.roles[0].role.name}</td>
@@ -74,6 +155,16 @@ export default function Users() {
             ))}
           </tbody>
         </table>
+        {/* Pagination */}
+        <div className="flex justify-center mt-6">
+          <Pagination
+            currentPage={page.current}
+            totalPages={totalPages.current}
+            onPageChange={handlePageChange}
+            showIcons
+          />
+        </div>
+      
       </main>
     </div>
   );

@@ -42,7 +42,7 @@ export default function SignIn(props: Props) {
         toast({
           variant: "destructive",
           title: "Gagal",
-          description: "Silakan isi semua email terlebih dahulu!",
+          description: "Silakan isi email terlebih dahulu!",
         })
         return;
       }

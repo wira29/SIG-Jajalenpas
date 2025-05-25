@@ -1,6 +1,8 @@
 "use client";
 
 import NavbarWidget from "@/app/components/navbar";
+import { Toaster } from "@/components/ui/toaster";
+import { useToast } from "@/hooks/use-toast";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Circles } from "react-loader-spinner";
@@ -22,6 +24,7 @@ export default function UploadReport({ params }: Props) {
   }>();
   const [uploading, setUploading] = useState(false);
   const [report, setReport] = useState<any | null>(null);
+  const {toast} = useToast();
 
   // set initial value for title and description
   useEffect(() => {
@@ -48,11 +51,19 @@ export default function UploadReport({ params }: Props) {
       if (response.ok) {
         navigateLaporan();
       } else {
-        alert("Error updating report. Please try again.");
+        toast({
+          variant: "destructive",
+          title: "Gagal",
+          description: "Gagal memperbarui laporan. Silakan coba lagi!",
+        })
       }
     } catch (error) {
       console.error("Error updating report:", error);
-      alert("Error updating report. Please try again.");
+      toast({
+        variant: "destructive",
+        title: "Gagal",
+        description: "Gagal memperbarui laporan. Silakan coba lagi!",
+      })
     } finally {
       setUploading(false);
     }
@@ -134,6 +145,7 @@ export default function UploadReport({ params }: Props) {
             />
           </div>
         )}
+        <Toaster />
       </main>
     </div>
   );

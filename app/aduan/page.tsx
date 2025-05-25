@@ -6,7 +6,8 @@
 // import AddUserForm from "./components/AddUserForm";
 // import DeleteUserForm from "./components/DeleteUserForm";
 
-import { useEffect, useState } from "react";
+import { Pagination } from "flowbite-react";
+import { useEffect, useRef, useState } from "react";
 import NavbarWidget from "../components/navbar";
 import { formatDate } from "../utils/helpers";
 import { getAduans } from "./actions";
@@ -18,15 +19,59 @@ import ImageDialog from "./components/imageDialog";
 // // for user crud
 export default function Aduan() {
 
-    const [aduans, setAduans] = useState<any[]>([]);
     const [isDialogOpen, setDialogOpen] = useState(false)
     const [selectedPhoto, setSelectedPhoto] = useState("")
+    const [aduans, setAduans] = useState<any[]>([]);
+    const totalPages = useRef(0);
+    const totalItems = useRef(0);
+    const allItems = useRef([]);
+    const page = useRef(1);
+    const pageSize = 5;
+    const search = useRef("");
+      
+    const paginate = (items: any) => {
+      const startIndex = (page.current - 1) * pageSize;
+      setAduans(items.slice(startIndex, startIndex + pageSize));
+      totalPages.current = Math.ceil(items.length / pageSize);
+      totalItems.current = items.length;
+    }
+
+    const handleInputChange = (e: any) => {
+        page.current = 1;
+
+        let items = allItems.current;
+        search.current = e.target.value;
+        
+        if (e.target.value === "") {
+            paginate(items);
+            return;
+        }
+
+        setTimeout(() => {
+            items = items.filter((item: any) => item.ruas.namaRuas.toLowerCase().includes(e.target.value.toLowerCase()));
+            paginate(items);
+        }, 1000);
+    }
+
+    const handlePageChange = (newPage: number) => {
+        
+      page.current = newPage;
+      let items = allItems.current;
+
+      if (search.current != "") {
+          items = items.filter((item: any) => item.ruas.namaRuas.toLowerCase().includes(search.current.toLowerCase()));
+      }
+
+      paginate(items);
+  };
 
     useEffect(() => {
         // console.log("users");
         const getAduansData = async () => {
             const data = await getAduans();
-            setAduans(data);
+            
+            paginate(data);
+            allItems.current = data;
         }
         getAduansData();
     }, []);
@@ -41,7 +86,16 @@ export default function Aduan() {
         style={{ height: "calc(100vh - 4rem)" }}
       >
         <div className="flex justify-between items-center pb-4 mx-auto">
-          <p className="text-lg font-semibold">Aduan Masyarakat</p>
+          <div className="flex">
+          <input
+              type="text"
+              name="name"
+              id="username"
+              className="p-2 my-4 border rounded-md flex-1"
+              onChange={handleInputChange}
+              placeholder="Cari ruas"
+            />
+          </div>
           <div className="flex items-center space-x-2">
             {/* <button className="px-4 py-2 text-sm font-medium text-white bg-green-500 rounded-md hover:bg-green-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75">
               Tambah
@@ -87,6 +141,15 @@ export default function Aduan() {
             ))}
           </tbody>
         </table>
+        {/* Pagination */}
+          <div className="flex justify-center mt-6">
+            <Pagination
+              currentPage={page.current}
+              totalPages={totalPages.current}
+              onPageChange={handlePageChange}
+              showIcons
+            />
+          </div>
         <ImageDialog isOpen={isDialogOpen} closeModal={() => setDialogOpen(false)} path={selectedPhoto} />
       </main>
     </div>

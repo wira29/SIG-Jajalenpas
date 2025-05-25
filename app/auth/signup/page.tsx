@@ -74,7 +74,11 @@ export default function SignUp(props: Props) {
 
         window.location.href = "/api/auth/signin";
       } else {
-        alert("user gagal dibuat");
+        toast({
+          variant: "destructive",
+          title: "Gagal",
+          description: "user gagal dibuat!",
+        })
       }
 
     };

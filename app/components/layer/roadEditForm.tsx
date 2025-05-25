@@ -18,8 +18,8 @@ export default function RoadEditForm({
 }: EditFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const inputYear = useRef(getCurrentYear())
-  const [isRoadDashed, setIsRoadDashed] = useState(roadInformation.road.dash ? true : false);
-  const [isKewenangan, setIsKewenangan] = useState(roadInformation.road.is_kewenangan ? true : false);
+  const [isRoadDashed, setIsRoadDashed] = useState(roadInformation.dash ? true : false);
+  const [isKewenangan, setIsKewenangan] = useState(roadInformation.is_kewenangan ? true : false);
 
   const updateRoad = useJalanStore((state) => state.updateRoad);
 
@@ -83,7 +83,7 @@ export default function RoadEditForm({
       >
         <div className="mb-4">
           <Label className="mb-3">Tahun</Label>
-          <TextInput name="tahun" defaultValue={roadInformation.road.tahun} />
+          <TextInput name="tahun" defaultValue={roadInformation.tahun} />
           {/* {state.error?.tahun && (
             <p style={{ color: "red" }}>{state.error.tahun[0]}</p>
           )} */}
@@ -101,7 +101,7 @@ export default function RoadEditForm({
             id="name"
             className="text-sm border focus:border-green-500 w-full focus:outline-none rounded-lg px-3 py-2 transition-all duration-300"
             required
-            defaultValue={roadInformation.road.nama}
+            defaultValue={roadInformation.name}
           />
         </div>
 
@@ -120,7 +120,7 @@ export default function RoadEditForm({
                 min={1}
                 max={5}
                 step={1}
-                defaultValue={roadInformation.road.weight}
+                defaultValue={roadInformation.weight}
               />
 
               {/* {state.error?.weight && (
@@ -162,7 +162,7 @@ export default function RoadEditForm({
                 min={1}
                 max={10}
                 step={1}
-                defaultValue={roadInformation.road.dash ?? 0}
+                defaultValue={roadInformation.dash ?? 0}
               />
 
               {/* {state.error?.weight && (
@@ -184,7 +184,7 @@ export default function RoadEditForm({
                 min={1}
                 max={10}
                 step={1}
-                defaultValue={roadInformation.road.dashLength ?? 0}
+                defaultValue={roadInformation.dashLength ?? 0}
               />
 
               {/* {state.error?.weight && (
@@ -222,7 +222,7 @@ export default function RoadEditForm({
                 name="desc_kewenangan"
                 id="desc_kewenangan"
                 className="text-sm border focus:border-green-500 w-full focus:outline-none rounded-lg px-3 py-2 transition-all duration-300"
-                defaultValue={roadInformation.road.desc_kewenangan ?? ""}
+                defaultValue={roadInformation.desc_kewenangan ?? ""}
               />
             </div>
 

@@ -75,7 +75,7 @@ export async function POST(request: Request) {
         if (from == "register")
         {
             const userId = user!.id;
-            const token = jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: '1d' });
+            const token = jwt.sign({ userId }, process.env.JWT_SECRET!, { expiresIn: '1d' });
 
             const verificationUrl = `${process.env.APP_URL}/verify?token=${token}`;
 

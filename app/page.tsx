@@ -1,5 +1,6 @@
 "use client";
 
+import { Toaster } from "@/components/ui/toaster";
 import dynamic from "next/dynamic";
 import { useEffect, useMemo } from "react";
 import { Puff } from "react-loader-spinner";
@@ -76,6 +77,7 @@ export default function Home() {
         </div>
         
         <LayerSidebar />
+        <Toaster />
       </main>
     </div>
   );

@@ -124,7 +124,7 @@ export default function ResetPassword() {
                       className="bg-green-800 text-white py-2 px-4 rounded-md mt-5 disabled:bg-green-600"
                     >
                       {
-                        loading ? <span className="text-white">Loading...</span> : <span className="text-white">Masuk</span>
+                        loading ? <span className="text-white">Loading...</span> : <span className="text-white">Reset</span>
                       }
                     </button>
                   </div>
