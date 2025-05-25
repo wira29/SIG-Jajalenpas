@@ -2,6 +2,7 @@
 
 import { useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useState } from 'react';
+import Loading from '../components/loading';
 
 export default function VerifyEmail() {
   const searchParams = useSearchParams();
