@@ -1,22 +1,11 @@
 "use client";
-// import prisma from "@/libs/prismadb";
-// import { getServerSession } from "next-auth";
-// import NavBar from "../components/NavBar";
-// import { authOptions } from "../utils/auth-options";
-// import AddUserForm from "./components/AddUserForm";
-// import DeleteUserForm from "./components/DeleteUserForm";
-
 import { Pagination } from "flowbite-react";
 import { useEffect, useRef, useState } from "react";
 import NavbarWidget from "../components/navbar";
 import { formatDate } from "../utils/helpers";
 import { getAduans } from "./actions";
 import ImageDialog from "./components/imageDialog";
-// import { getUsers } from "./actions";
-// import AddUserForm from "./components/addUserForm";
-// import DeleteUserForm from "./components/deleteUserForm";
 
-// // for user crud
 export default function Aduan() {
 
     const [isDialogOpen, setDialogOpen] = useState(false)
@@ -66,7 +55,6 @@ export default function Aduan() {
   };
 
     useEffect(() => {
-        // console.log("users");
         const getAduansData = async () => {
             const data = await getAduans();
             
@@ -97,11 +85,6 @@ export default function Aduan() {
             />
           </div>
           <div className="flex items-center space-x-2">
-            {/* <button className="px-4 py-2 text-sm font-medium text-white bg-green-500 rounded-md hover:bg-green-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75">
-              Tambah
-            </button> */}
-
-            {/* <AddUserForm /> */}
           </div>
         </div>
 

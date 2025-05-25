@@ -352,32 +352,6 @@ export default function Map() {
                                                 ></Polyline>
                             })
                         })
-                        // ==== WORKS ==== 
-                    //     dataKondisiJalan.map((jalan: any, i : number) => {
-                    //         return jalan.road.ruas.map((ruas: any, idx: number) => {
-                    //             return ruas.sta.map((sta:any) => {
-                    //                 return (
-                    //                     <Polyline
-                    //                     key={`road-line-${sta.id}`}
-                    //                     pane="road"
-                    //                     positions={swapLngLat(sta.coordinates as any) as any}
-                    //                     pathOptions={{
-                    //                         color: colorFromKondisi(sta.kondisi),
-                    //                         // color: selectedFeature == road ? "red" : "black",
-                    //                         weight: jalan.weight! + (currentZoom - 11),
-                    //                         dashArray: jalan.dash != null ? [jalan.dashLength, jalan.dash] : [],
-                    //                         // dashArray: [5,10]
-                    //                     }}
-                    //                     eventHandlers={{
-                    //                         click: (e) => {
-                    //                         setSelectedRuas(ruas);
-                    //                         },
-                    //                     }}
-                    //                     ></Polyline>
-                    //                 );
-                    //                 })
-                    //         })
-                    //     })
                     }
                     {/* menampilkan projek  */}
                     {
@@ -394,77 +368,22 @@ export default function Map() {
                     }
                     {/* end menampilkan projek  */}
                     {/* menampilkan marker kondisi jalan  */}
-                    {/* <MarkerClusterGroup key={markerClusterKey}>
-                        {
-                            
-                            dataKondisiJalan.map((jalan: JalanInformation) => {
-                                const ruas = jalan.road.ruas;
-
-                                if (!jalan.visible) return null;
-
-                                return ruas.map((ruas: any, idx: number) => {
-                                    return <Marker key={"ruas-" + ruas.nomorRuas} position={[ruas.latitude, ruas.longitude]} icon={icons[jalan.road.id]} eventHandlers={{ 
-                                        click: () => {
-                                            setSelectedRuas(ruas);
-                                        }
-                                     }} />;
-                                });
-                            })
-                        }
-                    </MarkerClusterGroup> */}
 
                     {/* menampilkan layers  */}
                     {layersInformation.map((information, i) => {
                         if (!isLayerVisible(information.id)) return null;
                         switch (information.layer.type) {
-                        // case "road":
-                        //     return information.layer.feature.map((feature:any, i:any) => (
-                            // <Polyline
-                            //     key={i}
-                            //     pane="road"
-                            //     positions={
-                            //         // [112.861319, -7.657763] as any
-                            //     swapLngLat(
-                            //         feature?.geometry[0]?.coordinates as any
-                            //     ) as any
-                            //     }
-                            //     pathOptions={{
-                            //     color: information.layer.color ? information.layer.color : "black",
-                            //     weight:
-                            //         selectedFeature?.id == feature.id
-                            //         ? information.layer.weight! + 2
-                            //         : information.layer.weight!,
-                            //     dashArray: information.layer.dashed ? [7, 7] : [],
-                            //     dashOffset: information.layer.dashed ? "10" : "15",
-                            //     }}
-                            // >
-                            //     <Popup>
-                            //     <FeaturePropertyDetailPopup
-                            //         feature={feature}
-                            //         onDetail={() => {
-                            //         setSelectedFeature(feature);
-                            //         }}
-                            //     />
-                            //     </Popup>
-                            // </Polyline>
-                            // ));
                         case "bridge":
                             return information.layer.feature.map((feature:any, i:any) => (
                             <CircleMarker
                                 key={i}
                                 pane="bridge"
                                 center={
-                                    // [112.861319, -7.657763] as any
                                 swapLngLat(
                                     feature?.geometry[0]?.coordinates as any
                                 ) as any
                                 }
                                 radius={2}
-                                // radius={
-                                // selectedFeature?.id == feature.id
-                                //     ? information.layer.radius! + 2
-                                //     : information.layer.radius!
-                                // }
                                 pathOptions={{
                                 color: "black",
                                 weight: 1,
@@ -490,13 +409,10 @@ export default function Map() {
                                 ) as any
                                 }
                                 pathOptions={{
-                                // color: seedColor(feature.properties[0]).toHex(),
                                 color: information.layer.color,
                                 fillColor: seedColor(feature.id.toString()).toHex(),
-                                // opacity: selectedFeature?.id == feature.id ? 1 : 0.5,
                                 opacity: 0.5,
                                 weight: information.layer.weight!,
-                                // fillOpacity: selectedFeature?.id == feature.id ? 1 : 0.25,
                                 fillOpacity: 0.25,
                                 }}
                                 eventHandlers={{

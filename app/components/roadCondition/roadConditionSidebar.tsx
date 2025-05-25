@@ -9,20 +9,8 @@ import Sta from "./sta";
 export default function RoadConditionSidebar() {
   const [isStaDetail, setIsStaDetail] = useState(false);
   const { selected: selectedRuas, set: setSelectedRuas } = useSelectedRuasStore();
-//   const { selectedRuas, setSelectedRuas } = useSelectedRuasStore(
-//     (selectedRuas) => ({
-//       selectedRuas: selectedRuas.selected,
-//       setSelectedRuas: selectedRuas.set,
-//     })
-//   );
 
     const { selected: selectedSta, set: setSelectedSta } = useSelectedStaStore();
-//   const { selectedSta, setSelectedSta } = useSelectedStaStore(
-//     (selectedSta) => ({
-//       selectedSta: selectedSta.selected,
-//       setSelectedSta: selectedSta.set,
-//     })
-//   );
 
   return (
     <aside

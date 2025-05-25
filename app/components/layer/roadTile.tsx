@@ -28,8 +28,6 @@ export function RoadTile({
       await deleteRoad(information.id);
     }
 
-    // const color = seedColor(information.road.id.toString()).toHex();
-
     return (
         <li key={information.id} className="flex flex-row items-center py-1">
       <input

@@ -1,21 +1,15 @@
+import { updateFeatureProperty } from "@/app/actions/actions";
 import { Tab, TabGroup, TabList, TabPanel, TabPanels, Transition } from "@headlessui/react";
+import { useSession } from "next-auth/react";
+import { useState } from "react";
 import { FaPencilAlt } from "react-icons/fa";
 import { IoClose } from "react-icons/io5";
-
-// import "react-tabs/style/react-tabs.css";
-import { useState } from "react";
 import { Oval } from "react-loader-spinner";
-// import { updateFeatureProperty } from "../../actions";
-import { updateFeatureProperty } from "@/app/actions/actions";
-import { useSession } from "next-auth/react";
 import useLayersStore from "../../stores/layers_store";
 import useSelectedFeatureStore from "../../stores/selected_feature_store";
 import AdminOnly from "../middleware/admin_only";
 import FeaturePropertyDetail from "./featurePropertyDetail";
 import FeaturePropertiesHistory from "./featurePropertyHistory";
-// import AuthenticatedOnly from "../AuthenticatedOnly";
-// import FeaturePropertiesHistory from "./FeaturePropertiesHistory";
-// import FeaturePropertyDetail from "./FeaturePropertyDetail";
 
 function classNames(...classes: any[]) {
   return classes.filter(Boolean).join(" ");
@@ -25,13 +19,6 @@ export default function FeatureSidebar() {
   const { data, status } = useSession();
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-
-//   const { selectedFeature, setSelectedFeature } = useSelectedFeatureStore(
-//     (selectedFeature) => ({
-//       selectedFeature: selectedFeature.selectedFeature,
-//       setSelectedFeature: selectedFeature.setSelectedFeature,
-//     })
-//   );
 
     const { selectedFeature, setSelectedFeature } = useSelectedFeatureStore();
 

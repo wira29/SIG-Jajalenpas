@@ -6,9 +6,6 @@ import { NextRequest } from "next/server";
 export async function GET(req: NextRequest, res: Response) {
     const { searchParams } = new URL(req.url);
   const token = searchParams.get('token');
-    
-    // const { token } = req.query;
-    // const token = req.query.token;
 
     if (!token) {
         return Response.json({ message: "Token tidak ditemukan" }, {
@@ -17,7 +14,7 @@ export async function GET(req: NextRequest, res: Response) {
     }
 
     try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const decoded : any = jwt.verify(token, process.env.JWT_SECRET!);
         const user = await prisma.users.findUnique({
             where: {
                 id: decoded.userId,
