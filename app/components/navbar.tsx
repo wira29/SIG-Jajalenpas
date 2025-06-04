@@ -25,7 +25,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Menu } from "lucide-react";
-import Link from "next/link";
 import AdminOnly from "./middleware/admin_only";
 import AuthenticatedOnly from "./middleware/authenticated_only";
 // import AdminOnly from "./AdminOnly";
@@ -175,9 +174,9 @@ export default function NavbarWidget() {
               <DropdownMenuContent className="z-[500]">
                 <DropdownMenuLabel>Akun Saya</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <Link href="/edit-profil">
+                {/* <Link href="/edit-profil">
                   <DropdownMenuItem>Edit Profil</DropdownMenuItem>
-                </Link>
+                </Link> */}
                 <AlertDialogTrigger className="w-full">
                   <DropdownMenuItem>Keluar</DropdownMenuItem>
                 </AlertDialogTrigger>
