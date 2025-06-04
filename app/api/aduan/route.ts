@@ -12,7 +12,10 @@ export async function GET(request: Request)
         include: {
             createdBy: true,
             ruas: true
-        }
+        },
+        orderBy: {
+            created_at: "desc",
+        },
     });
 
     return Response.json(aduans);

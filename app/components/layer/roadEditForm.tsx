@@ -37,10 +37,12 @@ export default function RoadEditForm({
     const dash = parseInt(formData.get("dash") as string);
     const dashLength = parseInt(formData.get("dashLength") as string);
     const descKewenangan = formData.get("desc_kewenangan") as string;
+    const color = formData.get("color") as string;
 
     const data : any = {
       nama,
       tahun,
+      color,
       weight,
       dash : null,
       dashLength : null,
@@ -104,6 +106,26 @@ export default function RoadEditForm({
             defaultValue={roadInformation.name}
           />
         </div>
+
+        <div className="mb-4">
+            <label
+              htmlFor="color"
+              className="text-gray-700 text-sm font-bold block mb-2"
+            >
+              Warna Garis
+            </label>
+            <input
+              type="color"
+              name="color"
+              id="color"
+              defaultValue={roadInformation.color}
+              className="border focus:border-green-500 focus:outline-none rounded transition-all duration-300"
+            />
+
+            {/* {state.error?.color && (
+              <p className="text-red-500 text-sm">{state.error.color}</p>
+            )} */}
+          </div>
 
         <div className="mb-4">
               <label

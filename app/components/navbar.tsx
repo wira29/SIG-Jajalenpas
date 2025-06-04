@@ -25,7 +25,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Menu } from "lucide-react";
-import AdminOnly from "./middleware/admin_only";
 import AuthenticatedOnly from "./middleware/authenticated_only";
 // import AdminOnly from "./AdminOnly";
 
@@ -62,11 +61,11 @@ export default function NavbarWidget() {
             <DropdownMenuItem>
               <a href="/">Beranda</a>
             </DropdownMenuItem>
-            <AdminOnly>
+            <AuthenticatedOnly>
               <DropdownMenuItem>
                 <a href="/laporan">Laporan</a>
               </DropdownMenuItem>
-            </AdminOnly>
+            </AuthenticatedOnly>
             <AuthenticatedOnly>
               <DropdownMenuItem>
                 <a href="/statistik">Statistik</a>
@@ -111,7 +110,7 @@ export default function NavbarWidget() {
         >
           Beranda
         </a>
-        <AdminOnly>
+        <AuthenticatedOnly>
         <a
           className={`p-4 ${
             currentPath === "/laporan"
@@ -122,7 +121,7 @@ export default function NavbarWidget() {
         >
           Laporan
         </a>
-        </AdminOnly>
+        </AuthenticatedOnly>
         <AuthenticatedOnly>
           <a
             className={`p-4 ${

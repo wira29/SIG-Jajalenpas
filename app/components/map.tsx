@@ -341,6 +341,7 @@ export default function Map() {
                                                 pathOptions={{
                                                     color: jalan.color,
                                                     weight: 3 + (currentZoom - 11),
+                                                    dashArray: [jalan.dashLength , jalan.dash].join(","),
                                                 }}
                                                 eventHandlers={{
                                                     click: (e) => {

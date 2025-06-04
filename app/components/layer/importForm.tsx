@@ -117,7 +117,7 @@ export default function ImportForm({
         >
           <div className="mb-4">
             <Label className="mb-3">Tahun</Label>
-            <TextInput name="tahun" value={inputYear.current.toString()} onChange={(e) =>  inputYear.current = parseInt(e.target.value)} />
+            <TextInput name="tahun" defaultValue={inputYear.current.toString()} onChange={(e) =>  inputYear.current = parseInt(e.target.value)} />
             {state.error?.tahun && (
               <p style={{ color: "red" }}>{state.error.tahun[0]}</p>
             )}
@@ -387,7 +387,7 @@ export default function ImportForm({
                 setLayerType(event.target.value as FeatureCollectionType);
               }}
             >
-              <option value="road">Jalan</option>
+              {/* <option value="road">Jalan</option> */}
               <option value="bridge">Jembatan</option>
               <option value="area">Area</option>
             </select>

@@ -74,10 +74,11 @@ export default function SignUp(props: Props) {
 
         window.location.href = "/api/auth/signin";
       } else {
+        console.log(res);
         toast({
           variant: "destructive",
           title: "Gagal",
-          description: "user gagal dibuat!",
+          description: "user gagal dibuat!, email sudah digunakan",
         })
       }
 

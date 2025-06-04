@@ -3,13 +3,15 @@
 import { Dialog, Transition } from "@headlessui/react";
 import { Pagination } from "flowbite-react";
 import moment from "moment";
+import { useSession } from "next-auth/react";
 import { Fragment, useEffect, useRef, useState } from "react";
-import AdminOnly from "../components/middleware/admin_only";
+import AuthenticatedOnly from "../components/middleware/authenticated_only";
 import NavbarWidget from "../components/navbar";
 
 export default function LaporanList() {
   const [reports, setReports] = useState<any[]>([]);
   const currentReport = useRef<any>(null);
+  const { data, status } = useSession();
 
       const totalPages = useRef(0);
       const totalItems = useRef(0);
@@ -105,14 +107,14 @@ export default function LaporanList() {
             />
           </div>
 
-            <AdminOnly>
+            <AuthenticatedOnly>
               <a
                 href="/laporan/upload"
                 className="bg-green-700 text-white py-2 px-4 rounded"
               >
                 Unggah Laporan
               </a>
-            </AdminOnly>
+            </AuthenticatedOnly>
           </div>
 
           <hr className="mb-4" />
@@ -155,8 +157,11 @@ export default function LaporanList() {
                       >
                         Detail
                       </a>
-                      <AdminOnly>
-                        <a
+                      <AuthenticatedOnly>
+                        {
+                          report.createdBy === (data?.user as any)?.id && (
+                            <>
+                            <a
                           href={`/laporan/${report.slug}/edit`}
                           className="rounded-md bg-yellow-300 px-4 py-2 text-sm font-medium text-white hover:bg-black/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75 ml-2"
                         >
@@ -172,7 +177,10 @@ export default function LaporanList() {
                         >
                           Hapus
                         </button>
-                      </AdminOnly>
+                            </>
+                          )
+                        }
+                      </AuthenticatedOnly>
                     </td>
                   </tr>
                 ))}

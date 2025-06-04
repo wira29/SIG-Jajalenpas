@@ -104,7 +104,8 @@ export default function SignIn(props: Props) {
                 <XCircle className="h-4 w-4" color="white" />
                 <AlertTitle>Gagal Masuk!</AlertTitle>
                 <AlertDescription>
-                  { props.searchParams?.error ?? "Username atau password anda salah." }
+                  {/* { props.searchParams?.error ?? "Username atau password anda salah." } */}
+                  {getErrorMessage(props.searchParams.error)}
                 </AlertDescription>
               </Alert>
             )}
@@ -150,4 +151,15 @@ export default function SignIn(props: Props) {
       <Toaster />
     </main>
   );
+}
+
+function getErrorMessage(code: string) {
+  switch (code) {
+    case "EMAIL_NOT_VERIFIED":
+      return "Email anda belum diverifikasi";
+    case "INVALID_CREDENTIALS":
+      return "Username atau password anda salah.";
+    default:
+      return "Terjadi kesalahan. Silakan coba lagi.";
+  }
 }

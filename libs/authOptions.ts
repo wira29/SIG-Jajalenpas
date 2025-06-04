@@ -44,13 +44,13 @@ export const authOptions : AuthOptions = {
               // user unverified 
               if (!user.email_verified_at) {
                 
-                throw new Error("Email anda belum diverifikasi");
+                throw new Error("EMAIL_NOT_VERIFIED");
               }
         
               // jika password salah
               const isValidPassword = await bcrypt.compare(credentials.password, user.password);
               if (!isValidPassword) {
-                throw new Error("Password salah");
+                throw new Error("INVALID_CREDENTIALS");
               }
 
               return {
