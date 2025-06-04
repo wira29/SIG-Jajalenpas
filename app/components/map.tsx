@@ -169,7 +169,7 @@ export default function Map() {
       };
 
     return (
-        <MapContainer
+        <MapContainer 
             ref={setMap}
             center={[-7.786, 112.8582]}
             zoom={11}
@@ -327,21 +327,19 @@ export default function Map() {
                 {!selectedRuas && (
                     <>
                     {
-                        
                         dataKondisiJalan.map((jalan: any, i: number) => {
 
                             if (!jalan.visible) 
                                 return null 
 
-                            return jalan.road.map((ruas: any, idx: number) => {
+
+                            return Array.isArray(jalan.road) && jalan.road.map((ruas: any, idx: number) => {
                                 return <Polyline
                                                 key={`road-line-${idx}`}
                                                 pane="road"
                                                 positions={swapLngLat(ruas.coordinates as any) as any}
                                                 pathOptions={{
                                                     color: jalan.color,
-                                                    // color: colorFromKondisi(ruas.kondisi),
-                                                    // color: selectedFeature == road ? "red" : "black",
                                                     weight: 3 + (currentZoom - 11),
                                                 }}
                                                 eventHandlers={{

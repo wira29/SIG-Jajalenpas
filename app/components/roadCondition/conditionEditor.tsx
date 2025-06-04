@@ -290,7 +290,6 @@ async function onSave(data: SaveData) {
   }
 
   try {
-    console.log(`/api/ruas/${data.properties.id}`)
     await fetch(`/api/ruas/${data.properties.id}`, {
       method: "PATCH",
       body: formData,

@@ -12,7 +12,7 @@ const layers: Record<BaseLayerType, React.ReactNode> = {
   stadia: (
     <TileLayer url="https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png" />
   ),
-};
+};  
 
 export default function BaseLayer() {
   const layer = useBaseLayerStore((state) => state.baseLayer);

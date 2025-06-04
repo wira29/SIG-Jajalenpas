@@ -132,9 +132,8 @@ export default function AddUserForm(props: AddUserFormProp) {
                           className="border border-gray-300 rounded-md w-full p-2 mb-2"
                           defaultValue={props.user?.roles[0].role.name}
                         >
-                          <option value="superadmin">Superadmin</option>
+                          <option value="superadmin">Admin</option>
                           <option value="operator">Operator</option>
-                          <option value="opd">OPD</option>
                           <option value="guest">Masyarakat</option>
                         </select>
                         {state.error?.role && (
