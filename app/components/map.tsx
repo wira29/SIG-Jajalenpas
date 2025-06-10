@@ -265,7 +265,47 @@ export default function Map() {
                                     </li>
                                 )
                             })}
-                           
+                            <hr className='my-3' />
+                            <li className="flex flex-row items-center">
+                                <div className="w-8 flex items-center justify-center">
+                                    <span
+                                    className="w-4 h-1"
+                                    style={{ backgroundColor: "#00ff00" }}
+                                    ></span>
+                                </div>
+                                <span className="ms-4 me-2 flex-grow text-xs">Kondisi Baik</span>
+                                
+                            </li>
+                            <li className="flex flex-row items-center">
+                                <div className="w-8 flex items-center justify-center">
+                                    <span
+                                    className="w-4 h-1"
+                                    style={{ backgroundColor: "#ffff00" }}
+                                    ></span>
+                                </div>
+                                <span className="ms-4 me-2 flex-grow text-xs">Kondisi Sedang</span>
+                                
+                            </li>
+                            <li className="flex flex-row items-center">
+                                <div className="w-8 flex items-center justify-center">
+                                    <span
+                                    className="w-4 h-1"
+                                    style={{ backgroundColor: "#ff9900" }}
+                                    ></span>
+                                </div>
+                                <span className="ms-4 me-2 flex-grow text-xs">Kondisi Rusak Ringan</span>
+                                
+                            </li>
+                            <li className="flex flex-row items-center">
+                                <div className="w-8 flex items-center justify-center">
+                                    <span
+                                    className="w-4 h-1"
+                                    style={{ backgroundColor: "#ff0000" }}
+                                    ></span>
+                                </div>
+                                <span className="ms-4 me-2 flex-grow text-xs">Kondisi Rusak Berat</span>
+                                
+                            </li>
                         </ul>
                         </TooltipProvider>
                     </div>
