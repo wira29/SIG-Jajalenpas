@@ -7,7 +7,7 @@ import { FaPencilAlt } from "react-icons/fa";
 import { FiAlertTriangle, FiInfo } from "react-icons/fi";
 import { IoClose } from "react-icons/io5";
 import AdminOnly from "../middleware/admin_only";
-import GuestOnly from "../middleware/guest_only";
+import GuestOperator from "../middleware/guest_operator";
 import ConditionDetail from "./conditionDetail";
 import ConditionEditor from "./conditionEditor";
 import ConditionHistory from "./conditionHistory";
@@ -110,7 +110,7 @@ export default function RoadCondition({
                 </button>
               </AdminOnly>
 
-              <GuestOnly>
+              <GuestOperator>
                 <div className="w-full">
                 <Alert className="mt-3 mb-3 bg-blue-400 text-white">
                   <FiInfo className="h-4 w-4" color="white" />
@@ -146,7 +146,7 @@ export default function RoadCondition({
                 </button>
                   ) : null
                 }
-                </GuestOnly>
+                </GuestOperator>
 
               {isEditing ? (
                 <ConditionEditor onDoneEditing={() => setIsEditing(false)} />

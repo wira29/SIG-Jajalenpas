@@ -4,7 +4,7 @@ import { getCurrentYear } from "@/app/utils/helpers";
 import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from "@headlessui/react";
 import { Fragment, useState } from "react";
 import { IoClose, IoSettings } from "react-icons/io5";
-import AdminOnly from "../middleware/admin_only";
+import SuperadminOnly from "../middleware/superadmin_only";
 
 type LayerTileProp = {
     layerInformation: LayerInformation;
@@ -70,7 +70,7 @@ export default function LayerTile({
         ></span>
       </div>
       <span className="flex-grow text-sm">{information.layer.name}</span>
-      <AdminOnly>
+      <SuperadminOnly>
         <button
           onClick={() => {
             onEdit(information);
@@ -79,9 +79,9 @@ export default function LayerTile({
         >
           <IoSettings />
         </button>
-      </AdminOnly>
+      </SuperadminOnly>
 
-      <AdminOnly>
+      <SuperadminOnly>
         <button
           onClick={() => {
             setIsDeleteDialogOpen(true);
@@ -90,7 +90,7 @@ export default function LayerTile({
         >
           <IoClose />
         </button>
-      </AdminOnly>
+      </SuperadminOnly>
 
       <Transition appear show={isDeleteDialogOpen} as={Fragment}>
         <Dialog

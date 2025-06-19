@@ -8,17 +8,52 @@ import { getServerSession } from "next-auth";
 export async function GET(request: Request)
 {
 
-    const aduans = await prisma.aduans.findMany({
-        include: {
-            createdBy: true,
-            ruas: true
+    // const aduans = await prisma.aduans.findMany({
+    //     include: {
+    //         createdBy: true,
+    //         ruas: true
+    //     },
+    //     orderBy: {
+    //         created_at: "desc",
+    //     },
+    // });
+
+    // return Response.json(aduans);
+
+    const aduans = await prisma.aduans.groupBy({
+        by: ["ruas_id"],
+        where: {
+            status: {
+                not: "done"
+            }
+        },
+        _count: {
+            id: true,
         },
         orderBy: {
-            created_at: "desc",
-        },
-    });
+            _count: {
+                id: "desc",
+            },
+        }
+    })
 
-    return Response.json(aduans);
+    const result = await Promise.all(
+        aduans.map(async (aduan) => {
+            const ruas = await prisma.ruas.findUnique({
+                where: {
+                    id: aduan.ruas_id,
+                },
+            });
+
+            return {
+                ruas_id: aduan.ruas_id,
+                laporan: aduan._count.id,
+                ruas: ruas,
+            };
+        })
+    )
+    
+    return Response.json(result);
 }
 
 export async function POST(request: Request)
@@ -29,6 +64,7 @@ export async function POST(request: Request)
     const keluhan = body.get("keluhan") as string;
     const photo = body.get("photo") as File;
     const ruasId = body.get("ruas_id") as string;
+    const user = session?.user as any;
     
     const bytes = await photo.arrayBuffer();
     const fileBuffer = Buffer.from(bytes);
@@ -51,7 +87,7 @@ export async function POST(request: Request)
             ruas_id: parseInt(ruasId),
             keluhan: keluhan,
             photo: path.replace("./public", ""),
-            status: "pending",
+            status: user.role === "guest" ? "pending" : "verified",
             created_at: new Date(),
         },
     });

@@ -12,3 +12,16 @@ export async function getAduans() {
         return [];
     }
 }
+
+export async function getAduanByRuasId(ruasId: string) {
+    try {
+        const response = await fetch(`/api/aduan/${ruasId}`);
+        const data = await response.json();
+        console.log(data);
+
+        return data;
+    } catch (error) {
+        console.error(error);
+        return [];
+    }
+}

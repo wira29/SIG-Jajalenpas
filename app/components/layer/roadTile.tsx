@@ -2,7 +2,7 @@ import useJalanStore, { JalanInformation } from "@/app/stores/jalan_store";
 import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from "@headlessui/react";
 import { Fragment, useState } from "react";
 import { IoClose, IoSettings } from "react-icons/io5";
-import AdminOnly from "../middleware/admin_only";
+import SuperadminOnly from "../middleware/superadmin_only";
 
 type LayerTileProp = {
     jalanInformation: JalanInformation;
@@ -45,7 +45,7 @@ export function RoadTile({
         ></span>
       </div>
       <span className="flex-grow text-sm">{information.name ?? "test"}</span>
-      <AdminOnly>
+      <SuperadminOnly>
         <button
           onClick={() => {
             onEdit(information);
@@ -54,9 +54,9 @@ export function RoadTile({
         >
           <IoSettings />
         </button>
-      </AdminOnly>
+      </SuperadminOnly>
 
-      <AdminOnly>
+      <SuperadminOnly>
         <button
           onClick={() => {
             setIsDeleteDialogOpen(true);
@@ -65,7 +65,7 @@ export function RoadTile({
         >
           <IoClose />
         </button>
-      </AdminOnly>
+      </SuperadminOnly>
 
       <Transition appear show={isDeleteDialogOpen} as={Fragment}>
         <Dialog

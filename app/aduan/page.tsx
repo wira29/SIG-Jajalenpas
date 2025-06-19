@@ -1,10 +1,9 @@
 "use client";
+import { Dialog, Transition } from "@headlessui/react";
 import { Pagination } from "flowbite-react";
-import { useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import NavbarWidget from "../components/navbar";
-import { formatDate } from "../utils/helpers";
 import { getAduans } from "./actions";
-import ImageDialog from "./components/imageDialog";
 
 export default function Aduan() {
 
@@ -17,6 +16,8 @@ export default function Aduan() {
     const page = useRef(1);
     const pageSize = 5;
     const search = useRef("");
+    const [isDoneOpen, setIsDoneOpen] = useState(false);
+    const [aduan, setAduan] = useState<any>(null);
       
     const paginate = (items: any) => {
       const startIndex = (page.current - 1) * pageSize;
@@ -42,6 +43,19 @@ export default function Aduan() {
         }, 1000);
     }
 
+    const handleChangeStatus = async (status: string) => {
+      setIsDoneOpen(false)
+
+      await fetch(`/api/aduan/${aduan.ruas_id}`, {
+        method: "PATCH",
+        body: JSON.stringify({
+          status: status
+        }),
+      })
+
+      getAduansData()
+    };
+
     const handlePageChange = (newPage: number) => {
         
       page.current = newPage;
@@ -54,13 +68,15 @@ export default function Aduan() {
       paginate(items);
   };
 
-    useEffect(() => {
-        const getAduansData = async () => {
+  const getAduansData = async () => {
             const data = await getAduans();
-            
-            paginate(data);
+            console.log(data)
+            paginate(data); 
             allItems.current = data;
         }
+
+    useEffect(() => {
+        
         getAduansData();
     }, []);
 
@@ -91,11 +107,10 @@ export default function Aduan() {
         <table className="w-full table-auto border-collapse">
           <thead>
             <tr className="rounded-lg text-sm font-semibold text-gray-700">
-              <th className="px-4 py-2 bg-gray-200">Tanggal Aduan</th>
-              <th className="px-4 py-2 bg-gray-200">Keluhan</th>
+              <th className="px-4 py-2 bg-gray-200">Nomor</th>
               <th className="px-4 py-2 bg-gray-200">Ruas</th>
-              <th className="px-4 py-2 bg-gray-200">Pengguna</th>
-              <th className="px-4 py-2 bg-gray-200">Photo</th>
+              <th className="px-4 py-2 bg-gray-200">Jumlah Laporan</th>
+              <th className="px-4 py-2 bg-gray-200">Aksi</th>
             </tr>
           </thead>
           <tbody className="text-sm font-normal text-gray-700">
@@ -104,21 +119,15 @@ export default function Aduan() {
                 key={aduan.id}
                 className="hover:bg-gray-100 border-b border-gray-200"
               >
-                <td className="px-4 py-3 text-center">{formatDate(aduan.created_at)}</td>
-                <td className="px-4 py-3 text-center">{aduan.keluhan}</td>
+                <td className="px-4 py-3 text-center">{(idx + 1) + ((page.current - 1) * pageSize)}</td>
                 <td className="px-4 py-3 text-center">{aduan.ruas.namaRuas}</td>
-                <td className="px-4 py-3 text-center">
-                  {aduan.createdBy.name}
-                  <p className="text-gray-400">{aduan.createdBy.email}</p>
-                </td>
-                <td className="px-4 py-3 text-center">
+                <td className="text-center"><span className="px-2 pb-1 m-0 rounded-sm bg-red-300 text-red-700 font-bold">{aduan.laporan}</span></td>
+                <td className="text-center">
+                    <a href={`/aduan/${aduan.ruas.id}/`} className="p-2 rounded-sm bg-gray-500 text-white">Detail</a>
                     <button onClick={() => {
-                        setDialogOpen(!isDialogOpen)
-                        setSelectedPhoto(aduan.photo)
-                    }} className="px-4 py-2 text-sm font-medium text-white bg-green-500 rounded-md hover:bg-green-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75">
-                        Lihat Foto 
-                    </button>
-                    
+                        setIsDoneOpen(!isDoneOpen)
+                        setAduan(aduan)
+                    }} className="p-2 mx-2 rounded-sm bg-green-500 text-white">Tandai Selesai</button>
                 </td>
               </tr>
             ))}
@@ -133,8 +142,62 @@ export default function Aduan() {
               showIcons
             />
           </div>
-        <ImageDialog isOpen={isDialogOpen} closeModal={() => setDialogOpen(false)} path={selectedPhoto} />
       </main>
+      {/* modal selesai  */}
+      <Transition appear show={isDoneOpen} as={Fragment}>
+        <Dialog as="div" className="relative z-10" onClose={() => setIsDoneOpen(false)}>
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-black/25" />
+          </Transition.Child>
+
+          <div className="fixed inset-0 overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center p-4 text-center">
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0 scale-95"
+                enterTo="opacity-100 scale-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100 scale-100"
+                leaveTo="opacity-0 scale-95"
+              >
+                <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                  <Dialog.Title
+                    as="h3"
+                    className="text-lg font-medium leading-6 text-gray-900"
+                  >
+                      Konfirmasi
+                  </Dialog.Title>
+
+                  <div className="mt-2">
+                    <p className="text-sm text-gray-500">
+                      Apakah anda yakin ingin menyelesaikan semua aduan di ruas ini?
+                    </p>
+                  </div>
+
+                  <div className="mt-4">
+                    <button
+                      type="submit"
+                      className="inline-flex justify-center rounded-md border border-transparent bg-green-100 px-4 py-2 text-sm font-medium text-green-900 hover:bg-green-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2"
+                      onClick={() => {handleChangeStatus("done")}}
+                    >
+                      Selesai
+                    </button>
+                  </div>
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </div>
+        </Dialog>
+      </Transition>
     </div>
   );
 }
