@@ -53,6 +53,8 @@ export async function PATCH(request: Request, {params}: {params: AduanRouteParam
     const { ruasId } = params;
     const body = await request.json();
     const status = body.status as string;
+    const note = body.note as string|null;
+    const date = body.date as Date|null;
 
     await prisma.aduans.updateMany({
         where: {
@@ -60,6 +62,8 @@ export async function PATCH(request: Request, {params}: {params: AduanRouteParam
         },
         data: {
             status: status,
+            note: note,
+            date_finished: date,
         },
     });
 

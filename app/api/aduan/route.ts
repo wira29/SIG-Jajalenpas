@@ -20,7 +20,7 @@ export async function GET(request: Request)
 
     // return Response.json(aduans);
 
-    const aduans = await prisma.aduans.groupBy({
+    const aduanUnfinished = await prisma.aduans.groupBy({
         by: ["ruas_id"],
         where: {
             status: {
@@ -37,8 +37,23 @@ export async function GET(request: Request)
         }
     })
 
-    const result = await Promise.all(
-        aduans.map(async (aduan) => {
+    const aduanDone = await prisma.aduans.groupBy({
+        by: ["ruas_id", "date_finished", "note"],
+        where: {
+            status: {
+                equals: "done"
+            }
+        },
+        _count: {
+            id: true,
+        },
+        orderBy: {
+            date_finished: "desc",
+        }
+    })
+
+    const resultUnfinished = await Promise.all(
+        aduanUnfinished.map(async (aduan) => {
             const ruas = await prisma.ruas.findUnique({
                 where: {
                     id: aduan.ruas_id,
@@ -52,8 +67,29 @@ export async function GET(request: Request)
             };
         })
     )
+
+    const resultFinished = await Promise.all(
+        aduanDone.map(async (aduan) => {
+            const ruas = await prisma.ruas.findUnique({
+                where: {
+                    id: aduan.ruas_id,
+                },
+            });
+
+            return {
+                ruas_id: aduan.ruas_id,
+                laporan: aduan._count.id,
+                date_finished: aduan.date_finished,
+                note: aduan.note,
+                ruas: ruas,
+            };
+        })
+    )
     
-    return Response.json(result);
+    return Response.json({
+        unfinished: resultUnfinished,
+        finished: resultFinished,
+    });
 }
 
 export async function POST(request: Request)

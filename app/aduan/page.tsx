@@ -1,15 +1,29 @@
 "use client";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Textarea } from "@/components/ui/textarea";
 import { Dialog, Transition } from "@headlessui/react";
+import { format } from "date-fns";
 import { Pagination } from "flowbite-react";
+import { CalendarIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { Fragment, useEffect, useRef, useState } from "react";
 import NavbarWidget from "../components/navbar";
+import useJalanStore from "../stores/jalan_store";
+import useSelectedRuasStore from "../stores/selected_ruas_store";
+import useYearStore from "../stores/year_store";
 import { getAduans } from "./actions";
 
 export default function Aduan() {
 
+   const router = useRouter();
+
     const [isDialogOpen, setDialogOpen] = useState(false)
     const [selectedPhoto, setSelectedPhoto] = useState("")
     const [aduans, setAduans] = useState<any[]>([]);
+    const [unfinished, setUnfinished] = useState<any[]>([]);
+    const [done, setDone] = useState<any[]>([]);
     const totalPages = useRef(0);
     const totalItems = useRef(0);
     const allItems = useRef([]);
@@ -18,6 +32,22 @@ export default function Aduan() {
     const search = useRef("");
     const [isDoneOpen, setIsDoneOpen] = useState(false);
     const [aduan, setAduan] = useState<any>(null);
+    const { selectedYear } = useYearStore();
+    const [filterStatus, setFilterStatus] = useState("belum");
+    
+    const [date, setDate] = useState<Date>()
+    const note = useRef("");
+
+    const { roads: dataKondisiJalan, fetchData: getKondisiJalan } = useJalanStore();
+    const setSelectedRuas = useSelectedRuasStore((state) => state.set);
+
+    const selectRuas = (ruas: any) => {
+      const jalan = dataKondisiJalan.find((l: any) => l.id === ruas.idJalan) as any;
+      // console.log(jalan)
+      const selectedRuas = jalan!.road.find((r: any) => r.id === ruas.id);
+      setSelectedRuas(selectedRuas);
+      router.push("/")
+    }
       
     const paginate = (items: any) => {
       const startIndex = (page.current - 1) * pageSize;
@@ -49,6 +79,8 @@ export default function Aduan() {
       await fetch(`/api/aduan/${aduan.ruas_id}`, {
         method: "PATCH",
         body: JSON.stringify({
+          note : note.current,
+          date : date,
           status: status
         }),
       })
@@ -68,16 +100,28 @@ export default function Aduan() {
       paginate(items);
   };
 
+  const handleFilterStatus = async (status: string) => {
+    setFilterStatus(status);
+    if (status === "belum") {
+      paginate(unfinished);
+    } else {
+      paginate(done);
+    }
+  }
+
   const getAduansData = async () => {
-            const data = await getAduans();
-            console.log(data)
-            paginate(data); 
-            allItems.current = data;
-        }
+        const data = await getAduans();
+
+        paginate(data.unfinished); 
+        allItems.current = data.unfinished;
+        setUnfinished(data.unfinished);
+        setDone(data.finished);
+    }
 
     useEffect(() => {
         
         getAduansData();
+        getKondisiJalan(selectedYear);
     }, []);
 
   return (
@@ -91,14 +135,18 @@ export default function Aduan() {
       >
         <div className="flex justify-between items-center pb-4 mx-auto">
           <div className="flex">
-          <input
-              type="text"
-              name="name"
-              id="username"
-              className="p-2 my-4 border rounded-md flex-1"
-              onChange={handleInputChange}
-              placeholder="Cari ruas"
-            />
+            <input
+                type="text"
+                name="name"
+                id="username"
+                className="p-2 my-4 border rounded-md flex-1"
+                onChange={handleInputChange}
+                placeholder="Cari ruas"
+              />
+              <select onChange={(e) => handleFilterStatus(e.target.value)} name="" id="" className="p-2 my-4 mx-2 border rounded-md flex-1">
+                <option value="belum">Belum Diperbaiki</option>
+                <option value="selesai">Sudah Diperbaiki</option>
+              </select>
           </div>
           <div className="flex items-center space-x-2">
           </div>
@@ -110,6 +158,12 @@ export default function Aduan() {
               <th className="px-4 py-2 bg-gray-200">Nomor</th>
               <th className="px-4 py-2 bg-gray-200">Ruas</th>
               <th className="px-4 py-2 bg-gray-200">Jumlah Laporan</th>
+              {
+                filterStatus == "selesai" && (<>
+                <th className="px-4 py-2 bg-gray-200">Tanggal</th>
+                <th className="px-4 py-2 bg-gray-200">Catatan</th>
+                </>)
+              }
               <th className="px-4 py-2 bg-gray-200">Aksi</th>
             </tr>
           </thead>
@@ -120,14 +174,20 @@ export default function Aduan() {
                 className="hover:bg-gray-100 border-b border-gray-200"
               >
                 <td className="px-4 py-3 text-center">{(idx + 1) + ((page.current - 1) * pageSize)}</td>
-                <td className="px-4 py-3 text-center">{aduan.ruas.namaRuas}</td>
-                <td className="text-center"><span className="px-2 pb-1 m-0 rounded-sm bg-red-300 text-red-700 font-bold">{aduan.laporan}</span></td>
+                <td className="px-4 py-3 text-center hover:cursor-pointer text-green-500 font-bold" onClick={() =>  selectRuas(aduan.ruas)}>{aduan.ruas.namaRuas}</td>
+                <td className="text-center"><span className={`px-2 pb-1 m-0 rounded-sm ${filterStatus == "belum" ? "bg-red-300 text-red-700" : "bg-green-300 text-green-700"} font-bold`}>{aduan.laporan}</span></td>
+                {
+                  filterStatus == "selesai" && (<>
+                  <td className="text-center">{aduan.date_finished ? format(aduan.date_finished, "PPP") : "-"}</td>
+                  <td className="text-center">{aduan.note}</td>
+                  </>)
+                }
                 <td className="text-center">
                     <a href={`/aduan/${aduan.ruas.id}/`} className="p-2 rounded-sm bg-gray-500 text-white">Detail</a>
-                    <button onClick={() => {
+                    {filterStatus == "belum" && (<button onClick={() => {
                         setIsDoneOpen(!isDoneOpen)
                         setAduan(aduan)
-                    }} className="p-2 mx-2 rounded-sm bg-green-500 text-white">Tandai Selesai</button>
+                    }} className="p-2 mx-2 rounded-sm bg-green-500 text-white">Tandai Selesai</button>)}
                 </td>
               </tr>
             ))}
@@ -181,6 +241,26 @@ export default function Aduan() {
                     <p className="text-sm text-gray-500">
                       Apakah anda yakin ingin menyelesaikan semua aduan di ruas ini?
                     </p>
+                    <div className="mt-3">
+                      <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          data-empty={!date}
+                          className="data-[empty=true]:text-muted-foreground w-full justify-start text-left font-normal"
+                        >
+                          <CalendarIcon />
+                          {date ? format(date, "PPP") : <span>Pilih tanggal</span>}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0">
+                        <Calendar required mode="single" selected={date} onSelect={setDate} />
+                      </PopoverContent>
+                    </Popover>
+                    </div>
+                    <div className="mt-3">
+                      <Textarea required placeholder="Keterangan..." rows={3} onChange={(e) => note.current = e.target.value} />
+                    </div>
                   </div>
 
                   <div className="mt-4">
