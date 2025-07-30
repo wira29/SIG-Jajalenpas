@@ -7,6 +7,7 @@ type SelectedRuasStore = {
   isLoading: boolean;
   error: string | null;
   set: (ruas: ruas | null) => Promise<void>;
+  setByNoRuas: (noRuas: number | null) => void;
   refresh(): Promise<void>;
 };
 
@@ -33,6 +34,18 @@ const useSelectedRuasStore = create<SelectedRuasStore>((set, get) => ({
     } catch (error) {
       set({ error: "Gagal memuat data kondisi jalan", isLoading: false });
     }
+  },
+  setByNoRuas: async (noRuas) => {
+
+    if (!noRuas) {
+      get().set(null);
+      return;
+    }
+
+    const response = await fetch(`/api/sta/ruas/${noRuas}`);
+    const data = await response.json();
+    
+    get().set(data);
   },
   refresh: async () => {
     const ruas = get().selected;

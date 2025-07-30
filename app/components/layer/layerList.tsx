@@ -1,5 +1,5 @@
 import useBaseLayerStore from "@/app/stores/base_layer_store";
-import useJalanStore, { JalanInformation } from "@/app/stores/jalan_store";
+import useJalanStore from "@/app/stores/jalan_store";
 import useLayersStore, { LayerInformation } from "@/app/stores/layers_store";
 import useProjectStore from "@/app/stores/project_store";
 import useYearStore from "@/app/stores/year_store";
@@ -9,7 +9,6 @@ import { UploadCloud } from "lucide-react";
 import Loading from "../loading";
 import AdminOnly from "../middleware/admin_only";
 import LayerTile from "./layerTile";
-import { RoadTile } from "./roadTile";
 
 type LayerListProps = {
     onImporting: (value: boolean) => void;
@@ -79,7 +78,7 @@ export default function LayerList(props: LayerListProps) {
                     </Select>
                 </div>
                 <ul className="p-4">
-                    {roads.map((road) => {
+                    {/* {roads.map((road) => {
                     return (
                         <RoadTile
                             key={road.id}
@@ -89,7 +88,7 @@ export default function LayerList(props: LayerListProps) {
                             }}
                         />
                     );
-                    })}
+                    })} */}
                     {layers.map((information) => {
                     return (
                         <LayerTile

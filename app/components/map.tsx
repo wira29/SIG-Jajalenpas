@@ -121,9 +121,9 @@ export default function Map() {
         updatePosition();
       }, [updatePosition]);
 
-    // selected state 
+    // selected state   
     const selectedRuas = useSelectedRuasStore((state) => state.selected);
-    const setSelectedRuas = useSelectedRuasStore((state) => state.set);
+    const setSelectedRuas = useSelectedRuasStore((state) => state.setByNoRuas);
     const selectedSta = useSelectedStaStore((state) => state.selected);
     const setSelectedSta = useSelectedStaStore((state) => state.set);
     const selectedFeature = useSelectedFeatureStore((state) => state.selectedFeature);
@@ -333,6 +333,7 @@ export default function Map() {
                     }}
                     eventHandlers={{
                         click: (e) => {
+                            // console.log("sta: ", sta);
                         setSelectedSta(sta);
                         },
                     }}
@@ -367,30 +368,31 @@ export default function Map() {
                 {!selectedRuas && (
                     <>
                     {
-                        dataKondisiJalan.map((jalan: any, i: number) => {
+                        // dataKondisiJalan.map((jalan: any, i: number) => {
 
-                            if (!jalan.visible) 
-                                return null 
+                        //     if (!jalan.visible) 
+                        //         return null 
 
 
-                            return Array.isArray(jalan.road) && jalan.road.map((ruas: any, idx: number) => {
-                                return <Polyline
-                                                key={`road-line-${idx}`}
-                                                pane="road"
-                                                positions={swapLngLat(ruas.coordinates as any) as any}
-                                                pathOptions={{
-                                                    color: jalan.color,
-                                                    weight: 3 + (currentZoom - 11),
-                                                    dashArray: [jalan.dashLength , jalan.dash].join(","),
-                                                }}
-                                                eventHandlers={{
-                                                    click: (e) => {
-                                                    setSelectedRuas(ruas);
-                                                    },
-                                                }}
-                                                ></Polyline>
-                            })
-                        })
+                        //     return Array.isArray(jalan.road) && jalan.road.map((ruas: any, idx: number) => {
+                        //         return <Polyline
+                        //                         key={`road-line-${idx}`}
+                        //                         pane="road"
+                        //                         positions={swapLngLat(ruas.coordinates as any) as any}
+                        //                         pathOptions={{
+                        //                             color: jalan.color,
+                        //                             weight: 3 + (currentZoom - 11),
+                        //                             dashArray: [jalan.dashLength , jalan.dash].join(","),
+                        //                         }}
+                        //                         eventHandlers={{
+                        //                             click: (e) => {
+                        //                                 // console.log("ruas: ", ruas);
+                        //                             setSelectedRuas(ruas.nomorRuas);
+                        //                             },
+                        //                         }}
+                        //                         ></Polyline>
+                        //     })
+                        // })
                     }
                     {/* menampilkan projek  */}
                     {
@@ -412,6 +414,44 @@ export default function Map() {
                     {layersInformation.map((information, i) => {
                         if (!isLayerVisible(information.id)) return null;
                         switch (information.layer.type) {
+                        case "road":
+                            return information.layer.feature.map((feature:any, i:any) => (
+                            <Polyline
+                                key={i}
+                                pane="road"
+                                positions={
+                                    // [112.861319, -7.657763] as any
+                                swapLngLat(
+                                    feature?.geometry[0]?.coordinates as any
+                                ) as any
+                                }
+                                pathOptions={{
+                                color: information.layer.color ? information.layer.color : "black",
+                                weight:
+                                    selectedFeature?.id == feature.id
+                                    ? information.layer.weight! + 2
+                                    : information.layer.weight!,
+                                dashArray: information.layer.dashed ? [7, 7] : [],
+                                dashOffset: information.layer.dashed ? "10" : "15",
+                                }}
+                                eventHandlers={{ 
+                                    click: (e) => {
+                                        setSelectedFeature(feature);
+                                        console.log("ruas: ", feature);
+                                        setSelectedRuas(feature.properties[0].data.No);
+                                    },
+                                 }}
+                            >
+                                {/* <Popup>
+                                <FeaturePropertyDetailPopup
+                                    feature={feature}
+                                    onDetail={() => {
+                                    setSelectedFeature(feature);
+                                    }}
+                                />
+                                </Popup> */}
+                            </Polyline>
+                            ));
                         case "bridge":
                             return information.layer.feature.map((feature:any, i:any) => (
                             <CircleMarker
