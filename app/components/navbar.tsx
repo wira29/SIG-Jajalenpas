@@ -76,9 +76,9 @@ export default function NavbarWidget() {
                 Pengaduan
               </a>
             </DropdownMenuItem> */}
-              <DropdownMenuItem>
+              {/* <DropdownMenuItem>
                 <a href="/aduan">Aduan Masyarakat</a>
-              </DropdownMenuItem>
+              </DropdownMenuItem> */}
             {(data?.user as any)?.role === "superadmin" && (
               <DropdownMenuItem>
                 <a href="/users">Akun</a>
@@ -134,12 +134,12 @@ export default function NavbarWidget() {
             Statistik
           </a>
         </AuthenticatedOnly>
-        <a
+        {/* <a
           className={`p-4 ${"text-sm text-gray-300"}`}
           href="/aduan"
         >
           Aduan Masyarakat
-        </a>
+        </a> */}
         {(data?.user as any)?.role === "superadmin" && (
           <a
             className={`p-4 ${
