@@ -1,11 +1,10 @@
-import { Tooltip as ComponentTooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { TooltipProvider } from '@/components/ui/tooltip';
 import { Card } from 'flowbite-react';
 import L, { Icon, latLng } from 'leaflet';
 import 'leaflet-defaulticon-compatibility';
 import 'leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.webpack.css';
 import 'leaflet/dist/leaflet.css';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { FiHelpCircle } from "react-icons/fi";
 import { MdClose, MdLayers, MdLayersClear } from 'react-icons/md';
 import { CircleMarker, MapContainer, Marker, Pane, Polygon, Polyline, Tooltip, useMap, ZoomControl } from "react-leaflet";
 import MarkerClusterGroup from "react-leaflet-markercluster";
@@ -164,7 +163,7 @@ export default function Map() {
 
     const classByType: Record<string, string> = {
         road: "w-4 h-1",
-        bridge: "w-2 h-2 rounded-full",
+        bridge: "w-2 h-2 rounded-full border-2 border-black",
         area: "w-4 h-4 rounded-sm",
       };
 
@@ -220,7 +219,7 @@ export default function Map() {
                         <h6 className="text-sm py-1">Legenda</h6>
                         <TooltipProvider>
                         <ul className="">
-                            {dataKondisiJalan.map((road: any) => {
+                            {/* {dataKondisiJalan.map((road: any) => {
                                 return  (
                                     <li key={road.id} className="flex flex-row items-center">
                                         
@@ -250,7 +249,7 @@ export default function Map() {
                                         </div>
                                     </li>
                                 )
-                            })}
+                            })} */}
                             {layersInformation.map((layer) => {
                                 return (
                                     <li key={layer.layer.id} className="flex flex-row items-center">
@@ -468,7 +467,7 @@ export default function Map() {
                                 weight: 1,
                                 fill: true,
                                 fillColor: information.layer.color,
-                                fillOpacity: 0.5,
+                                fillOpacity: 1,
                                 }}
                                 eventHandlers={{
                                 click: () => {

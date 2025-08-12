@@ -51,7 +51,7 @@ export default function LayerTile({
 
       const classByType: Record<string, string> = {
         road: "w-4 h-1",
-        bridge: "w-2 h-2 rounded-full",
+        bridge: "w-2 h-2 rounded-full border-2 border-black",
         area: "w-4 h-4 rounded-sm",
       };
 
