@@ -3,7 +3,7 @@ import { Control, DomUtil } from "leaflet";
 
 declare module "leaflet" {
   namespace Control {
-    class AutoLocate extends Control {
+    class CustomeAutoLocate extends Control {
       constructor(options?: AutoLocateOptions);
     }
 
@@ -13,10 +13,10 @@ declare module "leaflet" {
     }
   }
 
-  function autoLocate(options?: Control.AutoLocateOptions): Control.AutoLocate;
+  function autoLocate(options?: Control.AutoLocateOptions): Control.CustomeAutoLocate;
 }
 
-Control.AutoLocate = Control.extend({
+Control.CustomeAutoLocate = Control.extend({
   onAdd: function (map: any) {
     const img = DomUtil.create("img");
     img.src = "/images/current_location.png";
@@ -51,5 +51,5 @@ Control.AutoLocate = Control.extend({
 } as any);
 
 export const AutoLocateControl = createControlComponent(
-  (props) => new Control.AutoLocate(props)
+  (props) => new Control.CustomeAutoLocate(props)
 );
