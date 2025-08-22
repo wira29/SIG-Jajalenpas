@@ -4,16 +4,16 @@ import { Control, DomUtil } from "leaflet";
 declare module "leaflet" {
   namespace Control {
     class CustomeAutoLocate extends Control {
-      constructor(options?: AutoLocateOptions);
+      constructor(options?: IAutoLocateOptions);
     }
 
-    interface AutoLocateOptions {
+    interface IAutoLocateOptions {
       position?: string;
       [key: string]: any;
     }
   }
 
-  function autoLocate(options?: Control.AutoLocateOptions): Control.CustomeAutoLocate;
+  function autoLocate(options?: Control.IAutoLocateOptions): Control.CustomeAutoLocate;
 }
 
 Control.CustomeAutoLocate = Control.extend({
