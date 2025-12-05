@@ -1,5 +1,3 @@
-import { TooltipProvider } from '@/components/ui/tooltip';
-import { Card } from 'flowbite-react';
 import L, { Icon, latLng } from 'leaflet';
 import 'leaflet-defaulticon-compatibility';
 import 'leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.webpack.css';
@@ -16,7 +14,7 @@ import useProjectStore from '../stores/project_store';
 import useSelectedFeatureStore from '../stores/selected_feature_store';
 import useSelectedRuasStore from '../stores/selected_ruas_store';
 import useSelectedStaStore from '../stores/selected_sta_store';
-import { colorFromKondisi, swapLngLat } from '../utils/helpers';
+import { swapLngLat } from '../utils/helpers';
 import { AutoLocateControl } from './autoLocateControl';
 import BaseLayer from './baseLayer';
 import ProjectDialog from './dialog/projectDialog';
@@ -214,101 +212,7 @@ export default function Map() {
                 <AutoInvalidateMapSize />
                 {/* end auto bound to ruas  */}
 
-                <Card className="hidden md:flex absolute bottom-0 left-0 z-[500] rounded-lg bg-white text-xl text-green-900 shadow-lg  m-4">
-                    <div className="flex flex-col">
-                        <h6 className="text-sm py-1">Legenda</h6>
-                        <TooltipProvider>
-                        <ul className="">
-                            {/* {dataKondisiJalan.map((road: any) => {
-                                return  (
-                                    <li key={road.id} className="flex flex-row items-center">
-                                        
-                                        <div className="w-8 flex items-center justify-center">
-                                        <svg width="100" height="4">
-                                            <line
-                                                x1="0"
-                                                y1="2"
-                                                x2="100"
-                                                y2="2"
-                                                stroke={road.color}
-                                                strokeWidth="2"
-                                                strokeDasharray={[road.dashLength , road.dash].join(",")} // 10px dash, 5px gap
-                                            />
-                                            </svg>
-                                        </div>
-                                        <div className="d-flex flex-row items-center gap-2">
-                                            <span className="ms-4 me-2 flex-grow text-xs">{road.name}</span>
-                                            <ComponentTooltip>
-                                                <TooltipTrigger>
-                                                    <FiHelpCircle className="text-sm" />
-                                                </TooltipTrigger>
-                                                <TooltipContent>
-                                                    <p>{road.desc_kewenangan ?? ""}</p>
-                                                </TooltipContent>
-                                            </ComponentTooltip>
-                                        </div>
-                                    </li>
-                                )
-                            })} */}
-                            {layersInformation.map((layer) => {
-                                return (
-                                    <li key={layer.layer.id} className="flex flex-row items-center">
-                                        <div className="w-8 flex items-center justify-center">
-                                            <span
-                                            className={`inline-block mx-2 ${classByType[layer.layer.type]}`}
-                                            style={{ backgroundColor: layer.layer.color }}
-                                            ></span>
-                                        </div>
-                                        <span className="ms-4 flex-grow text-xs">{layer.layer.name}</span>
-                                        
-                                    </li>
-                                )
-                            })}
-                            <hr className='my-3' />
-                            <li className="flex flex-row items-center">
-                                <div className="w-8 flex items-center justify-center">
-                                    <span
-                                    className="w-4 h-1"
-                                    style={{ backgroundColor: "#00ff00" }}
-                                    ></span>
-                                </div>
-                                <span className="ms-4 me-2 flex-grow text-xs">Kondisi Baik</span>
-                                
-                            </li>
-                            <li className="flex flex-row items-center">
-                                <div className="w-8 flex items-center justify-center">
-                                    <span
-                                    className="w-4 h-1"
-                                    style={{ backgroundColor: "#ffff00" }}
-                                    ></span>
-                                </div>
-                                <span className="ms-4 me-2 flex-grow text-xs">Kondisi Sedang</span>
-                                
-                            </li>
-                            <li className="flex flex-row items-center">
-                                <div className="w-8 flex items-center justify-center">
-                                    <span
-                                    className="w-4 h-1"
-                                    style={{ backgroundColor: "#ff9900" }}
-                                    ></span>
-                                </div>
-                                <span className="ms-4 me-2 flex-grow text-xs">Kondisi Rusak Ringan</span>
-                                
-                            </li>
-                            <li className="flex flex-row items-center">
-                                <div className="w-8 flex items-center justify-center">
-                                    <span
-                                    className="w-4 h-1"
-                                    style={{ backgroundColor: "#ff0000" }}
-                                    ></span>
-                                </div>
-                                <span className="ms-4 me-2 flex-grow text-xs">Kondisi Rusak Berat</span>
-                                
-                            </li>
-                        </ul>
-                        </TooltipProvider>
-                    </div>
-                </Card>
+                
 
                 {/* Pane  */}
                 <Pane name="sta" style={{ zIndex: 504 }} />
@@ -320,13 +224,15 @@ export default function Map() {
                 {/* jika ada ruas dipilih  */}
                 {selectedRuas &&
                 selectedRuas.sta.map((sta:any) => {
+                    console.log(sta)
                 return (
                     <Polyline
                     key={`sta-line-${sta.id}`}
                     pane="sta"
                     positions={swapLngLat(sta.coordinates as any) as any}
                     pathOptions={{
-                        color: colorFromKondisi(sta.kondisi),
+                        // color: colorFromKondisi(sta.kondisi),
+                        color: "red",
                         // color: selectedFeature == road ? "red" : "black",
                         weight: selectedSta?.id == sta.id ? 10 : 3,
                     }}
@@ -367,31 +273,30 @@ export default function Map() {
                 {!selectedRuas && (
                     <>
                     {
-                        // dataKondisiJalan.map((jalan: any, i: number) => {
-
-                        //     if (!jalan.visible) 
-                        //         return null 
-
-
-                        //     return Array.isArray(jalan.road) && jalan.road.map((ruas: any, idx: number) => {
-                        //         return <Polyline
-                        //                         key={`road-line-${idx}`}
-                        //                         pane="road"
-                        //                         positions={swapLngLat(ruas.coordinates as any) as any}
-                        //                         pathOptions={{
-                        //                             color: jalan.color,
-                        //                             weight: 3 + (currentZoom - 11),
-                        //                             dashArray: [jalan.dashLength , jalan.dash].join(","),
-                        //                         }}
-                        //                         eventHandlers={{
-                        //                             click: (e) => {
-                        //                                 // console.log("ruas: ", ruas);
-                        //                             setSelectedRuas(ruas.nomorRuas);
-                        //                             },
-                        //                         }}
-                        //                         ></Polyline>
-                        //     })
-                        // })
+                        dataKondisiJalan.map((jalan: any, i: number) => {
+                            if (!jalan.visible) 
+                                return null 
+                            
+                            
+                            return Array.isArray(jalan.road) && jalan.road.map((ruas: any, idx: number) => {
+                                return <Polyline
+                                                key={`road-line-${idx}`}
+                                                pane="road"
+                                                positions={swapLngLat(ruas.coordinates as any) as any}
+                                                pathOptions={{
+                                                    color: jalan.color,
+                                                    weight: 3 + (currentZoom - 11),
+                                                    dashArray: [jalan.dashLength , jalan.dash].join(","),
+                                                }}
+                                                eventHandlers={{
+                                                    click: (e) => {
+                                                        // console.log("ruas: ", ruas);
+                                                    setSelectedRuas(ruas.nomorRuas);
+                                                    },
+                                                }}
+                                                ></Polyline>
+                            })
+                        })
                     }
                     {/* menampilkan projek  */}
                     {
@@ -413,44 +318,44 @@ export default function Map() {
                     {layersInformation.map((information, i) => {
                         if (!isLayerVisible(information.id)) return null;
                         switch (information.layer.type) {
-                        case "road":
-                            return information.layer.feature.map((feature:any, i:any) => (
-                            <Polyline
-                                key={i}
-                                pane="road"
-                                positions={
-                                    // [112.861319, -7.657763] as any
-                                swapLngLat(
-                                    feature?.geometry[0]?.coordinates as any
-                                ) as any
-                                }
-                                pathOptions={{
-                                color: information.layer.color ? information.layer.color : "black",
-                                weight:
-                                    selectedFeature?.id == feature.id
-                                    ? information.layer.weight! + 2
-                                    : information.layer.weight!,
-                                dashArray: information.layer.dashed ? [7, 7] : [],
-                                dashOffset: information.layer.dashed ? "10" : "15",
-                                }}
-                                eventHandlers={{ 
-                                    click: (e) => {
-                                        setSelectedFeature(feature);
-                                        console.log("ruas: ", feature);
-                                        setSelectedRuas(feature.properties[0].data.No);
-                                    },
-                                 }}
-                            >
-                                {/* <Popup>
-                                <FeaturePropertyDetailPopup
-                                    feature={feature}
-                                    onDetail={() => {
-                                    setSelectedFeature(feature);
-                                    }}
-                                />
-                                </Popup> */}
-                            </Polyline>
-                            ));
+                        // case "road":
+                        //     return information.layer.feature.map((feature:any, i:any) => (
+                        //     <Polyline
+                        //         key={i}
+                        //         pane="road"
+                        //         positions={
+                        //             // [112.861319, -7.657763] as any
+                        //         swapLngLat(
+                        //             feature?.geometry[0]?.coordinates as any
+                        //         ) as any
+                        //         }
+                        //         pathOptions={{
+                        //         color: information.layer.color ? information.layer.color : "black",
+                        //         weight:
+                        //             selectedFeature?.id == feature.id
+                        //             ? information.layer.weight! + 2
+                        //             : information.layer.weight!,
+                        //         dashArray: information.layer.dashed ? [7, 7] : [],
+                        //         dashOffset: information.layer.dashed ? "10" : "15",
+                        //         }}
+                        //         eventHandlers={{ 
+                        //             click: (e) => {
+                        //                 setSelectedFeature(feature);
+                        //                 console.log("ruas: ", feature);
+                        //                 setSelectedRuas(feature.properties[0].data.No);
+                        //             },
+                        //          }}
+                        //     >
+                        //         {/* <Popup>
+                        //         <FeaturePropertyDetailPopup
+                        //             feature={feature}
+                        //             onDetail={() => {
+                        //             setSelectedFeature(feature);
+                        //             }}
+                        //         />
+                        //         </Popup> */}
+                        //     </Polyline>
+                        //     ));
                         case "bridge":
                             return information.layer.feature.map((feature:any, i:any) => (
                             <CircleMarker

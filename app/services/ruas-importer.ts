@@ -107,17 +107,22 @@ export class RuasImporter {
         return acc;
       }
 
-      const ruas = acc.find((ruas) => ruas.nomorRuas === properties.No_Ruas);
+      const ruas = acc.find((ruas) => ruas.nomorRuas === properties.No);
 
       const sta = {
-        nomorRuas: properties.No_Ruas,
-        sta: properties.STA,
-        xAwal: properties.X_Awal,
-        yAwal: properties.Y_awal,
-        xAkhir: properties.X_Akhir,
-        yAkhir: properties.Y_Akhir,
-        kondisi: properties.Kondisi,
-        perkerasan: properties.Perkerasan || properties.Tipe_Perke,
+        nomorRuas: properties.No,
+        sta: `${properties.Sta_Awal} - ${properties.Sta_Akhir}`,
+        // xAwal: properties.X_Awal,
+        // yAwal: properties.Y_awal,
+        // xAkhir: properties.X_Akhir,
+        // yAkhir: properties.Y_Akhir,
+        xAwal: 0,
+        yAwal: 0,
+        xAkhir: 0,
+        yAkhir: 0,
+        kondisi: properties.Kondisi || "Baik",
+        // perkerasan: properties.Perkerasan || properties.Tipe_Perke,
+        perkerasan: "",
         coordinates: feature.geometry ? (feature.geometry as any).coordinates : [],
       };
 
@@ -143,12 +148,12 @@ export class RuasImporter {
       return [
         ...acc,
         {
-          nomorRuas: properties.No_Ruas,
-          namaRuas: properties.GPX_Name,
+          nomorRuas: properties.No,
+          namaRuas: properties.Nama_Ruas,
           kecamatan: properties.Kecamatan,
-          panjangSK: properties.Pjng_SK,
-          lebar: parseFloat(properties.Lebar_SK) || 0,
-          keterangan: properties.GPX_Name,
+          panjangSK: properties.Panjang_Ru,
+          lebar: parseFloat(properties.Lebar_Ruas) || 0,
+          keterangan: properties.Nama_Ruas,
           latitude,
           longitude,
           sta: [sta],
