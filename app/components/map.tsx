@@ -243,7 +243,7 @@ export default function Map() {
 
                 {/* UI Control Overlay - Top Right (Shifts when sidebar open) */}
                 <div 
-                    className={`absolute top-4 transition-all duration-500 z-[2001] flex flex-col gap-3 ${
+                    className={`absolute top-4 transition-all duration-500 z-[2001] flex flex-col gap-2 md:gap-3 ${
                         isSidebarLayerVisible 
                         ? "right-[calc(20%+1rem)] md:right-[calc(33.33%+1rem)] xl:right-[calc(25%+1rem)] 2xl:right-[calc(20%+1rem)]" 
                         : "right-4"
@@ -251,14 +251,19 @@ export default function Map() {
                 >
                     <button
                         onClick={() => toggleSidebarLayerVisibility()}
-                        className={`p-3.5 rounded-2xl shadow-2xl border-2 transition-all active:scale-95 ${
+                        className={`p-2.5 md:p-3.5 rounded-xl md:rounded-2xl shadow-2xl border-2 transition-all active:scale-95 ${
                             isSidebarLayerVisible 
                             ? "bg-green-700 border-green-800 text-white" 
                             : "bg-white/90 backdrop-blur-md border-slate-200 text-green-800 hover:bg-white"
                         }`}
                         title="Toggle Legend"
                     >
-                        {isSidebarLayerVisible ? <MdLayersClear size={24} /> : <MdLayers size={24} />}
+                        <div className="md:hidden">
+                            {isSidebarLayerVisible ? <MdLayersClear size={20} /> : <MdLayers size={20} />}
+                        </div>
+                        <div className="hidden md:block">
+                            {isSidebarLayerVisible ? <MdLayersClear size={24} /> : <MdLayers size={24} />}
+                        </div>
                     </button>
 
                     {selectedRuas && (
@@ -267,16 +272,17 @@ export default function Map() {
                                 setSelectedRuas(null);
                                 setSelectedSta(null);
                             }}
-                            className="p-3.5 rounded-2xl bg-white/90 backdrop-blur-md text-red-600 shadow-2xl border-2 border-slate-200 hover:bg-red-50 transition-all active:scale-95 animate-in zoom-in duration-300"
+                            className="p-2.5 md:p-3.5 rounded-xl md:rounded-2xl bg-white/90 backdrop-blur-md text-red-600 shadow-2xl border-2 border-slate-200 hover:bg-red-50 transition-all active:scale-95 animate-in zoom-in duration-300"
                             title="Tutup Detail"
                         >
-                            <MdClose size={24} />
+                            <MdClose className="md:hidden" size={20} />
+                            <MdClose className="hidden md:block" size={24} />
                         </button>
                     )}
                 </div>
 
                 {/* Unified Map Controls - Bottom Right */}
-                <div className="absolute bottom-6 right-6 z-[1010] flex flex-col gap-3 items-end">
+                <div className="absolute bottom-6 right-6 z-[1010] flex flex-col gap-2 md:gap-3 items-end">
                     <button
                         onClick={() => {
                             map?.locate();
@@ -284,26 +290,29 @@ export default function Map() {
                                 map?.setView(e.latlng, 11);
                             });
                         }}
-                        className="p-3.5 rounded-2xl bg-white/90 backdrop-blur-md text-green-700 shadow-2xl border-2 border-slate-200 hover:bg-green-50 transition-all active:scale-95"
+                        className="p-2.5 md:p-3.5 rounded-xl md:rounded-2xl bg-white/90 backdrop-blur-md text-green-700 shadow-2xl border-2 border-slate-200 hover:bg-green-50 transition-all active:scale-95"
                         title="Lokasi Saya"
                     >
-                        <MdMyLocation size={24} />
+                        <MdMyLocation className="md:hidden" size={20} />
+                        <MdMyLocation className="hidden md:block" size={24} />
                     </button>
                     
-                    <div className="flex flex-col bg-white/90 backdrop-blur-md rounded-2xl shadow-2xl border-2 border-slate-200 overflow-hidden">
+                    <div className="flex flex-col bg-white/90 backdrop-blur-md rounded-xl md:rounded-2xl shadow-2xl border-2 border-slate-200 overflow-hidden">
                         <button 
                             onClick={() => map?.zoomIn()}
-                            className="p-3.5 hover:bg-slate-100 text-slate-600 border-b border-slate-100 transition-colors active:bg-slate-200"
+                            className="p-2.5 md:p-3.5 hover:bg-slate-100 text-slate-600 border-b border-slate-100 transition-colors active:bg-slate-200"
                             title="Zoom In"
                         >
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                            <svg className="md:hidden" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                            <svg className="hidden md:block" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                         </button>
                         <button 
                             onClick={() => map?.zoomOut()}
-                            className="p-3.5 hover:bg-slate-100 text-slate-600 transition-colors active:bg-slate-200"
+                            className="p-2.5 md:p-3.5 hover:bg-slate-100 text-slate-600 transition-colors active:bg-slate-200"
                             title="Zoom Out"
                         >
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                            <svg className="md:hidden" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                            <svg className="hidden md:block" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                         </button>
                     </div>
                 </div>
