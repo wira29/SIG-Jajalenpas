@@ -10,17 +10,35 @@ type ProjectStore = {
     toggleProjectVisibility: () => void;
 }
 
+let currentController: AbortController | null = null;
+
 const useProjectStore = create<ProjectStore>()((set, get) => ({
     projects: [],
     loading: false,
     loadProject: async (tahun: number) => {
-        console.log(tahun)
-        const response = await fetch(`/api/projects?year=${tahun}`);
-        const data = await response.json();
+        if (currentController) {
+            currentController.abort();
+        }
+        currentController = new AbortController();
 
-        set({
-            projects: data
-        })
+        set({ loading: true });
+        try {
+            const response = await fetch(`/api/projects?year=${tahun}`, {
+                signal: currentController.signal
+            });
+            const data = await response.json();
+
+            set({
+                projects: data,
+                loading: false
+            })
+        } catch (error: any) {
+            if (error.name === 'AbortError') {
+                return;
+            }
+            console.error("Failed to load projects:", error);
+            set({ loading: false });
+        }
     },
     isProjectVisible: true,
     toggleProjectVisibility: () => {

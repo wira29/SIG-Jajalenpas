@@ -71,6 +71,9 @@ export default function NavbarWidget() {
                 <a href="/statistik">Statistik</a>
               </DropdownMenuItem>
             </AuthenticatedOnly>
+            <DropdownMenuItem>
+              <a href="/data-jalan">Data Jalan</a>
+            </DropdownMenuItem>
             {/* <DropdownMenuItem>
               <a href="https://www.lapor.go.id/" target="_blank">
                 Pengaduan
@@ -134,6 +137,16 @@ export default function NavbarWidget() {
             Statistik
           </a>
         </AuthenticatedOnly>
+        <a
+            className={`p-4 ${
+              currentPath === "/data-jalan"
+                ? "font-bold text-md text-white"
+                : "text-sm text-gray-300"
+            }`}
+            href="/data-jalan"
+          >
+            Data Jalan
+          </a>
         {/* <a
           className={`p-4 ${"text-sm text-gray-300"}`}
           href="/aduan"

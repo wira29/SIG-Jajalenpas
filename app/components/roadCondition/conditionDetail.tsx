@@ -19,371 +19,274 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { DialogTrigger } from "@radix-ui/react-dialog";
-import { ChevronDownCircle, Eye } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { ChevronDownCircle, Eye, Info, Ruler, MapPin, Activity, Layers } from "lucide-react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
 import ImageDialog from "../dialog/imageDialog";
 
 type ConditionDetailProps = {
   ruas: RuasWithSta;
 };
+
 export default function ConditionDetail({ ruas }: ConditionDetailProps) {
   const { set: setSelectedSta } = useSelectedStaStore();
-    const [render, setRender] = useState(0);
-  
-    const panjangJalan = useRef(0);
-  
-    // kondisi
-    const baik = useRef(0);
-    const sedang = useRef(0);
-    const rusakRingan = useRef(0);
-    const rusakBerat = useRef(0);
-  
-    // permukaan
-    const aspal = useRef(0);
-    const beton = useRef(0);
-    const kerikil = useRef(0);
-    const tanah = useRef(0);
-  
-    const formatSta = (sta: string) => {
-      return parseInt(sta.replace(/\+/g, ""));
-    };
-  
-    const sortSta = (sta: any = []) => {
-      return sta.sort((a: any, b: any) => formatSta(a.sta) - formatSta(b.sta));
-    };
-  
-    const clearCondition = () => {
-      baik.current = 0;
-      sedang.current = 0;
-      rusakRingan.current = 0;
-      rusakBerat.current = 0;
-  
-      aspal.current = 0;
-      beton.current = 0;
-      kerikil.current = 0;
-      tanah.current = 0;
-    };
-  
-    useEffect(() => {
-      const rerender = () => {
-        setRender((prev) => prev + 1);
+  const selectedSta = useSelectedStaStore((state) => state.selected);
+
+  const parseSingleSta = (staStr: string) => {
+    // Remove non-numeric characters except + and handle the parts
+    const clean = staStr.replace(/[^+0-9]/g, "");
+    if (clean.includes("+")) {
+        const [km, m] = clean.split("+");
+        return (parseInt(km || "0", 10) * 1000) + parseInt(m || "0", 10);
+    }
+    return parseInt(clean, 10) || 0;
+  }
+
+  const formatStaValue = (sta: any) => {
+    if (sta === null || sta === undefined) return 0;
+    const staStr = String(sta);
+    
+    // Handle range format "0+000 - 0+100" or "0+000 / 0+100"
+    if (staStr.includes("-") || staStr.includes("/")) {
+        const parts = staStr.split(/[-/]/);
+        // Take the end of the range as the value for the segment
+        return parseSingleSta(parts[parts.length - 1].trim());
+    }
+
+    return parseSingleSta(staStr);
+  };
+
+  const calculatedStats = useMemo(() => {
+    if (!ruas?.sta || ruas.sta.length === 0) {
+      return {
+        panjangTotal: 0,
+        kondisi: { baik: 0, sedang: 0, rusakRingan: 0, rusakBerat: 0 },
+        perkerasan: { aspal: 0, beton: 0, kerikil: 0, tanah: 0 }
       };
-  
-      const cekPanjangJalan = () => {
-        if (ruas?.sta) {
-          sortSta(ruas.sta);
-          const sta = ruas.sta[ruas.sta.length - 1].sta;
-          const panjang = formatSta(sta);
-  
-          panjangJalan.current = panjang;
-        }
-      };
-  
-      const cekPanjangTiapKondisi = () => {
-        if (ruas?.sta) {
-          clearCondition();
-          sortSta(ruas.sta);
-          ruas.sta.forEach((sta: any, index: number) => {
-            if (sta.kondisi === "Baik") {
-              
-              baik.current += index > 0
-                ? formatSta(sta.sta) - formatSta(ruas.sta[index - 1].sta)
-                : formatSta(sta.sta);
-            } else if (sta.kondisi === "Sedang") {
-              
-              sedang.current += index > 0
-                ? formatSta(sta.sta) - formatSta(ruas.sta[index - 1].sta)
-                : formatSta(sta.sta);
-            } else if (sta.kondisi === "Rusak Ringan") {
-              
-              rusakRingan.current += index > 0
-                ? formatSta(sta.sta) - formatSta(ruas.sta[index - 1].sta)
-                : formatSta(sta.sta);
-            } else if (sta.kondisi === "Rusak Berat") {
-              
-              rusakBerat.current += index > 0
-                ? formatSta(sta.sta) - formatSta(ruas.sta[index - 1].sta)
-                : formatSta(sta.sta);
-            }
-  
-            if (sta.perkerasan === "Aspal") {
-              
-              aspal.current += index > 0
-                ? formatSta(sta.sta) - formatSta(ruas.sta[index - 1].sta)
-                : formatSta(sta.sta);
-            } else if (sta.perkerasan === "Beton") {
-              
-              beton.current += index > 0
-                ? formatSta(sta.sta) - formatSta(ruas.sta[index - 1].sta)
-                : formatSta(sta.sta);
-            } else if (sta.perkerasan === "Kerikil") {
-              
-              kerikil.current += index > 0
-                ? formatSta(sta.sta) - formatSta(ruas.sta[index - 1].sta)
-                : formatSta(sta.sta);
-            } else if (sta.perkerasan === "Tanah") {
-              
-              tanah.current += index > 0
-                ? formatSta(sta.sta) - formatSta(ruas.sta[index - 1].sta)
-                : formatSta(sta.sta);
-            }
-          });
-          rerender();
-        }
-  
-      };
-  
-      cekPanjangJalan();
-      cekPanjangTiapKondisi();
-      // rerender();
-  
-      // setRender((prev) => prev + 1);
-    }, [ruas?.sta]);
+    }
+
+    const sortedSta = [...ruas.sta].sort((a: any, b: any) => formatStaValue(a.sta) - formatStaValue(b.sta));
+    
+    const stats = {
+      panjangTotal: formatStaValue(sortedSta[sortedSta.length - 1].sta),
+      kondisi: { baik: 0, sedang: 0, rusakRingan: 0, rusakBerat: 0 },
+      perkerasan: { aspal: 0, beton: 0, kerikil: 0, tanah: 0 }
+    };
+
+    sortedSta.forEach((sta: any, index: number) => {
+      const currentVal = formatStaValue(sta.sta);
+      const prevVal = index > 0 ? formatStaValue(sortedSta[index - 1].sta) : 0;
+      
+      // Calculate segment length
+      // If first point starts ahead of 0, count it.
+      let segmentLength = 0;
+      if (index === 0) {
+          segmentLength = currentVal;
+      } else {
+          segmentLength = Math.max(0, currentVal - prevVal);
+      }
+
+      // Condition calculation (Supporting codes: B, S, RR, RB)
+      const k = (sta.kondisi || "").toUpperCase().trim();
+      if (k === "B" || k === "BAIK" || k.includes("MANTAP")) stats.kondisi.baik += segmentLength;
+      else if (k === "S" || k === "SEDANG") stats.kondisi.sedang += segmentLength;
+      else if (k === "RR" || k.includes("RINGAN")) stats.kondisi.rusakRingan += segmentLength;
+      else if (k === "RB" || k.includes("BERAT")) stats.kondisi.rusakBerat += segmentLength;
+
+      // Surface type calculation
+      const p = (sta.perkerasan || "").toUpperCase().trim();
+      if (p.includes("ASPAL") || p.includes("MAKADAM") || p.includes("LAPEN") || p.includes("HOTMIX")) stats.perkerasan.aspal += segmentLength;
+      else if (p.includes("BETON") || p.includes("RIGIT")) stats.perkerasan.beton += segmentLength;
+      else if (p.includes("KERIKIL") || p.includes("TELFORD")) stats.perkerasan.kerikil += segmentLength;
+      else if (p.includes("TANAH")) stats.perkerasan.tanah += segmentLength;
+      else {
+          // If empty, assume Aspal as default or just ignore? 
+          // Usually better to count as 'Other' but we don't have that category in UI.
+          // Let's not add to any if truly unknown.
+      }
+    });
+
+    return stats;
+  }, [ruas]);
+
+  if (!ruas) return null;
 
 
   return (
-    <>
-      {ruas && ruas?.picturesonruas?.length > 0 && (
-        <Carousel
-          opts={{
-            align: "end",
-          }}
-          className="w-full"
-        >
-          <CarouselContent>
-            {ruas?.picturesonruas.map((picture: any, index: number) => (
-              <CarouselItem key={index} className="">
-                <div className="p-1">
-                  <ImageDialog image={"/api/picture/" + picture.picture.id} desc={picture.description ?? ""} data={ruas} >
-                  <DialogTrigger className="w-full">
-                  <Card className="w-full">
-                    <CardContent className="flex h-48 items-center justify-center p-0">
-                      <img
-                        className="w-full h-full object-cover"
-                        src={"/api/picture/" + picture.picture.id}
-                        alt={picture.description ?? ""}
-                      />
-                    </CardContent>
-                  </Card>
-                  </DialogTrigger>
-                  </ImageDialog>
-                  
-                </div>
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-          <CarouselPrevious className="left-4" />
-          <CarouselNext className="right-4" />
-        </Carousel>
-      )}
-      <div className="w-full p-1 mt-6">
-        <table className="w-full">
-          {ruas && (
-            <tbody className="w-full">
-              <tr className="w-full text-sm sm:text-md">
-                <td className="w-1/2 font-bold">Nomor Ruas</td>
-                <td className="w-1/2">: {ruas.nomorRuas}</td>
-              </tr>
-              <tr className="w-full text-sm sm:text-md">
-                <td className="w-1/2 font-bold">Nama Ruas</td>
-                <td className="w-1/2">: {ruas.namaRuas}</td>
-              </tr>
-              <tr className="w-full text-sm sm:text-md">
-                <td className="w-1/2 font-bold">Kecamatan</td>
-                <td className="w-1/2">: {ruas.kecamatan}</td>
-              </tr>
-              <tr className="w-full text-sm sm:text-md">
-                <td className="w-1/2 font-bold">panjang SK</td>
-                <td className="w-1/2">: {ruas.panjangSK}</td>
-              </tr>
-              <tr className="w-full text-sm sm:text-md">
-                <td className="w-1/2 font-bold">Lebar</td>
-                <td className="w-1/2">: {ruas.lebar}</td>
-              </tr>
-              <tr className="w-full text-sm sm:text-md">
-                <td className="w-1/2 font-bold">Latitude</td>
-                <td className="w-1/2">: {ruas.latitude}</td>
-              </tr>
-              <tr className="w-full text-sm sm:text-md">
-                <td className="w-1/2 font-bold">Longitude</td>
-                <td className="w-1/2">: {ruas.longitude}</td>
-              </tr>
-              <tr className="w-full text-sm sm:text-md">
-                <td className="w-1/2 font-bold">Keterangan</td>
-                <td className="w-1/2">: {ruas.keterangan}</td>
-              </tr>
-            </tbody>
-          )}
-        </table>
+    <div className="space-y-8">
+      {/* Header Info */}
+      <div>
+          <div className="flex items-center gap-2 mb-4">
+              <div className="w-8 h-8 bg-green-100 text-green-700 rounded-lg flex items-center justify-center">
+                  <Layers size={18} />
+              </div>
+              <h2 className="text-lg font-black text-slate-800 uppercase tracking-tight">Detail Ruas Jalan</h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50 rounded-2xl p-4 border border-slate-100">
+              <InfoItem label="Nomor Ruas" value={ruas.nomorRuas} icon={<Activity size={14} />} />
+              <InfoItem label="Kecamatan" value={ruas.kecamatan} icon={<MapPin size={14} />} />
+              <InfoItem label="Panjang SK" value={`${ruas.panjangSK} Km`} icon={<Ruler size={14} />} />
+              <InfoItem label="Lebar" value={`${ruas.lebar} m`} icon={<Ruler size={14} />} />
+          </div>
       </div>
 
-      {ruas?.sta && ruas.sta.length > 0 && (
-        <>
-          <div className="w-full p-1 mt-6">
-            <h6 className="font-bold flex gap-2 items-center text-sm sm:text-md">
-              <ChevronDownCircle size={14} /> PANJANG TIPE PERMUKAAN
-            </h6>
-            <Table className="mt-3">
-              <TableHeader>
-                <TableRow className="text-xs sm:text-md">
-                  <TableHead className="font-bold text-black ">
-                    ASPAL / PENETRASI / MAKADAM
-                  </TableHead>
-                  <TableHead className="font-bold text-black">
-                    PERKERASAN BETON
-                  </TableHead>
-                  <TableHead className="font-bold text-black">
-                    TELFORD / KERIKIL
-                  </TableHead>
-                  <TableHead className="font-bold text-black">
-                    TANAH / BELUM TEMBUS
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                <TableRow className="text-xs sm:text-md">
-                  <TableCell className="text-gray-500">{aspal.current}</TableCell>
-                  <TableCell className="text-gray-500">{beton.current}</TableCell>
-                  <TableCell className="text-gray-500">{kerikil.current}</TableCell>
-                  <TableCell className="text-gray-500">{tanah.current}</TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-          </div>
-
-          <div className="w-full p-1 mt-6">
-            <h6 className="font-bold flex items-center gap-2 text-sm sm:text-md">
-              <ChevronDownCircle size={14} /> PANJANG TIAP KONDISI
-            </h6>
-            <Table className="mt-3">
-              <TableHeader>
-                <TableRow className="text-xs sm:text-md">
-                  <TableHead
-                    className="text-center text-black font-bold"
-                    colSpan={2}
-                  >
-                    BAIK
-                  </TableHead>
-                  <TableHead
-                    className="text-center text-black font-bold"
-                    colSpan={2}
-                  >
-                    SEDANG
-                  </TableHead>
-                  <TableHead
-                    className="text-center text-black font-bold"
-                    colSpan={2}
-                  >
-                    RUSAK RINGAN
-                  </TableHead>
-                  <TableHead
-                    className="text-center text-black font-bold"
-                    colSpan={2}
-                  >
-                    RUSAK BERAT
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableHeader>
-                <TableRow className="text-xs sm:text-md">
-                  <TableHead className="text-black font-bold">m</TableHead>
-                  <TableHead className="text-black font-bold">%</TableHead>
-                  <TableHead className="text-black font-bold">m</TableHead>
-                  <TableHead className="text-black font-bold">%</TableHead>
-                  <TableHead className="text-black font-bold">m</TableHead>
-                  <TableHead className="text-black font-bold">%</TableHead>
-                  <TableHead className="text-black font-bold">m</TableHead>
-                  <TableHead className="text-black font-bold">%</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                <TableRow className="text-xs sm:text-md">
-                  <TableCell className="text-gray-500">
-                    {baik.current > 0 ? baik.current : "-"}
-                  </TableCell>
-                  <TableCell className="text-gray-500">
-                    {baik.current > 0 ? ((baik.current / panjangJalan.current) * 100).toFixed(2) : "-"}
-                  </TableCell>
-                  <TableCell className="text-gray-500">
-                    {sedang.current > 0 ? sedang.current : "-"}
-                  </TableCell>
-                  <TableCell className="text-gray-500">
-                    {sedang.current > 0
-                      ? ((sedang.current / panjangJalan.current) * 100).toFixed(2)
-                      : "-"}
-                  </TableCell>
-                  <TableCell className="text-gray-500">
-                    {rusakRingan.current > 0 ? rusakRingan.current : "-"}
-                  </TableCell>
-                  <TableCell className="text-gray-500">
-                    {rusakRingan.current > 0
-                      ? ((rusakRingan.current / panjangJalan.current) * 100).toFixed(2)
-                      : "-"}
-                  </TableCell>
-                  <TableCell className="text-gray-500">
-                    {rusakBerat.current > 0 ? rusakBerat.current : "-"}
-                  </TableCell>
-                  <TableCell className="text-gray-500">
-                    {rusakBerat.current > 0
-                      ? ((rusakBerat.current / panjangJalan.current) * 100).toFixed(2)
-                      : "-"}
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-          </div>
-
-          <div className="w-full p-1 mt-6">
-            <h6 className="font-bold flex items-center gap-2 text-sm sm:text-md">
-              <ChevronDownCircle size={14} /> RINCIAN DATA PER STA
-            </h6>
-            <Table className="mt-3">
-              <TableHeader>
-                <TableRow className="text-xs sm:text-md">
-                  <TableHead className="font-bold text-black">
-                    NOMOR RUAS
-                  </TableHead>
-                  <TableHead className="font-bold text-black">STA</TableHead>
-                  <TableHead className="font-bold text-black">
-                    TIPE PERMUKAAN
-                  </TableHead>
-                  <TableHead className="font-bold text-black">
-                    KONDISI
-                  </TableHead>
-                  <TableHead className="font-bold text-black">DETAIL</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {ruas?.sta &&
-                  ruas.sta.map((sta: any) => {
-                    sortSta(ruas.sta);
-                    return (
-                      <TableRow key={sta.id} className="text-xs sm:text-md">
-                        <TableCell className="text-gray-500">
-                          {sta.ruas.nomorRuas}
-                        </TableCell>
-                        <TableCell className="text-gray-500">
-                          {sta.sta}
-                        </TableCell>
-                        <TableCell className="text-gray-500">
-                          {sta.perkerasan}
-                        </TableCell>
-                        <TableCell className="text-gray-500">
-                          {sta.kondisi}
-                        </TableCell>
-                        <TableCell>
-                          <Button onClick={() => setSelectedSta(sta)}>
-                            <Eye size={16} />
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-              </TableBody>
-            </Table>
-          </div>
-        </>
+      {/* Visual Carousel */}
+      {ruas && ruas?.picturesonruas?.length > 0 && (
+        <div className="relative">
+            <Carousel opts={{ align: "start" }} className="w-full">
+              <CarouselContent>
+                {ruas?.picturesonruas.map((picture: any, index: number) => (
+                  <CarouselItem key={index} className="basis-full">
+                    <ImageDialog image={"/api/picture/" + picture.picture.id} desc={picture.description ?? ""} data={ruas} >
+                      <DialogTrigger className="w-full">
+                        <div className="group relative h-56 rounded-2xl overflow-hidden border border-slate-200 shadow-sm">
+                          <img
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                            src={"/api/picture/" + picture.picture.id}
+                            alt={picture.description ?? ""}
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4">
+                              <p className="text-white text-xs font-medium truncate">{picture.description || "Dokumentasi Lapangan"}</p>
+                          </div>
+                        </div>
+                      </DialogTrigger>
+                    </ImageDialog>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <div className="flex justify-end gap-2 mt-2">
+                <CarouselPrevious className="static translate-y-0" />
+                <CarouselNext className="static translate-y-0" />
+              </div>
+            </Carousel>
+        </div>
       )}
-    </>
+
+      {/* Statistics Sections */}
+      {ruas?.sta && ruas.sta.length > 0 && (
+        <div className="space-y-8">
+          {/* Surface Type Stats */}
+          <div className="bg-white rounded-3xl border border-slate-100 p-6 shadow-sm">
+            <h6 className="font-bold flex gap-2 items-center text-sm text-slate-900 mb-6 uppercase tracking-wider">
+              <div className="w-6 h-6 bg-blue-50 text-blue-600 rounded flex items-center justify-center">
+                  <Activity size={14} />
+              </div> 
+              Panjang Tipe Permukaan
+            </h6>
+            <div className="grid grid-cols-2 gap-4">
+                <StatBox label="Aspal / Makadam" value={`${calculatedStats.perkerasan.aspal} m`} color="bg-blue-600" />
+                <StatBox label="Beton" value={`${calculatedStats.perkerasan.beton} m`} color="bg-slate-600" />
+                <StatBox label="Kerikil" value={`${calculatedStats.perkerasan.kerikil} m`} color="bg-orange-600" />
+                <StatBox label="Tanah" value={`${calculatedStats.perkerasan.tanah} m`} color="bg-amber-800" />
+            </div>
+          </div>
+
+          {/* Condition Stats */}
+          <div className="bg-white rounded-3xl border border-slate-100 p-6 shadow-sm">
+            <h6 className="font-bold flex items-center gap-2 text-sm text-slate-900 mb-6 uppercase tracking-wider">
+              <div className="w-6 h-6 bg-green-50 text-green-600 rounded flex items-center justify-center">
+                  <Activity size={14} />
+              </div> 
+              Panjang Tiap Kondisi
+            </h6>
+            <div className="space-y-4">
+                <ConditionProgress label="BAIK" value={calculatedStats.kondisi.baik} total={calculatedStats.panjangTotal} color="bg-green-500" />
+                <ConditionProgress label="SEDANG" value={calculatedStats.kondisi.sedang} total={calculatedStats.panjangTotal} color="bg-yellow-400" />
+                <ConditionProgress label="RUSAK RINGAN" value={calculatedStats.kondisi.rusakRingan} total={calculatedStats.panjangTotal} color="bg-orange-500" />
+                <ConditionProgress label="RUSAK BERAT" value={calculatedStats.kondisi.rusakBerat} total={calculatedStats.panjangTotal} color="bg-red-600" />
+            </div>
+          </div>
+
+          {/* Detailed Table */}
+          <div className="bg-white rounded-3xl border border-slate-100 overflow-hidden shadow-sm">
+            <h6 className="font-bold flex items-center gap-2 text-sm text-slate-900 p-6 bg-slate-50/50 uppercase tracking-wider border-b border-slate-100">
+              <div className="w-6 h-6 bg-green-50 text-green-600 rounded flex items-center justify-center">
+                  <Layers size={14} />
+              </div> 
+              Rincian Data Per STA
+            </h6>
+            <div className="overflow-x-auto">
+                <Table>
+                <TableHeader>
+                    <TableRow className="bg-slate-50/30">
+                    <TableHead className="font-bold text-[10px] uppercase tracking-widest text-slate-400">STA</TableHead>
+                    <TableHead className="font-bold text-[10px] uppercase tracking-widest text-slate-400">Permukaan</TableHead>
+                    <TableHead className="font-bold text-[10px] uppercase tracking-widest text-slate-400">Kondisi</TableHead>
+                    <TableHead className="font-bold text-[10px] uppercase tracking-widest text-slate-400 text-right">Aksi</TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    {[...ruas.sta].sort((a: any, b: any) => formatStaValue(a.sta) - formatStaValue(b.sta)).map((sta: any) => (
+                        <TableRow key={sta.id} className="hover:bg-slate-50/50 transition-colors">
+                            <TableCell className="font-mono text-xs font-bold text-slate-700">{sta.sta}</TableCell>
+                            <TableCell className="text-xs text-slate-500 font-medium">{sta.perkerasan}</TableCell>
+                            <TableCell>
+                                <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase ${
+                                    (sta.kondisi || "").toUpperCase().trim() === 'B' || (sta.kondisi || "").toUpperCase().trim() === 'BAIK' ? 'bg-green-100 text-green-700' :
+                                    (sta.kondisi || "").toUpperCase().trim() === 'S' || (sta.kondisi || "").toUpperCase().trim() === 'SEDANG' ? 'bg-yellow-100 text-yellow-700' :
+                                    (sta.kondisi || "").toUpperCase().trim() === 'RR' || (sta.kondisi || "").toUpperCase().includes('RINGAN') ? 'bg-orange-100 text-orange-700' :
+                                    'bg-red-100 text-red-700'
+                                }`}>
+                                    {sta.kondisi}
+                                </span>
+                            </TableCell>
+                            <TableCell className="text-right">
+                            <button 
+                                onClick={() => setSelectedSta(sta)}
+                                className="p-2 text-slate-400 hover:text-green-700 hover:bg-green-50 rounded-lg transition-all"
+                            >
+                                <Eye size={16} />
+                            </button>
+                            </TableCell>
+                        </TableRow>
+                    ))}
+                </TableBody>
+                </Table>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
+}
+
+function InfoItem({ label, value, icon }: { label: string, value: any, icon: React.ReactNode }) {
+    return (
+        <div className="flex items-start gap-3">
+            <div className="p-1.5 bg-white rounded-lg text-slate-400 shadow-sm border border-slate-200">
+                {icon}
+            </div>
+            <div>
+                <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{label}</div>
+                <div className="text-sm font-bold text-slate-700">{value || "-"}</div>
+            </div>
+        </div>
+    );
+}
+
+function StatBox({ label, value, color }: { label: string, value: string, color: string }) {
+    return (
+        <div className="bg-slate-50 rounded-2xl p-3 border border-slate-100">
+            <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 truncate">{label}</div>
+            <div className="flex items-baseline gap-1.5">
+                <div className={`w-1.5 h-1.5 rounded-full ${color}`}></div>
+                <div className="text-sm font-black text-slate-800">{value}</div>
+            </div>
+        </div>
+    );
+}
+
+function ConditionProgress({ label, value, total, color }: { label: string, value: number, total: number, color: string }) {
+    const percentage = total > 0 ? (value / total) * 100 : 0;
+    return (
+        <div className="space-y-1.5">
+            <div className="flex justify-between items-end">
+                <span className="text-[10px] font-black text-slate-500 tracking-tight">{label}</span>
+                <span className="text-[10px] font-bold text-slate-900">{value}m <span className="text-slate-300 ml-1">({percentage.toFixed(1)}%)</span></span>
+            </div>
+            <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+                <div className={`h-full ${color} transition-all duration-1000`} style={{ width: `${percentage}%` }}></div>
+            </div>
+        </div>
+    );
 }

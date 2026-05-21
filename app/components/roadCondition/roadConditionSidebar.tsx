@@ -15,13 +15,13 @@ export default function RoadConditionSidebar() {
   return (
     <aside
       className={clsx(
+        "fixed left-0 top-16 bottom-0 z-[2000] transition-all duration-500 ease-in-out bg-white/90 backdrop-blur-xl border-r border-slate-200 overflow-y-auto custom-scrollbar",
         selectedRuas || selectedSta
-          ? "lg:w-4/6 xl:w-1/3 w-full p-4 shrink-0"
-          : "w-0 p-0",
-        "transition-all duration-500 ease-in-out overflow-y-auto border-r h-full  bg-white"
+          ? "md:w-2/3 lg:w-1/3 xl:w-1/4 w-full p-6 shadow-2xl"
+          : "w-0 p-0 overflow-hidden"
       )}
     >
-      <div>
+      <div className="animate-in fade-in slide-in-from-left-4 duration-500">
         {selectedSta ? (
           <Sta />
         ) : (

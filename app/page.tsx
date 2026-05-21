@@ -7,16 +7,18 @@ import { Puff } from "react-loader-spinner";
 import FeatureSidebar from "./components/feature/featureSidebar";
 import LayerSidebar from "./components/layer/layerSidebar";
 import NavbarWidget from "./components/navbar";
+import MapErrorBoundary from "./components/mapErrorBoundary";
 import RoadConditionSidebar from "./components/roadCondition/roadConditionSidebar";
+import SearchRuas from "./components/searchRuas";
+import HomeOverlay from "./components/homeOverlay";
 import useJalanStore from "./stores/jalan_store";
 import useLayersStore from "./stores/layers_store";
 import useProjectStore from "./stores/project_store";
 import useYearStore from "./stores/year_store";
 
-export default function Home() {
-
-  const DynamicMap = useMemo(() => dynamic(() => import("./components/map"), {
-    loading: () => (
+const DynamicMap = dynamic(() => import("./components/map"), {
+  loading: () => (
+    <div className="flex items-center justify-center h-full w-full">
       <Puff
         visible={true}
         height="40"
@@ -26,9 +28,12 @@ export default function Home() {
         wrapperStyle={{}}
         wrapperClass=""
       />
-    ),
-    ssr: false,
-  }), []);
+    </div>
+  ),
+  ssr: false,
+});
+
+export default function Home() {
 
   // const { data: session } = useSession();
 
@@ -44,23 +49,16 @@ export default function Home() {
   
   useEffect(() => { 
     getYears();
-  }, [layers]);
+  }, [getYears, layers]);
 
   useEffect(() => {
-    loadLayers(selectedYear);
-  }, [loadLayers, selectedYear]);
+    if (selectedYear) {
+      loadLayers(selectedYear);
+      loadProject(selectedYear);
+      loadRoads(selectedYear);
+    }
+  }, [selectedYear, loadLayers, loadProject, loadRoads]);
 
-  useEffect(() => {
-    loadProject(selectedYear)
-  }, [loadProject, selectedYear])
-
-  useEffect(() => {
-    loadRoads(selectedYear);
-  }
-  , [loadRoads, selectedYear]);
-  // console.log("rerender")
-
-  {console.log("rerender")}
   return (
     <div className="flex flex-col items-stretch h-screen">
       <NavbarWidget />
@@ -71,9 +69,12 @@ export default function Home() {
 
         <FeatureSidebar />
         <RoadConditionSidebar />
+        <SearchRuas />
 
         <div className="flex-grow bg-slate-100 w-full relative flex justify-center items-center">
-          <DynamicMap />
+          <MapErrorBoundary>
+            <DynamicMap />
+          </MapErrorBoundary>
         </div>
         
         <LayerSidebar />

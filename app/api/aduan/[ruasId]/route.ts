@@ -13,7 +13,7 @@ export async function GET(request: Request, {params}: {params: AduanRouteParams}
 
     const aduans = await prisma.aduans.findMany({
         where: {
-            ruas_id: parseInt(ruasId),
+            ruas_id: BigInt(ruasId),
             status : {
                 not: "done"
             }
@@ -38,7 +38,7 @@ export async function POST(request: Request, {params}: {params: AduanRouteParams
 
     await prisma.aduans.updateMany({
         where: {
-            id: parseInt(ruasId),
+            id: BigInt(ruasId),
         },
         data: {
             status: status,
@@ -58,7 +58,7 @@ export async function PATCH(request: Request, {params}: {params: AduanRouteParam
 
     await prisma.aduans.updateMany({
         where: {
-            ruas_id: parseInt(ruasId),
+            ruas_id: BigInt(ruasId),
         },
         data: {
             status: status,

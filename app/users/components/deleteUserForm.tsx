@@ -2,6 +2,7 @@
 
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment, useState } from "react";
+import { MdDelete, MdWarning, MdClose } from "react-icons/md";
 import { CreateUserFormState, deleteUser } from "../actions";
 
 const initialState: CreateUserFormState = {
@@ -26,7 +27,6 @@ export default function DeleteUserForm(props: AddUserFormProp) {
 
   async function confirmDelete() {
     await deleteUser(props.user?.id as number);
-
     window.location.reload();
   }
 
@@ -35,13 +35,14 @@ export default function DeleteUserForm(props: AddUserFormProp) {
       <button
         type="button"
         onClick={openModal}
-        className="rounded-md bg-red-700 px-4 py-2 text-sm font-medium text-white hover:bg-black/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75"
+        className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+        title="Hapus Akun"
       >
-        Hapus
+        <MdDelete size={18} />
       </button>
 
       <Transition appear show={isOpen} as={Fragment}>
-        <Dialog as="div" className="relative z-10" onClose={closeModal}>
+        <Dialog as="div" className="relative z-[3000]" onClose={closeModal}>
           <Transition.Child
             as={Fragment}
             enter="ease-out duration-300"
@@ -51,7 +52,7 @@ export default function DeleteUserForm(props: AddUserFormProp) {
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <div className="fixed inset-0 bg-black/25" />
+            <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" />
           </Transition.Child>
 
           <div className="fixed inset-0 overflow-y-auto">
@@ -65,27 +66,42 @@ export default function DeleteUserForm(props: AddUserFormProp) {
                 leaveFrom="opacity-100 scale-100"
                 leaveTo="opacity-0 scale-95"
               >
-                <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
-                  <Dialog.Title
-                    as="h3"
-                    className="text-lg font-medium leading-6 text-gray-900"
-                  >
-                    Hapus Akun?
-                  </Dialog.Title>
+                <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-3xl bg-white p-8 text-left align-middle shadow-2xl transition-all border border-slate-100">
+                  <div className="flex justify-between items-start mb-6">
+                    <div className="w-14 h-14 bg-red-50 text-red-600 rounded-2xl flex items-center justify-center">
+                      <MdWarning size={32} />
+                    </div>
+                    <button onClick={closeModal} className="text-slate-400 hover:text-slate-600 transition-colors">
+                      <MdClose size={24} />
+                    </button>
+                  </div>
 
-                  <div className="mt-2">
-                    <p className="text-sm text-gray-500">
-                      Apakah anda yakin ingin menghapus akun ini?
+                  <div className="mb-8">
+                    <Dialog.Title
+                      as="h3"
+                      className="text-xl font-bold leading-tight text-slate-900 mb-2"
+                    >
+                      Hapus Akun Pengguna?
+                    </Dialog.Title>
+                    <p className="text-sm text-slate-500 leading-relaxed">
+                      Anda akan menghapus akun <span className="font-bold text-slate-700">"{props.user?.name}"</span>. Tindakan ini bersifat permanen dan pengguna tersebut tidak akan bisa lagi mengakses sistem.
                     </p>
                   </div>
 
-                  <div className="mt-4">
+                  <div className="flex gap-3">
                     <button
-                      type="submit"
-                      className="inline-flex justify-center rounded-md border border-transparent bg-red-100 px-4 py-2 text-sm font-medium text-red-900 hover:bg-red-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2"
+                      type="button"
+                      className="flex-1 px-4 py-3 text-sm font-bold text-slate-500 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors"
+                      onClick={closeModal}
+                    >
+                      Batalkan
+                    </button>
+                    <button
+                      type="button"
+                      className="flex-1 px-4 py-3 text-sm font-bold text-white bg-red-600 rounded-xl hover:bg-red-700 shadow-lg shadow-red-200 transition-all active:scale-95"
                       onClick={confirmDelete}
                     >
-                      Hapus
+                      Ya, Hapus Akun
                     </button>
                   </div>
                 </Dialog.Panel>

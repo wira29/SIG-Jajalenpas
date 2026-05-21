@@ -37,6 +37,7 @@ model aduans {
   ruas                ruas?             @relation(fields: [ruas_id], references: [id], onDelete: Cascade, map: "aduans_ruas_id_foreign")
 
   @@index([created_by], map: "aduans_created_by_foreign")
+  @@index([status])
 }
 
 model amendment_deeds {
@@ -285,6 +286,8 @@ model featurecollection {
   tahun     Int       @default(2023)
   createdAt DateTime  @default(now()) @db.Timestamp(0)
   feature   feature[]
+
+  @@index([tahun])
 }
 
 model fiscal_years {
@@ -365,6 +368,8 @@ model jalan {
   created_at DateTime? @db.Timestamp(0)
   updated_at DateTime? @db.Timestamp(0)
   ruas       ruas[]
+
+  @@index([tahun])
 }
 
 model material_projects {

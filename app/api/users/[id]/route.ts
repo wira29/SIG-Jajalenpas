@@ -17,7 +17,7 @@ export async function POST(request: Request, { params }: { params: UserParams })
     try {
         const user = await prisma.users.update({
             where: {
-                id: parseInt(id),
+                id: BigInt(id),
             },
             data: {
                 name: body.name,
@@ -52,13 +52,13 @@ export async function DELETE(request: Request, { params }: { params: UserParams 
     try {
         await prisma.model_has_roles.deleteMany({
             where: {
-                model_id: parseInt(id),
+                model_id: BigInt(id),
             }
         });
 
         await prisma.users.delete({
             where: {
-                id: parseInt(id),
+                id: BigInt(id),
             },
         });
 

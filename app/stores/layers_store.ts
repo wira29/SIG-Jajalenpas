@@ -21,37 +21,55 @@ type LayersStore = {
   isLayerVisible: (layerId: number) => boolean;
 };
 
+let currentController: AbortController | null = null;
+
 const useLayersStore = create<LayersStore>((set, get) => ({
   layers: [],
   isLoading: false,
   isVisible: false,
-  years: [],
   toggleVisibility: () => set((state) => ({ isVisible: !state.isVisible })),
   loadLayers: async (selectedYear: number) => {
+    if (currentController) {
+      currentController.abort();
+    }
+    currentController = new AbortController();
+
     set({ isLoading: true });
 
-    const response = await fetch(`/api/layers?year=${selectedYear}`, { next: { revalidate: 10 }});
-    const data = await response.json();
+    try {
+      const response = await fetch(`/api/layers?year=${selectedYear}`, { 
+        next: { revalidate: 10 },
+        signal: currentController.signal 
+      });
+      const json = await response.json();
+      const data = json.data || [];
 
-    // sort data bridge, road, area
-    const score: { [key: string]: number } = {
-      bridge: 0,
-      road: 1,
-      area: 2,
-    };
+      // sort data bridge, road, area
+      const score: { [key: string]: number } = {
+        bridge: 0,
+        road: 1,
+        area: 2,
+      };
 
-    data.sort((a: FeatureCollectionFull, b: FeatureCollectionFull) => {
-      return score[a.type] - score[b.type];
-    });
+      data.sort((a: FeatureCollectionFull, b: FeatureCollectionFull) => {
+        return score[a.type] - score[b.type];
+      });
 
-    set({
-      layers: data.map((layer: FeatureCollectionFull) => ({
-        id: layer.id,
-        layer,
-        visible: true,
-      })),
-      isLoading: false,
-    });
+      set({
+        layers: data.map((layer: FeatureCollectionFull) => ({
+          id: Number(layer.id),
+          layer,
+          visible: true,
+        })),
+        isLoading: false,
+      });
+    } catch (error: any) {
+      if (error.name === 'AbortError') {
+        return;
+      }
+      console.error("Failed to load layers:", error);
+      set({ isLoading: false });
+    }
   },
   addLayer: (layer) => {
     set((state) => ({

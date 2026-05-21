@@ -12,7 +12,7 @@ export async function GET(
 
   const road = await prisma.jalan.findUnique({
     where: {
-      id: parseInt(roadId),
+      id: BigInt(roadId),
     },
     include: {
       ruas: {
@@ -42,7 +42,7 @@ export async function DELETE(
 
   const road = await prisma.jalan.delete({
     where: {
-      id: parseInt(roadId),
+      id: BigInt(roadId),
     },
   });
 
@@ -58,7 +58,7 @@ export async function PATCH(
 
   const feature = await prisma.jalan.update({
     where: {
-      id: parseInt(roadId),
+      id: BigInt(roadId),
     },
     data: {
       ...body,

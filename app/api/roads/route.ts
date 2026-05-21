@@ -2,23 +2,28 @@
 import { getCurrentYear } from "@/app/utils/helpers";
 import "@/libs/bigIntToJson";
 import prisma from "@/libs/prismadb";
+import { apiError, apiResponse } from "@/app/utils/api-helpers";
 
 export async function GET(request: Request) {
-    const { searchParams } = new URL(request.url); 
-    const year = searchParams.get("year");
+    try {
+        const { searchParams } = new URL(request.url); 
+        const year = searchParams.get("year");
 
-    const roads = await prisma.jalan.findMany({
-        include: {
-            ruas: {
-                include: {
-                    sta: true,
+        const roads = await prisma.jalan.findMany({
+            include: {
+                ruas: {
+                    include: {
+                        sta: true,
+                    }
                 }
+            },
+            where: {
+                tahun: year ? parseInt(year) : getCurrentYear()
             }
-        },
-        where: {
-            tahun: year ? parseInt(year) : getCurrentYear()
-        }
-    });
+        });
 
-    return Response.json(roads);
+        return apiResponse(roads);
+    } catch (error) {
+        return apiError("Gagal mengambil data jalan", 500, error);
+    }
 }

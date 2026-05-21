@@ -54,31 +54,10 @@ export class RuasImporter {
   async importGeoJSON(geoJSON: GeoJSON.FeatureCollection, detail: ImportRuasDetail) {
     "use server"
 
+    if (!geoJSON || geoJSON.type !== "FeatureCollection" || !Array.isArray(geoJSON.features)) {
+      throw new Error("Invalid GeoJSON: FeatureCollection expected.");
+    }
 
-    // {
-    //   "type": "Feature",
-    //   "properties": {
-    //     "Judul": "Lingkar",
-    //     "No_Ruas": 90809,
-    //     "SK_Name": "Lingkar",
-    //     "GPX_Name": "Lingkar - Rebono",
-    //     "Pangkal_Ru": "Lingkar",
-    //     "Ujung_Ruas": "Rebono",
-    //     "TP_Pangk": "239/239",
-    //     "TP_Ujung": "239/239",
-    //     "Pjng_SK": 1.88,
-    //     "Lebar_SK": 2.5,
-    //     "X_Awal": 694346.50846599997,
-    //     "Y_awal": 9148351.0654399991,
-    //     "X_Akhir": 694511.16083399998,
-    //     "Y_Akhir": 9148261.0528699998,
-    //     "Kecamatan": "Wonorejo",
-    //     "STA": "0+200",
-    //     "Kondisi": "Baik",
-    //     "Perkerasan": "Beton"
-    //   },
-
-    // each feature is an STA, to get the ruas, we need to group them by No_Ruas and create a new ruas for each No_Ruas
     type Ruas = {
       nomorRuas: number;
       namaRuas: string;
@@ -100,6 +79,7 @@ export class RuasImporter {
         coordinates: any[];
       }[];
     };
+
     const ruas = geoJSON.features.reduce((acc: Ruas[], feature) => {
       const properties = feature.properties as any;
 
@@ -107,53 +87,75 @@ export class RuasImporter {
         return acc;
       }
 
-      const ruas = acc.find((ruas) => ruas.nomorRuas === properties.No);
+      // Support various property names for road number
+      const noRuas = tryParseInt(properties.No || properties.No_Ruas || properties.nomorRuas, 0);
+      if (noRuas === 0) return acc;
+
+      const geometry = feature.geometry as any;
+      if (!geometry || !geometry.coordinates) return acc;
+
+      const coords = geometry.coordinates;
+      let xAwal = properties.X_Awal || properties.xAwal || 0;
+      let yAwal = properties.Y_awal || properties.yAwal || 0;
+      let xAkhir = properties.X_Akhir || properties.xAkhir || 0;
+      let yAkhir = properties.Y_Akhir || properties.yAkhir || 0;
+
+      // Fallback: extract from geometry if properties are missing
+      if (xAwal === 0 && yAwal === 0 && xAkhir === 0 && yAkhir === 0) {
+        const firstSegment = geometry.type === 'MultiLineString' ? coords[0] : coords;
+        const lastSegment = geometry.type === 'MultiLineString' ? coords[coords.length - 1] : coords;
+
+        if (firstSegment && firstSegment.length > 0) {
+          const startPoint = firstSegment[0];
+          xAwal = startPoint[0];
+          yAwal = startPoint[1];
+        }
+        if (lastSegment && lastSegment.length > 0) {
+          const endPoint = lastSegment[lastSegment.length - 1];
+          xAkhir = endPoint[0];
+          yAkhir = endPoint[1];
+        }
+      }
+
+      const sta_val = properties.STA || properties.Sta || `${properties.Sta_Awal || "0"} - ${properties.Sta_Akhir || "0"}`;
 
       const sta = {
-        nomorRuas: properties.No,
-        sta: `${properties.Sta_Awal} - ${properties.Sta_Akhir}`,
-        // xAwal: properties.X_Awal,
-        // yAwal: properties.Y_awal,
-        // xAkhir: properties.X_Akhir,
-        // yAkhir: properties.Y_Akhir,
-        xAwal: 0,
-        yAwal: 0,
-        xAkhir: 0,
-        yAkhir: 0,
-        kondisi: properties.Kondisi || "Baik",
-        // perkerasan: properties.Perkerasan || properties.Tipe_Perke,
-        perkerasan: "",
-        coordinates: feature.geometry ? (feature.geometry as any).coordinates : [],
+        nomorRuas: noRuas,
+        sta: String(sta_val),
+        xAwal: Number(xAwal),
+        yAwal: Number(yAwal),
+        xAkhir: Number(xAkhir),
+        yAkhir: Number(yAkhir),
+        kondisi: properties.Kondisi || properties.kondisi || "Baik",
+        perkerasan: properties.Perkerasan || properties.perkerasan || properties.Tipe_Perke || "",
+        coordinates: coords,
       };
 
-      if (ruas) {
-        // add STA to existing ruas
-        ruas.sta.push(sta);
+      const existingRuas = acc.find((r) => r.nomorRuas === noRuas);
 
+      if (existingRuas) {
+        existingRuas.sta.push(sta);
         return acc;
       }
 
-      // lat and long, use first STA geometry
-      const geometry = feature.geometry as any;
-      // get first coordinate from MultiLineString
-      if (geometry.coordinates[0] == undefined) {
-        return acc;
+      // Initial lat/long from first STA
+      let latitude = 0;
+      let longitude = 0;
+      const firstSegment = geometry.type === 'MultiLineString' ? coords[0] : coords;
+      if (firstSegment && firstSegment[0]) {
+        longitude = firstSegment[0][0];
+        latitude = firstSegment[0][1];
       }
-
-      const coordinate = geometry.coordinates[0][0];
-      // geojson stored as [longitude, latitude]
-      const latitude = coordinate[1];
-      const longitude = coordinate[0];
 
       return [
         ...acc,
         {
-          nomorRuas: properties.No,
-          namaRuas: properties.Nama_Ruas,
-          kecamatan: properties.Kecamatan,
-          panjangSK: properties.Panjang_Ru,
-          lebar: parseFloat(properties.Lebar_Ruas) || 0,
-          keterangan: properties.Nama_Ruas,
+          nomorRuas: noRuas,
+          namaRuas: properties.Nama_Ruas || properties.namaRuas || properties.Judul || "Tanpa Nama",
+          kecamatan: properties.Kecamatan || properties.kecamatan || "-",
+          panjangSK: parseFloat(properties.Panjang_Ru || properties.Pjng_SK || 0),
+          lebar: parseFloat(properties.Lebar_Ruas || properties.Lebar_SK || 0),
+          keterangan: properties.Keterangan || properties.keterangan || properties.Nama_Ruas || "",
           latitude,
           longitude,
           sta: [sta],
@@ -164,14 +166,13 @@ export class RuasImporter {
     // update ruas latitude and longitude to be the middle of the stas
     ruas.forEach((ruas) => {
       const middleSTA = ruas.sta[Math.floor(ruas.sta.length / 2)];
-
-      if (middleSTA) {
-        const geometry = middleSTA.coordinates[0];
-
-        if (geometry) {
-          const coordinate = geometry[0];
-          ruas.latitude = coordinate[1];
-          ruas.longitude = coordinate[0];
+      if (middleSTA && middleSTA.coordinates) {
+        const coords = middleSTA.coordinates;
+        const segment = Array.isArray(coords[0][0]) ? coords[0] : coords; // Handle MultiLineString vs LineString
+        const point = segment[Math.floor(segment.length / 2)];
+        if (point) {
+          ruas.longitude = point[0];
+          ruas.latitude = point[1];
         }
       }
     });
@@ -187,25 +188,25 @@ export class RuasImporter {
         is_kewenangan: detail.is_kewenangan,
         desc_kewenangan: detail.desc_kewenangan,
         ruas: {
-          create: ruas.map((ruas) => ({
-            nomorRuas: ruas.nomorRuas,
-            namaRuas: ruas.namaRuas,
-            kecamatan: ruas.kecamatan,
-            panjangSK: ruas.panjangSK,
-            lebar: ruas.lebar,
-            keterangan: ruas.keterangan,
-            latitude: ruas.latitude,
-            longitude: ruas.longitude,
+          create: ruas.map((r) => ({
+            nomorRuas: BigInt(r.nomorRuas),
+            namaRuas: r.namaRuas,
+            kecamatan: r.kecamatan,
+            panjangSK: r.panjangSK,
+            lebar: r.lebar,
+            keterangan: r.keterangan,
+            latitude: r.latitude,
+            longitude: r.longitude,
             sta: {
-              create: ruas.sta.map((sta) => ({
-                sta: sta.sta,
-                xAwal: sta.xAwal,
-                yAwal: sta.yAwal,
-                xAkhir: sta.xAkhir,
-                yAkhir: sta.yAkhir,
-                kondisi: sta.kondisi,
-                perkerasan: sta.perkerasan,
-                coordinates: sta.coordinates,
+              create: r.sta.map((s) => ({
+                sta: s.sta,
+                xAwal: s.xAwal,
+                yAwal: s.yAwal,
+                xAkhir: s.xAkhir,
+                yAkhir: s.yAkhir,
+                kondisi: s.kondisi,
+                perkerasan: s.perkerasan,
+                coordinates: s.coordinates as any,
               })),
             },
           })),
@@ -214,75 +215,5 @@ export class RuasImporter {
     });
 
     return jalan;
-
-
-    // model Ruas {
-    //   id         Int      @id @default(autoincrement())
-    //   nomorRuas  String
-    //   namaRuas   String
-    //   kecamatan  String
-    //   panjangSK  Float
-    //   lebar      Float
-    //   keterangan String?
-    //   createdAt  DateTime @default(now())
-
-    //   sta Sta[]
-    // }
-
-    // model Sta {
-    //   id         Int      @id @default(autoincrement())
-    //   nomorRuas  String
-    //   sta        Float
-    //   xAwal      Float
-    //   yAwal      Float
-    //   xAkhir     Float
-    //   yAkhir     Float
-    //   kondisi    String
-    //   perkerasan String
-    //   createdAt  DateTime @default(now())
-
-    //   ruasId Int  @map("ruasId")
-    //   ruas   Ruas @relation(fields: [ruasId], references: [id], onDelete: Cascade)
-    // }
-
-
-    // const featureCollection = await this.client.featureCollection.create({
-    //   data: {
-    //     name: detail.name,
-    //     type: detail.type,
-    //     color: detail.color,
-    //     weight: detail.weight,
-    //     dashed: detail.dashed,
-    //     radius: detail.radius,
-    //     features: {
-    //       create: geoJSON.features.map((feature) => ({
-    //         type: feature.type,
-    //         properties: {
-    //           create: [
-    //             {
-    //               data: feature.properties as any,
-    //               // baik: tryParseInt(feature.properties?.Kon_Baik_1, null),
-    //               // sedang: tryParseInt(feature.properties?.Kon_Sdg_1, null),
-    //               // rusakRingan: tryParseInt(feature.properties?.Kon_Rgn_1, null),
-    //               // rusakBerat: tryParseInt(feature.properties?.Kon_Rusa_1, null),
-    //               // mantap: tryParseInt(feature.properties?.Kon_Mntp_1, null),
-    //               // tidakMantap: tryParseInt(feature.properties?.Kon_T_Mn_1, null),
-    //               // perkerasan: feature.properties?.Tipe_Ker_1,
-    //             },
-    //           ],
-    //         },
-    //         geometry: {
-    //           create: {
-    //             type: feature.geometry.type,
-    //             coordinates: (feature.geometry as any)?.coordinates ?? [],
-    //           },
-    //         },
-    //       })),
-    //     },
-    //   },
-    // });
-
-    // return featureCollection;
   }
-
 }
