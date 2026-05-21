@@ -1,7 +1,7 @@
 "use client";
 
 import { Toaster } from "@/components/ui/toaster";
-import dynamic from "next/dynamic";
+import nextDynamic from "next/dynamic";
 import { useEffect, useMemo } from "react";
 import { Puff } from "react-loader-spinner";
 import FeatureSidebar from "./components/feature/featureSidebar";
@@ -16,7 +16,7 @@ import useLayersStore from "./stores/layers_store";
 import useProjectStore from "./stores/project_store";
 import useYearStore from "./stores/year_store";
 
-const DynamicMap = dynamic(() => import("./components/map"), {
+const DynamicMap = nextDynamic(() => import("./components/map"), {
   loading: () => (
     <div className="flex items-center justify-center h-full w-full">
       <Puff
