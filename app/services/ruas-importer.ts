@@ -23,7 +23,9 @@ import { PrismaClient } from "@prisma/client";
 //   Perkerasan
 // )
 
-function tryParseInt(value: any, defaultValue?: number | null) {
+function tryParseInt(value: any, defaultValue: number): number;
+function tryParseInt(value: any, defaultValue: null): number | null;
+function tryParseInt(value: any, defaultValue?: number | null): number | null | undefined {
   const parsed = parseInt(value, 10);
 
   if (isNaN(parsed)) {
@@ -80,7 +82,7 @@ export class RuasImporter {
       }[];
     };
 
-    const ruas = geoJSON.features.reduce((acc: Ruas[], feature) => {
+    const ruas = geoJSON.features.reduce<Ruas[]>((acc, feature) => {
       const properties = feature.properties as any;
 
       if (!properties) {

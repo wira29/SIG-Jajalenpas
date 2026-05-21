@@ -138,14 +138,16 @@ export default function Statistik() {
           </div>
         </div>
 
-        {!selectedRoadId ? (
+        {!selectedRoad ? (
           <div className="flex flex-col items-center justify-center py-32 bg-white rounded-[2rem] border-2 border-dashed border-slate-200">
             <div className="w-20 h-20 bg-slate-50 text-slate-300 rounded-full flex items-center justify-center mb-4">
               <MdMap size={48} />
             </div>
-            <h3 className="text-xl font-bold text-slate-800">Mulai Analisis</h3>
+            <h3 className="text-xl font-bold text-slate-800">
+              {selectedRoadId ? "Memuat Data..." : "Mulai Analisis"}
+            </h3>
             <p className="text-slate-500 max-w-xs text-center mt-2 text-sm leading-relaxed">
-              Pilih kategori jalan dan tahun anggaran untuk memuat visualisasi data statistik.
+              {selectedRoadId ? "Sedang menyiapkan visualisasi data untuk kategori jalan yang dipilih." : "Pilih kategori jalan dan tahun anggaran untuk memuat visualisasi data statistik."}
             </p>
           </div>
         ) : (
