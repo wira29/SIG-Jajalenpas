@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { JalanWithRuas, JalanWithRuasExtended } from "../types";
+import { swapLngLat } from "../utils/helpers";
 
 export type SimpleRuas = {
   idJalan: number,
@@ -105,7 +106,7 @@ const useJalanStore = create<JalanStore>()((set, get) => ({
                 dashLength: jalan.dashLength,
                 road: jalan.ruas.map((ruas: any) => ({
                   ...ruas,
-                  coordinates: ruas.sta.flatMap((sta: any) => sta.coordinates)
+                  coordinates: swapLngLat(ruas.sta.flatMap((sta: any) => sta.coordinates))
                 }))
               } 
             }

@@ -1,9 +1,40 @@
+import "@/libs/bigIntToJson";
 import prisma from "@/libs/prismadb";
 import { writeFile } from "fs";
 
 type RuasRouteParams = {
   ruas: string;
 };
+
+export async function GET(request: Request, { params }: { params: RuasRouteParams }) {
+  const { ruas } = params;
+
+  const data = await prisma.ruas.findFirst({
+    where: {
+      id: parseInt(ruas),
+    },
+    include: {
+      jalan: true,
+      picturesonruas: {
+        include: {
+          picture: true,
+        },
+      },
+      sta: {
+        include: {
+          picturesonsta: {
+            include: {
+              picture: true,
+            },
+          },
+          ruas: true
+        },
+      },
+    }
+  });
+
+  return Response.json(data);
+}
 
 export async function PATCH(request: Request, { params }: { params: RuasRouteParams }) {
   const { ruas } = params;

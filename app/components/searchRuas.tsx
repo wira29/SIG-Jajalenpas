@@ -10,7 +10,7 @@ export default function SearchRuas() {
   const [query, setQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const { roads } = useJalanStore();
-  const setSelectedRuas = useSelectedRuasStore((state) => state.setByNoRuas);
+  const setSelectedRuas = useSelectedRuasStore((state) => state.set);
   const searchRef = useRef<HTMLDivElement>(null);
 
   // Filter logic: Search by name or road number (nomorRuas)
@@ -50,8 +50,8 @@ export default function SearchRuas() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleSelect = (noRuas: number) => {
-    setSelectedRuas(noRuas);
+  const handleSelect = (ruas: any) => {
+    setSelectedRuas(ruas);
     setQuery("");
     setIsOpen(false);
   };
@@ -100,7 +100,7 @@ export default function SearchRuas() {
                   <button
                     key={`${ruas.nomorRuas}-${idx}`}
                     className="w-full text-left px-3 py-2.5 hover:bg-green-50 border-b border-slate-50 last:border-0 flex items-start gap-3 transition-colors group/item"
-                    onClick={() => handleSelect(Number(ruas.nomorRuas))}
+                    onClick={() => handleSelect(ruas)}
                   >
                     <div className="mt-0.5 text-slate-300 group-hover/item:text-green-600 transition-colors">
                       <MdLocationOn size={16} />

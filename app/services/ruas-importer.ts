@@ -90,7 +90,7 @@ export class RuasImporter {
       }
 
       // Support various property names for road number
-      const noRuas = tryParseInt(properties.No || properties.No_Ruas || properties.nomorRuas, 0);
+      const noRuas = tryParseInt(properties.No__Ruas || properties.No_Ruas || properties.nomorRuas, 0);
       if (noRuas === 0) return acc;
 
       const geometry = feature.geometry as any;

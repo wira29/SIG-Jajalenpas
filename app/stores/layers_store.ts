@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { FeatureCollectionFull } from "../types";
+import { swapLngLat } from "../utils/helpers";
 
 export type LayerInformation = {
   id: number;
@@ -56,11 +57,22 @@ const useLayersStore = create<LayersStore>((set, get) => ({
       });
 
       set({
-        layers: data.map((layer: FeatureCollectionFull) => ({
-          id: Number(layer.id),
-          layer,
-          visible: true,
-        })),
+        layers: data.map((layer: FeatureCollectionFull) => {
+          if (layer.feature) {
+            layer.feature = layer.feature.map((f: any) => ({
+              ...f,
+              geometry: f.geometry?.map((g: any) => ({
+                ...g,
+                coordinates: swapLngLat(g.coordinates)
+              }))
+            }));
+          }
+          return {
+            id: Number(layer.id),
+            layer,
+            visible: true,
+          };
+        }),
         isLoading: false,
       });
     } catch (error: any) {

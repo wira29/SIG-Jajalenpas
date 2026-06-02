@@ -55,8 +55,13 @@ export default function ConditionDetail({ ruas }: ConditionDetailProps) {
     return parseSingleSta(staStr);
   };
 
+  const sortedSta = useMemo(() => {
+    if (!ruas?.sta || ruas.sta.length === 0) return [];
+    return [...ruas.sta].sort((a: any, b: any) => formatStaValue(a.sta) - formatStaValue(b.sta));
+  }, [ruas?.sta]);
+
   const calculatedStats = useMemo(() => {
-    if (!ruas?.sta || ruas.sta.length === 0) {
+    if (sortedSta.length === 0) {
       return {
         panjangTotal: 0,
         kondisi: { baik: 0, sedang: 0, rusakRingan: 0, rusakBerat: 0 },
@@ -64,8 +69,6 @@ export default function ConditionDetail({ ruas }: ConditionDetailProps) {
       };
     }
 
-    const sortedSta = [...ruas.sta].sort((a: any, b: any) => formatStaValue(a.sta) - formatStaValue(b.sta));
-    
     const stats = {
       panjangTotal: formatStaValue(sortedSta[sortedSta.length - 1].sta),
       kondisi: { baik: 0, sedang: 0, rusakRingan: 0, rusakBerat: 0 },
@@ -98,15 +101,10 @@ export default function ConditionDetail({ ruas }: ConditionDetailProps) {
       else if (p.includes("BETON") || p.includes("RIGIT")) stats.perkerasan.beton += segmentLength;
       else if (p.includes("KERIKIL") || p.includes("TELFORD")) stats.perkerasan.kerikil += segmentLength;
       else if (p.includes("TANAH")) stats.perkerasan.tanah += segmentLength;
-      else {
-          // If empty, assume Aspal as default or just ignore? 
-          // Usually better to count as 'Other' but we don't have that category in UI.
-          // Let's not add to any if truly unknown.
-      }
     });
 
     return stats;
-  }, [ruas]);
+  }, [sortedSta]);
 
   if (!ruas) return null;
 
@@ -163,7 +161,7 @@ export default function ConditionDetail({ ruas }: ConditionDetailProps) {
       )}
 
       {/* Statistics Sections */}
-      {ruas?.sta && ruas.sta.length > 0 && (
+      {sortedSta.length > 0 && (
         <div className="space-y-8">
           {/* Surface Type Stats */}
           <div className="bg-white rounded-3xl border border-slate-100 p-6 shadow-sm">
@@ -216,7 +214,7 @@ export default function ConditionDetail({ ruas }: ConditionDetailProps) {
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {[...ruas.sta].sort((a: any, b: any) => formatStaValue(a.sta) - formatStaValue(b.sta)).map((sta: any) => (
+                    {sortedSta.map((sta: any) => (
                         <TableRow key={sta.id} className="hover:bg-slate-50/50 transition-colors">
                             <TableCell className="font-mono text-xs font-bold text-slate-700">{sta.sta}</TableCell>
                             <TableCell className="text-xs text-slate-500 font-medium">{sta.perkerasan}</TableCell>

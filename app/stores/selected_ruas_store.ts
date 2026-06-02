@@ -1,6 +1,7 @@
 import { ruas } from "@prisma/client";
 import { create } from "zustand";
 import { RuasWithSta } from "../types";
+import { swapLngLat } from "../utils/helpers";
 
 type SelectedRuasStore = {
   selected: RuasWithSta | null;
@@ -23,15 +24,20 @@ const useSelectedRuasStore = create<SelectedRuasStore>((set, get) => ({
 
     set({ isLoading: true });
     try {
-      const idJalan = ruas?.idJalan;
-      const nomorRuas = ruas?.nomorRuas;
-      const response = await fetch(`/api/roads/${idJalan}/ruas/${nomorRuas}`);
-      const result = await response.json();
+      const response = await fetch(`/api/ruas/${ruas.id}`);
+      const result = await response.json() as RuasWithSta;
 
-      console.log(result as RuasWithSta);
+      // Pre-swap coordinates to avoid doing it in the render loop
+      if (result.sta) {
+        result.sta = result.sta.map(s => ({
+          ...s,
+          coordinates: swapLngLat(s.coordinates as any) as any
+        }));
+      }
 
-      set({ selected: result as RuasWithSta, isLoading: false });
+      set({ selected: result, isLoading: false });
     } catch (error) {
+      console.error("Error setting selected ruas:", error);
       set({ error: "Gagal memuat data kondisi jalan", isLoading: false });
     }
   },

@@ -39,14 +39,13 @@ const AutoboundToRuas = () => {
       }
 
       try {
-        const coordinates = selectedRuas.sta.reduce((acc: any[], curr: any) => {
+        const coordinates = selectedRuas.sta.flatMap((curr: any) => {
           const coords = curr.coordinates;
-          const segment = Array.isArray(coords[0][0]) ? coords[0] : coords;
-          return [...acc, ...segment];
-        }, []);
+          return Array.isArray(coords[0][0]) ? coords[0] : coords;
+        });
         
         if (coordinates.length > 0) {
-          const bounds = L.latLngBounds(swapLngLat(coordinates as any) as any);
+          const bounds = L.latLngBounds(coordinates as any);
           setTimeout(() => {
             map.flyToBounds(bounds, {
               padding: [50, 50],
@@ -112,7 +111,7 @@ export default function Map() {
     }, [updatePosition]);
 
     const selectedRuas = useSelectedRuasStore((state) => state.selected);
-    const setSelectedRuas = useSelectedRuasStore((state) => state.setByNoRuas);
+    const setSelectedRuas = useSelectedRuasStore((state) => state.set);
     const selectedSta = useSelectedStaStore((state) => state.selected);
     const setSelectedSta = useSelectedStaStore((state) => state.set);
     const setSelectedFeature = useSelectedFeatureStore((state) => state.setSelectedFeature);
@@ -162,7 +161,7 @@ export default function Map() {
                 return <Polyline
                     key={`road-line-${ruas.id || idx}`}
                     pane="road"
-                    positions={swapLngLat(ruas.coordinates as any) as any}
+                    positions={ruas.coordinates as any}
                     pathOptions={{
                         color: jalan.color || "blue",
                         weight: Math.max(1, 3 + (currentZoom - 11)),
@@ -170,7 +169,7 @@ export default function Map() {
                     }}
                     eventHandlers={{
                         click: () => {
-                            setSelectedRuas(ruas.nomorRuas);
+                            setSelectedRuas(ruas);
                         },
                     }}
                 ></Polyline>
@@ -192,7 +191,7 @@ export default function Map() {
                     <CircleMarker
                         key={`bridge-${feature.id}-${i}`}
                         pane="bridge"
-                        center={swapLngLat(geom.coordinates as any) as any}
+                        center={geom.coordinates as any}
                         radius={2}
                         pathOptions={{
                             color: "black",
@@ -211,7 +210,7 @@ export default function Map() {
                     <Polygon
                         key={`area-${feature.id}-${i}`}
                         pane="area"
-                        positions={swapLngLat(geom.coordinates as any) as any}
+                        positions={geom.coordinates as any}
                         pathOptions={{
                             color: information.layer.color,
                             fillColor: seedColor(feature.id.toString()).toHex(),
@@ -230,6 +229,45 @@ export default function Map() {
             }).filter(Boolean);
         });
     }, [layersInformation, isLayerVisible, setSelectedFeature]);
+
+    const staLayers = useMemo(() => {
+        if (!selectedRuas || !selectedRuas.sta) return null;
+        
+        return selectedRuas.sta.map((sta:any) => {
+            if (!sta.coordinates || sta.coordinates.length === 0) return null;
+            const coords = Array.isArray(sta.coordinates[0][0]) ? sta.coordinates[0] : sta.coordinates;
+            const lastPoint = coords[coords.length - 1];
+            
+            return (
+                <React.Fragment key={`sta-group-${sta.id}`}>
+                    <Polyline
+                        pane="sta"
+                        positions={sta.coordinates as any}
+                        pathOptions={{
+                            color: "red",
+                            weight: selectedSta?.id == sta.id ? 10 : 3,
+                        }}
+                        eventHandlers={{
+                            click: () => { setSelectedSta(sta); },
+                        }}
+                    />
+                    {currentZoom >= 15 && (
+                        <Marker
+                            position={[lastPoint[0], lastPoint[1]]}
+                            icon={healthIcon}
+                            eventHandlers={{
+                                click: () => { setSelectedSta(sta); },
+                            }}
+                        >
+                            <Tooltip direction="top" offset={[0, 0]} opacity={1} permanent>
+                                {sta.sta}
+                            </Tooltip>
+                        </Marker>
+                    )}
+                </React.Fragment>
+            );
+        }).filter(Boolean);
+    }, [selectedRuas, selectedSta, currentZoom, setSelectedSta]);
 
     return (
         <MapContainer 
@@ -325,38 +363,7 @@ export default function Map() {
                 <Pane name="road" style={{ zIndex: 502 }} />
                 <Pane name="area" style={{ zIndex: 501 }} />
 
-                {selectedRuas && selectedRuas.sta && selectedRuas.sta.map((sta:any) => {
-                    if (!sta.coordinates || sta.coordinates.length === 0) return null;
-                    const coords = Array.isArray(sta.coordinates[0][0]) ? sta.coordinates[0] : sta.coordinates;
-                    const lastPoint = coords[coords.length - 1];
-                    
-                    return (
-                        <React.Fragment key={`sta-group-${sta.id}`}>
-                            <Polyline
-                                pane="sta"
-                                positions={swapLngLat(sta.coordinates as any) as any}
-                                pathOptions={{
-                                    color: "red",
-                                    weight: selectedSta?.id == sta.id ? 10 : 3,
-                                }}
-                                eventHandlers={{
-                                    click: () => { setSelectedSta(sta); },
-                                }}
-                            />
-                            <Marker
-                                position={[lastPoint[1], lastPoint[0]]}
-                                icon={healthIcon}
-                                eventHandlers={{
-                                    click: () => { setSelectedSta(sta); },
-                                }}
-                            >
-                                <Tooltip direction="top" offset={[0, 0]} opacity={1} permanent>
-                                    {sta.sta}
-                                </Tooltip>
-                            </Marker>
-                        </React.Fragment>
-                    );
-                })}
+                {staLayers}
 
                 {!selectedRuas && (
                     <>
