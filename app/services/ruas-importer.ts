@@ -96,7 +96,8 @@ export class RuasImporter {
       const geometry = feature.geometry as any;
       if (!geometry || !geometry.coordinates) return acc;
 
-      const coords = geometry.coordinates;
+      // Normalisasi format LineString (2D) menjadi MultiLineString (3D)
+      const coords = geometry.type === "LineString" ? [geometry.coordinates] : geometry.coordinates;
       let xAwal = properties.X_Awal || properties.xAwal || 0;
       let yAwal = properties.Y_awal || properties.yAwal || 0;
       let xAkhir = properties.X_Akhir || properties.xAkhir || 0;
@@ -104,8 +105,8 @@ export class RuasImporter {
 
       // Fallback: extract from geometry if properties are missing
       if (xAwal === 0 && yAwal === 0 && xAkhir === 0 && yAkhir === 0) {
-        const firstSegment = geometry.type === 'MultiLineString' ? coords[0] : coords;
-        const lastSegment = geometry.type === 'MultiLineString' ? coords[coords.length - 1] : coords;
+        const firstSegment = coords[0];
+        const lastSegment = coords[coords.length - 1];
 
         if (firstSegment && firstSegment.length > 0) {
           const startPoint = firstSegment[0];
@@ -143,7 +144,7 @@ export class RuasImporter {
       // Initial lat/long from first STA
       let latitude = 0;
       let longitude = 0;
-      const firstSegment = geometry.type === 'MultiLineString' ? coords[0] : coords;
+      const firstSegment = coords[0];
       if (firstSegment && firstSegment[0]) {
         longitude = firstSegment[0][0];
         latitude = firstSegment[0][1];
