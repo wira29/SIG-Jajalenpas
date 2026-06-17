@@ -1,8 +1,10 @@
 import useLayersStore, { LayerInformation } from "@/app/stores/layers_store";
+import useYearStore from "@/app/stores/year_store";
+import { getCurrentYear } from "@/app/utils/helpers";
 import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from "@headlessui/react";
 import { Fragment, useState } from "react";
 import { IoClose, IoSettings } from "react-icons/io5";
-import AdminOnly from "../middleware/admin_only";
+import SuperadminOnly from "../middleware/superadmin_only";
 
 type LayerTileProp = {
     layerInformation: LayerInformation;
@@ -14,6 +16,8 @@ export default function LayerTile({
     onEdit,
 }: LayerTileProp) {
 
+    const { setSelectedYear, getYears, years } = useYearStore()
+
     // state 
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     // end state 
@@ -22,6 +26,16 @@ export default function LayerTile({
     async function confirmDeleteLayer() {
       setIsDeleteDialogOpen(false);
       await deleteLayer(information.id);
+      
+      // perbarui tahun aktif 
+      await getYears();
+      const newYears = useYearStore.getState().years;
+
+      // cek apakah masih ada item di tahun yang dipilih 
+      if (!newYears.includes(information.layer.tahun)){
+        const currentYear = newYears.length > 0 ? newYears[0].tahun : getCurrentYear();
+        setSelectedYear(currentYear)
+      }
     }
     // end delete layer 
 
@@ -29,58 +43,66 @@ export default function LayerTile({
         isLayerVisible: isVisible,
         toggleLayerVisibility: toggleVisibility,
         deleteLayer,
-      } = useLayersStore();
+      } = useLayersStore(); 
 
       const classByType: Record<string, string> = {
         road: "w-4 h-1",
-        bridge: "w-2 h-2 rounded-full",
+        bridge: "w-2 h-2 rounded-full border-2 border-black",
         area: "w-4 h-4 rounded-sm",
       };
 
     return (
-    <li key={information.layer.id} className="flex flex-row items-center py-1">
-      <input
-        type="checkbox"
-        className="text-sm font-medium text-green-500 dark:text-gray-300 rounded-sm"
-        checked={isVisible(information.layer.id)}
-        onChange={() => toggleVisibility(information.id)}
-      />
-      <div className="w-8 flex items-center justify-center">
+    <li key={information.layer.id} className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100 group">
+      <div className="relative flex items-center">
+        <input
+            type="checkbox"
+            className="w-4 h-4 text-green-600 border-slate-300 rounded focus:ring-green-500 cursor-pointer transition-all"
+            checked={isVisible(Number(information.layer.id))}
+            onChange={() => toggleVisibility(information.id)}
+        />
+      </div>
+
+      <div className="w-6 h-6 flex items-center justify-center shrink-0">
         <span
-          className={`inline-block mx-2 ${classByType[information.layer.type]}`}
+          className={`inline-block border border-slate-200 shadow-sm ${classByType[information.layer.type]}`}
           style={{ backgroundColor: information.layer.color }}
         ></span>
       </div>
-      <span className="flex-grow text-sm">{information.layer.name}</span>
-      <AdminOnly>
-        <button
-          onClick={() => {
-            onEdit(information);
-          }}
-          className="mr-2 text-gray-500"
-        >
-          <IoSettings />
-        </button>
-      </AdminOnly>
 
-      <AdminOnly>
-        <button
-          onClick={() => {
-            setIsDeleteDialogOpen(true);
-          }}
-          className="text-red-500"
-        >
-          <IoClose />
-        </button>
-      </AdminOnly>
+      <div className="flex-grow min-w-0">
+        <div className="text-xs font-bold text-slate-700 group-hover:text-slate-900 transition-colors truncate uppercase tracking-tight">
+            {information.layer.name}
+        </div>
+        <div className="text-[9px] text-slate-400 font-medium uppercase tracking-widest">{information.layer.type}</div>
+      </div>
+
+      <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
+        <SuperadminOnly>
+            <button
+                onClick={() => onEdit(information)}
+                className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+                title="Pengaturan Layer"
+            >
+                <IoSettings size={14} />
+            </button>
+        </SuperadminOnly>
+
+        <SuperadminOnly>
+            <button
+                onClick={() => setIsDeleteDialogOpen(true)}
+                className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                title="Hapus Layer"
+            >
+                <IoClose size={16} />
+            </button>
+        </SuperadminOnly>
+      </div>
 
       <Transition appear show={isDeleteDialogOpen} as={Fragment}>
         <Dialog
           as="div"
-          className="relative z-[500]"
-          onClose={() => {
-            setIsDeleteDialogOpen(false);
-          }}
+          className="relative z-[3000]"
+          onClose={() => setIsDeleteDialogOpen(false)}
         >
           <TransitionChild
             as={Fragment}
@@ -91,7 +113,7 @@ export default function LayerTile({
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <div className="fixed inset-0 bg-black/25" />
+            <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" />
           </TransitionChild>
 
           <div className="fixed inset-0 overflow-y-auto">
@@ -105,19 +127,19 @@ export default function LayerTile({
                 leaveFrom="opacity-100 scale-100"
                 leaveTo="opacity-0 scale-95"
               >
-                <DialogPanel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                <DialogPanel className="w-full max-w-md transform overflow-hidden rounded-3xl bg-white p-8 text-left align-middle shadow-2xl transition-all border border-slate-100">
                   <DialogTitle
                     as="h3"
-                    className="text-lg font-medium leading-6 text-gray-900"
+                    className="text-lg font-bold leading-6 text-slate-900"
                   >
                     Hapus Layer?
                   </DialogTitle>
-                  <div className="mt-2">
-                    <p className="text-sm text-gray-500">
+                  <div className="mt-4">
+                    <p className="text-sm text-slate-500">
                       Apakah Anda yakin ingin menghapus layer berikut:
                       <br />
                       <br />
-                      <span className="font-bold text-red-500">
+                      <span className="font-bold text-red-600">
                         {information.layer.name}
                       </span>
                       <br />
@@ -126,22 +148,18 @@ export default function LayerTile({
                     </p>
                   </div>
 
-                  <div className="mt-4 flex justify-end">
+                  <div className="mt-8 flex gap-3">
                     <button
                       type="button"
-                      className="inline-flex justify-center rounded-md border border-transparent bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 focus:outline-none "
-                      onClick={() => {
-                        setIsDeleteDialogOpen(false);
-                      }}
+                      className="flex-1 justify-center rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors"
+                      onClick={() => setIsDeleteDialogOpen(false)}
                     >
                       Batal
                     </button>
                     <button
                       type="button"
-                      className="inline-flex justify-center rounded-md border border-transparent bg-red-100 px-4 py-2 text-sm font-medium text-red-900 hover:bg-red-200 focus:outline-none "
-                      onClick={() => {
-                        confirmDeleteLayer();
-                      }}
+                      className="flex-1 justify-center rounded-xl bg-red-600 px-4 py-3 text-sm font-bold text-white hover:bg-red-700 shadow-lg shadow-red-200 transition-all active:scale-95"
+                      onClick={confirmDeleteLayer}
                     >
                       Hapus
                     </button>

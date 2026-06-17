@@ -1,19 +1,15 @@
+import { updateFeatureProperty } from "@/app/actions/actions";
 import { Tab, TabGroup, TabList, TabPanel, TabPanels, Transition } from "@headlessui/react";
-import { FaPencilAlt } from "react-icons/fa";
-import { IoClose } from "react-icons/io5";
-
-// import "react-tabs/style/react-tabs.css";
-import { useState } from "react";
-import { Oval } from "react-loader-spinner";
-// import { updateFeatureProperty } from "../../actions";
 import { useSession } from "next-auth/react";
+import { useState } from "react";
+import { FaPencilAlt } from "react-icons/fa";
+import { IoClose, IoInformationCircleOutline, IoTimeOutline } from "react-icons/io5";
+import { Oval } from "react-loader-spinner";
 import useLayersStore from "../../stores/layers_store";
 import useSelectedFeatureStore from "../../stores/selected_feature_store";
 import AdminOnly from "../middleware/admin_only";
 import FeaturePropertyDetail from "./featurePropertyDetail";
-// import AuthenticatedOnly from "../AuthenticatedOnly";
-// import FeaturePropertiesHistory from "./FeaturePropertiesHistory";
-// import FeaturePropertyDetail from "./FeaturePropertyDetail";
+import FeaturePropertiesHistory from "./featurePropertyHistory";
 
 function classNames(...classes: any[]) {
   return classes.filter(Boolean).join(" ");
@@ -23,13 +19,6 @@ export default function FeatureSidebar() {
   const { data, status } = useSession();
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-
-//   const { selectedFeature, setSelectedFeature } = useSelectedFeatureStore(
-//     (selectedFeature) => ({
-//       selectedFeature: selectedFeature.selectedFeature,
-//       setSelectedFeature: selectedFeature.setSelectedFeature,
-//     })
-//   );
 
     const { selectedFeature, setSelectedFeature } = useSelectedFeatureStore();
 
@@ -41,105 +30,101 @@ export default function FeatureSidebar() {
   >;
 
   const titleCandidates = Object.values(property);
-  const title = property?.Jdl ?? titleCandidates[0] ?? "Feature";
-
-  console.log(data)
+  const title = property?.Nama_Ruas ?? titleCandidates[0] ?? "Detail Fitur";
 
   return (
     <aside
       className={`
-        ${selectedFeature ? "md:w-1/3 lg:w-1/5 w-full p-4 shrink-0" : "w-0 p-0"}
+        fixed left-0 top-16 bottom-0 z-[2000]
+        ${selectedFeature ? "md:w-1/3 lg:w-1/4 xl:w-1/5 w-full p-6 shadow-2xl" : "w-0 p-0 overflow-hidden"}
         transition-all duration-500 ease-in-out
-        overflow-y-auto 
-        border-r
-        h-full  bg-white`}
+        bg-white/90 backdrop-blur-xl border-r border-slate-200 overflow-y-auto custom-scrollbar`}
     >
-      <div className="flex flex-row justify-between items-center pb-4">
-        <h1 className="text-xl font-bold">{title}</h1>
+      <div className="flex flex-row justify-between items-start mb-6">
+        <div className="flex-1 min-w-0">
+            <span className="text-[10px] font-black text-green-700 uppercase tracking-widest mb-1 block">Informasi Aset</span>
+            <h1 className="text-xl font-black text-slate-900 leading-tight truncate uppercase">{title}</h1>
+        </div>
 
         <button
-          className="text-xl font-bold"
+          className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
           onClick={() => {
             setSelectedFeature(null);
           }}
         >
-          <IoClose />
+          <IoClose size={24} />
         </button>
       </div>
 
       <TabGroup>
-        <TabList className="flex space-x-1  p-1">
+        <TabList className="flex p-1 bg-slate-100 rounded-2xl mb-6">
           <Tab
             key="tab_data"
             className={({ selected } : any) =>
               classNames(
-                "w-full py-2.5 text-sm font-medium leading-5",
-                "ring-white/60 ring-offset-2 ring-offset-blue-400 focus:outline-none",
+                "w-full py-2.5 text-xs font-bold leading-5 rounded-xl transition-all flex items-center justify-center gap-2",
                 selected
-                  ? "bg-white text-gray-700 border-b-4 border-green-500"
-                  : "text-gray-500 hover:bg-white/[0.12] hover:text-green-500"
+                  ? "bg-white text-green-700 shadow-sm border border-slate-200"
+                  : "text-slate-500 hover:text-slate-700"
               )
             }
           >
+            <IoInformationCircleOutline size={18} />
             Data
           </Tab>
 
-          {/* <AuthenticatedOnly> */}
-            <Tab
-              key="tab_riwayat"
-              className={({ selected } : any) =>
-                classNames(
-                  "w-full py-2.5 text-sm font-medium leading-5",
-                  "ring-white/60 ring-offset-2 ring-offset-blue-400 focus:outline-none",
-                  selected
-                    ? "bg-white text-gray-700 border-b-4 border-green-500"
-                    : "text-gray-500 hover:bg-white/[0.12] hover:text-green-500"
-                )
-              }
-            >
-              Riwayat
-            </Tab>
-          {/* </AuthenticatedOnly> */}
+          <Tab
+            key="tab_riwayat"
+            className={({ selected } : any) =>
+              classNames(
+                "w-full py-2.5 text-xs font-bold leading-5 rounded-xl transition-all flex items-center justify-center gap-2",
+                selected
+                  ? "bg-white text-green-700 shadow-sm border border-slate-200"
+                  : "text-slate-500 hover:text-slate-700"
+              )
+            }
+          >
+            <IoTimeOutline size={18} />
+            Riwayat
+          </Tab>
         </TabList>
-        <TabPanels className="mt-2">
-          <TabPanel key="tab_data" className="py-4">
+        <TabPanels>
+          <TabPanel key="tab_data">
             <Transition
-            as={"div"}
+              as={"div"}
               appear
               show={true}
-              enter="transition-opacity duration-500"
-              enterFrom="opacity-0"
-              enterTo="opacity-100"
-              leave="transition-opacity duration-500"
+              enter="transition-all duration-500"
+              enterFrom="opacity-0 translate-y-4"
+              enterTo="opacity-100 translate-y-0"
+              leave="transition-all duration-500"
               leaveFrom="opacity-100"
               leaveTo="opacity-0"
             >
               <AdminOnly>
                 <button
-                  className={`mb-4 w-full py-2 pl-4 pr-2 rounded  flex justify-between items-center ${
-                    isEditing ? "bg-red-500" : "bg-green-700"
-                  } transition-all duration-300`}
+                  className={`mb-6 w-full py-3 px-4 rounded-xl flex justify-between items-center ${
+                    isEditing ? "bg-red-600 shadow-red-100" : "bg-green-700 shadow-green-100"
+                  } transition-all duration-300 shadow-lg text-white group`}
                   onClick={() => setIsEditing(!isEditing)}
                 >
-                  <p className="text-white text-lg font-bold">
-                    {isEditing ? "Batal" : "Edit"}
-                  </p>
-                  <div className="p-2 bg-white rounded">
+                  <span className="text-sm font-bold uppercase tracking-wider">
+                    {isEditing ? "Batalkan Edit" : "Sunting Data"}
+                  </span>
+                  <div className="p-1.5 bg-white/20 rounded-lg group-hover:bg-white/30 transition-colors">
                     {isLoading ? (
                       <Oval
                         visible={true}
-                        height="16"
-                        width="16"
-                        color="#4fa94d"
+                        height="18"
+                        width="18"
+                        color="#ffffff"
                         ariaLabel="oval-loading"
                         strokeWidth={4}
-                        wrapperStyle={{}}
-                        wrapperClass=""
                       />
                     ) : isEditing ? (
-                      <IoClose className="text-red-500" />
+                      <IoClose size={18} />
                     ) : (
-                      <FaPencilAlt className="text-green-700" />
+                      <FaPencilAlt size={16} />
                     )}
                   </div>
                 </button>
@@ -158,13 +143,13 @@ export default function FeatureSidebar() {
                   setIsEditing(false);
 
                   setIsLoading(true);
-                //   const property = await updateFeatureProperty(
-                //     selectedFeature?.id!,
-                //     data,
-                //     selectedFeature?.properties[0]?.photos ?? [],
-                //     updatedPhotos,
-                //     deletedPhotos
-                //   );
+                  const property = await updateFeatureProperty(
+                    Number(selectedFeature?.id!),
+                    data,
+                    selectedFeature?.properties[0]?.photo ?? [],
+                    updatedPhotos,
+                    deletedPhotos
+                  );
 
                   for (const photo of newPhotos) {
                     const formData = new FormData();
@@ -185,11 +170,11 @@ export default function FeatureSidebar() {
                   }
 
                   const newLayer = await loadLayer(
-                    selectedFeature?.featureCollectionId!
+                    Number(selectedFeature?.featureCollectionId!)
                   );
 
                   setSelectedFeature(
-                    newLayer.features.find((f: any) => f.id === selectedFeature?.id)!
+                    newLayer.feature.find((f: any) => f.id === selectedFeature?.id)!
                   );
                   setIsLoading(false);
                 }}
@@ -197,25 +182,23 @@ export default function FeatureSidebar() {
             </Transition>
           </TabPanel>
 
-          {/* <AuthenticatedOnly> */}
-            <TabPanel key="tab_riwayat" className="py-4">
-              <Transition
-                appear
-                show={true}
-                enter="transition-opacity duration-500"
-                enterFrom="opacity-0"
-                enterTo="opacity-100"
-                leave="transition-opacity duration-500"
-                leaveFrom="opacity-100"
-                leaveTo="opacity-0"
-              >
-                <h1>Riwayat</h1>
-                {/* {selectedFeature && (
-                  <FeaturePropertiesHistory feature={selectedFeature!} />
-                )} */}
-              </Transition>
-            </TabPanel>
-          {/* </AuthenticatedOnly> */}
+          <TabPanel key="tab_riwayat">
+            <Transition
+              as={"div"}
+              appear
+              show={true}
+              enter="transition-all duration-500"
+              enterFrom="opacity-0 translate-y-4"
+              enterTo="opacity-100 translate-y-0"
+              leave="transition-all duration-500"
+              leaveFrom="opacity-100"
+              leaveTo="opacity-0"
+            >
+              {selectedFeature && (
+                <FeaturePropertiesHistory feature={selectedFeature!} />
+              )}
+            </Transition>
+          </TabPanel>
         </TabPanels>
       </TabGroup>
     </aside>

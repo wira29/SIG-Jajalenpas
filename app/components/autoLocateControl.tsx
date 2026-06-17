@@ -3,20 +3,20 @@ import { Control, DomUtil } from "leaflet";
 
 declare module "leaflet" {
   namespace Control {
-    class AutoLocate extends Control {
-      constructor(options?: AutoLocateOptions);
+    class CustomeAutoLocate extends Control {
+      constructor(options?: IAutoLocateOptions);
     }
 
-    interface AutoLocateOptions {
+    interface IAutoLocateOptions {
       position?: string;
       [key: string]: any;
     }
   }
 
-  function autoLocate(options?: Control.AutoLocateOptions): Control.AutoLocate;
+  function autoLocate(options?: Control.IAutoLocateOptions): Control.CustomeAutoLocate;
 }
 
-Control.AutoLocate = Control.extend({
+Control.CustomeAutoLocate = Control.extend({
   onAdd: function (map: any) {
     const img = DomUtil.create("img");
     img.src = "/images/current_location.png";
@@ -33,7 +33,16 @@ Control.AutoLocate = Control.extend({
 
     // onClick
     img.onclick = function () {
-      map.locate({ setView: true });
+      map.locate();
+
+      map.once("locationfound", function (e: any) {
+        // Set view manual ke lokasi user, dengan zoom tetap 11
+        map.setView(e.latlng, 11);
+      });
+
+      map.once("locationerror", function (e: any) {
+        console.error("Gagal mendapatkan lokasi:", e.message);
+      });
     };
 
     return img;
@@ -42,5 +51,5 @@ Control.AutoLocate = Control.extend({
 } as any);
 
 export const AutoLocateControl = createControlComponent(
-  (props) => new Control.AutoLocate(props)
+  (props) => new Control.CustomeAutoLocate(props)
 );

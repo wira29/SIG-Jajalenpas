@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { FeatureCollectionFull } from "../types";
+import { swapLngLat } from "../utils/helpers";
 
 export type LayerInformation = {
   id: number;
@@ -15,47 +16,76 @@ type LayersStore = {
   loadLayers: (selectedYear: number) => void;
   addLayer: (layer: FeatureCollectionFull) => void;
   deleteLayer: (layerId: number) => void;
-  updateLayer: (layerId: number, layer: Record<string, any>) => void;
+  updateLayer: (layerId: number, layer: Record<string, any>, year: number) => void;
   loadLayer: (layerId: number) => Promise<FeatureCollectionFull>;
   toggleLayerVisibility: (layerId: number) => void;
   isLayerVisible: (layerId: number) => boolean;
 };
 
+let currentController: AbortController | null = null;
+
 const useLayersStore = create<LayersStore>((set, get) => ({
   layers: [],
   isLoading: false,
   isVisible: false,
-  years: [],
   toggleVisibility: () => set((state) => ({ isVisible: !state.isVisible })),
   loadLayers: async (selectedYear: number) => {
+    if (currentController) {
+      currentController.abort();
+    }
+    currentController = new AbortController();
+
     set({ isLoading: true });
 
-    const response = await fetch(`/api/layers?year=${selectedYear}`, { next: { revalidate: 10 }});
-    const data = await response.json();
+    try {
+      const response = await fetch(`/api/layers?year=${selectedYear}`, { 
+        next: { revalidate: 10 },
+        signal: currentController.signal 
+      });
+      const json = await response.json();
+      const data = json.data || [];
 
-    // sort data bridge, road, area
-    const score: { [key: string]: number } = {
-      bridge: 0,
-      road: 1,
-      area: 2,
-    };
+      // sort data bridge, road, area
+      const score: { [key: string]: number } = {
+        bridge: 0,
+        road: 1,
+        area: 2,
+      };
 
-    data.sort((a: FeatureCollectionFull, b: FeatureCollectionFull) => {
-      return score[a.type] - score[b.type];
-    });
+      data.sort((a: FeatureCollectionFull, b: FeatureCollectionFull) => {
+        return score[a.type] - score[b.type];
+      });
 
-    set({
-      layers: data.map((layer: FeatureCollectionFull) => ({
-        id: layer.id,
-        layer,
-        visible: true,
-      })),
-      isLoading: false,
-    });
+      set({
+        layers: data.map((layer: FeatureCollectionFull) => {
+          if (layer.feature) {
+            layer.feature = layer.feature.map((f: any) => ({
+              ...f,
+              geometry: f.geometry?.map((g: any) => ({
+                ...g,
+                coordinates: swapLngLat(g.coordinates)
+              }))
+            }));
+          }
+          return {
+            id: Number(layer.id),
+            layer,
+            visible: true,
+          };
+        }),
+        isLoading: false,
+      });
+    } catch (error: any) {
+      if (error.name === 'AbortError') {
+        return;
+      }
+      console.error("Failed to load layers:", error);
+      set({ isLoading: false });
+    }
   },
   addLayer: (layer) => {
     set((state) => ({
-      layers: [...state.layers, { id: layer.id, layer, visible: true }],
+      layers: [...state.layers, { id: Number(layer.id), layer, visible: true }],
     }));
   },
   deleteLayer: async (layerId: number) => {
@@ -69,7 +99,7 @@ const useLayersStore = create<LayersStore>((set, get) => ({
       }));
     }
   },
-  updateLayer: async (layerId, layer) => {
+  updateLayer: async (layerId, layer, year) => {
     try {
       const response = await fetch(`/api/layers/${layerId}`, {
         method: "PATCH",
@@ -80,7 +110,7 @@ const useLayersStore = create<LayersStore>((set, get) => ({
       });
   
       if (response.ok) {
-        await get().loadLayer(layerId);
+        await get().loadLayers(year);
       }
     } catch (error) {
       console.log(error);
@@ -108,7 +138,7 @@ const useLayersStore = create<LayersStore>((set, get) => ({
   toggleLayerVisibility: (layerId) =>
     set((state) => ({
       layers: state.layers.map((l) => {
-        if (l.id === layerId) {
+        if (l.id == layerId) {
           const visibility = !l.visible;
 
           // localStorage.setItem(`layer-${l.id}`, JSON.stringify(visibility));
@@ -123,7 +153,7 @@ const useLayersStore = create<LayersStore>((set, get) => ({
     // return visibility ? JSON.parse(visibility) : true;
     let isVisible = false;
     get().layers.forEach((l) => {
-      if (l.id === layerId) {
+      if (l.id == layerId) {
         isVisible =  l.visible;
       }
     });

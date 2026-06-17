@@ -5,6 +5,7 @@ import { useState } from "react";
 import EditForm from "./editForm";
 import ImportForm from "./importForm";
 import LayerList from "./layerList";
+import RoadEditForm from "./roadEditForm";
 
 
 export default function LayerSidebar() {
@@ -24,21 +25,20 @@ export default function LayerSidebar() {
 
     return (
         <aside className={`
-            ${isVisible ? "md:w-1/3 xl:w-1/4 2xl:w-1/5 w-full shrink-0" :"w-0 p-0"}
-            transition-all duration-300 ease-in-out
-            h-full border-l bg-white`}>
-            <button
-                className="md:hidden text-red-500
-                w-full text-lg p-4 flex justify-center items-center"
-                onClick={() => {
-                    toggleVisibility();
-                }}
-            >
-                Tutup
-            </button>
+            fixed right-0 top-16 bottom-0 z-[2000]
+            ${isVisible ? "md:w-1/3 xl:w-1/4 2xl:w-1/5 w-full p-6 shadow-2xl" : "w-0 p-0 overflow-hidden"}
+            transition-all duration-500 ease-in-out
+            bg-white/90 backdrop-blur-xl border-l border-slate-200 overflow-y-auto custom-scrollbar`}>
+            
+            <div className="flex flex-col h-full">
+                <button
+                    className="md:hidden self-end text-slate-400 hover:text-red-500 p-2 mb-2 transition-colors"
+                    onClick={() => toggleVisibility()}
+                >
+                    Tutup
+                </button>
 
-            {
-                isImporting ? (
+                {isImporting ? (
                     <ImportForm
                         onLayerSuccess={() => {
                             setIsImporting(false);
@@ -52,15 +52,26 @@ export default function LayerSidebar() {
                             setIsImporting(false)
                         }}
                     />
-                ) :
-                isLayerEditing ? (
+                ) : isLayerEditing ? (
                     <EditForm
                         layerInformation={isLayerEditing}
                         onSuccess={() => {
                             setIsLayerEditing(null);
+                            loadLayers(selectedYear);
                         }}
                         onClose={() => {
                             setIsLayerEditing(null);
+                        }}
+                    />
+                ) : isRoadEditing ? (
+                    <RoadEditForm
+                        roadInformation={isRoadEditing}
+                        onClose={() => {
+                            setIsRoadEditing(null);
+                        }}
+                        onSuccess={() => {
+                            setIsRoadEditing(null);
+                            loadCondition(selectedYear);
                         }}
                     />
                 ) : (
@@ -69,8 +80,8 @@ export default function LayerSidebar() {
                         onLayerEdit={setIsLayerEditing}
                         onImporting={setIsImporting}
                     />
-                )
-            }
+                )}
+            </div>
         </aside>   
     )
 }

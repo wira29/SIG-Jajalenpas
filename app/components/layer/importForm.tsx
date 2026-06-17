@@ -1,3 +1,4 @@
+import useYearStore from "@/app/stores/year_store";
 import { FeatureCollectionType } from "@/app/types";
 import { getCurrentYear } from "@/app/utils/helpers";
 import { Label, TextInput } from "flowbite-react";
@@ -33,11 +34,11 @@ function SubmitButton() {
   return (
     <button
       type="submit"
-      className={`bg-green-700 hover:bg-green-900 text-white px-4 py-2 mt-2 rounded transition-all duration-300 ${
+      className={`bg-green-700 hover:bg-green-900 text-white px-4 py-3 mt-4 w-full font-bold rounded-xl transition-all duration-300 shadow-lg shadow-green-900/10 active:scale-95 ${
         pending ? "opacity-50 cursor-not-allowed" : ""
       }`}
     >
-      {pending ? "Loading..." : "Submit"}
+      {pending ? "Memproses..." : "Simpan Data"}
     </button>
   );
 }
@@ -53,6 +54,8 @@ export default function ImportForm({
   
   const [layerType, setLayerType] = useState<FeatureCollectionType>("road");
   const [isRoadCondition, setIsRoadCondition] = useState(false);
+  const [isRoadDashed, setIsRoadDashed] = useState(false);
+  const [isKewenangan, setIsKewenangan] = useState(false);
   
   const isRoad = () => layerType === "road";
   const isBridge = () => layerType === "bridge";
@@ -63,263 +66,207 @@ export default function ImportForm({
     saveRuasGeoJSON,
     initialSaveRuasState
   );
+
+  const { setSelectedYear } = useYearStore();
   
   useEffect(() => {
     if (state.success) {
       onLayerSuccess();
+      setSelectedYear(inputYear.current) 
     }
   }, [state.success, onLayerSuccess]);
   
   useEffect(() => {
     if (ruasState.success) {
       onConditionSuccess();
+      setSelectedYear(inputYear.current)
     }
   }, [ruasState.success, onConditionSuccess]);
   
   return (
-    <div className="max-w-lg mx-auto overflow-hidden">
-      <div className="flex justify-between items-center p-4">
-        <div className="flex-grow">
-          <h1 className="text-xl font-bold ">Impor</h1>
-          <small className="inline-block">Impor layer dari file GeoJSON.</small>
+    <div className="flex flex-col h-full overflow-hidden">
+      <div className="flex justify-between items-center p-4 bg-slate-50/50 border-b border-slate-100 shrink-0">
+        <div>
+          <h1 className="text-lg font-black text-slate-900 uppercase tracking-tighter">Impor Data</h1>
+          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Unggah File GeoJSON</p>
         </div>
-        <button onClick={() => onClose()}>
-          <IoClose />
+        <button 
+            onClick={() => onClose()}
+            className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
+        >
+          <IoClose size={24} />
         </button>
       </div>
 
-      <hr />
+      <div className="flex-grow overflow-y-auto custom-scrollbar p-6">
+        <div className="space-y-6">
+            <div className="space-y-2">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Tipe Impor</label>
+                <select
+                onChange={(event) => {
+                    setIsRoadCondition(event.target.value === "condition");
+                }}
+                value={isRoadCondition ? "condition" : "feature"}
+                className="block w-full px-4 py-3 border border-slate-200 rounded-xl bg-slate-50 text-sm font-medium text-slate-600 focus:outline-none focus:ring-2 focus:ring-green-600/20 transition-all cursor-pointer"
+                >
+                    <option value="condition">Jalan dengan Kondisi (STA)</option>
+                    <option value="feature">Feature (Jembatan, Area, dll)</option>
+                </select>
+            </div>
 
-      <div className="p-4">
-        <select
-          onChange={(event) => {
-            setIsRoadCondition(event.target.value === "condition");
-          }}
-          value={isRoadCondition ? "condition" : "feature"}
-          className="text-sm border focus:border-green-500 w-full focus:outline-none rounded-lg px-3 py-2 transition-all duration-300"
-        >
-          <option value="condition">Jalan dengan Kondisi</option>
-          <option value="feature">Feature (Jalan, Jembatan, Area)</option>
-        </select>
+            {isRoadCondition ? (
+                <form action={ruasFormAction} className="space-y-5">
+                <div className="space-y-4">
+                    <div>
+                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 ml-1">Tahun Anggaran</label>
+                    <TextInput 
+                        name="tahun" 
+                        defaultValue={inputYear.current.toString()} 
+                        onChange={(e) => inputYear.current = parseInt(e.target.value)} 
+                        className="rounded-xl"
+                    />
+                    {state.error?.tahun && (
+                        <p className="text-red-500 text-[10px] font-bold mt-1">{state.error.tahun[0]}</p>
+                    )}
+                    </div>
+
+                    <div>
+                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 ml-1">File GeoJSON (STA Structured)</label>
+                    <input
+                        type="file"
+                        name="file"
+                        accept=".geojson"
+                        className="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-green-50 file:text-green-700 hover:file:bg-green-100 transition-all border border-slate-200 rounded-xl p-2 bg-slate-50"
+                    />
+                    {state.error?.file && (
+                        <p className="text-red-500 text-[10px] font-bold mt-1">{state.error.file}</p>
+                    )}
+                    </div>
+
+                    <div>
+                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 ml-1">Nama Kelompok Jalan</label>
+                    <input
+                        type="text"
+                        name="name"
+                        placeholder="Misal: Jalan Kabupaten 2024"
+                        className="block w-full px-4 py-3 border border-slate-200 rounded-xl bg-slate-50 text-sm focus:outline-none focus:bg-white focus:ring-2 focus:ring-green-600/20 transition-all"
+                    />
+                    {state.error?.name && (
+                        <p className="text-red-500 text-[10px] font-bold mt-1">{state.error.name}</p>
+                    )}
+                    </div>
+
+                    <div>
+                        <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 ml-1">Ketebalan Visual</label>
+                        <input type="range" name="weight" className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-green-600" min={1} max={5} step={1} />
+                    </div>
+
+                    <div>
+                        <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 ml-1">Warna Garis</label>
+                        <input type="color" name="color" className="block w-full h-10 border-0 p-0 rounded-xl cursor-pointer" />
+                    </div>
+
+                    <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
+                        <input
+                            type="checkbox"
+                            id="dashed"
+                            name="dashed"
+                            className="w-4 h-4 text-green-600 border-slate-300 rounded focus:ring-green-500"
+                            onChange={(e) => setIsRoadDashed(e.target.checked)}
+                        />
+                        <label htmlFor="dashed" className="text-xs font-bold text-slate-600 uppercase tracking-tight">Garis Putus-putus</label>
+                    </div>
+
+                    {isRoadDashed && (
+                        <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 space-y-4 animate-in slide-in-from-top-2">
+                            <div>
+                                <label className="block text-[9px] font-black text-slate-400 uppercase mb-1">Spasi Antar Garis</label>
+                                <input type="range" name="dash" className="w-full accent-green-600" min={1} max={10} step={1} />
+                            </div>
+                            <div>
+                                <label className="block text-[9px] font-black text-slate-400 uppercase mb-1">Panjang Segmen Garis</label>
+                                <input type="range" name="dashLength" className="w-full accent-green-600" min={1} max={10} step={1} />
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
+                        <input
+                            type="checkbox"
+                            id="is_kewenangan"
+                            name="is_kewenangan"
+                            checked={isKewenangan}
+                            className="w-4 h-4 text-green-600 border-slate-300 rounded focus:ring-green-500"
+                            onChange={(e) => setIsKewenangan(e.target.checked)}
+                        />
+                        <label htmlFor="is_kewenangan" className="text-xs font-bold text-slate-600 uppercase tracking-tight">Kewenangan Kabupaten</label>
+                    </div>
+
+                    <div>
+                        <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 ml-1">Keterangan Tambahan</label>
+                        <textarea
+                            name="desc_kewenangan"
+                            className="block w-full px-4 py-3 border border-slate-200 rounded-xl bg-slate-50 text-sm focus:outline-none focus:bg-white focus:ring-2 focus:ring-green-600/20 transition-all min-h-[100px]"
+                            placeholder="Opsional: Tambahkan informasi kewenangan atau catatan teknis..."
+                        />
+                    </div>
+                </div>
+                <SubmitButton />
+                </form>
+            ) : (
+                <form action={formAction} className="space-y-5">
+                <div className="space-y-4">
+                    <div>
+                        <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 ml-1">Tahun Anggaran</label>
+                        <TextInput name="tahun" defaultValue={inputYear.current.toString()} onChange={(e) => inputYear.current = parseInt(e.target.value)} />
+                        {state.error?.tahun && <p className="text-red-500 text-[10px] font-bold mt-1">{state.error.tahun}</p>}
+                    </div>
+
+                    <div>
+                        <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 ml-1">File GeoJSON</label>
+                        <input type="file" name="file" accept=".geojson" className="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-green-50 file:text-green-700 hover:file:bg-green-100 transition-all border border-slate-200 rounded-xl p-2 bg-slate-50" />
+                        {state.error?.file && <p className="text-red-500 text-[10px] font-bold mt-1">{state.error.file}</p>}
+                    </div>
+
+                    <div>
+                        <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 ml-1">Nama Layer</label>
+                        <input type="text" name="name" placeholder="Misal: Jembatan Kabupaten 2023" className="block w-full px-4 py-3 border border-slate-200 rounded-xl bg-slate-50 text-sm focus:outline-none focus:bg-white focus:ring-2 focus:ring-green-600/20 transition-all" />
+                        {state.error?.name && <p className="text-red-500 text-[10px] font-bold mt-1">{state.error.name}</p>}
+                    </div>
+
+                    <div>
+                        <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 ml-1">Tipe Data Spasial</label>
+                        <select name="type" className="block w-full px-4 py-3 border border-slate-200 rounded-xl bg-slate-50 text-sm font-medium text-slate-600 transition-all cursor-pointer" onChange={(e) => setLayerType(e.target.value as FeatureCollectionType)}>
+                            <option value="road">Garis (Jalan)</option>
+                            <option value="bridge">Titik (Jembatan)</option>
+                            <option value="area">Poligon (Area)</option>
+                        </select>
+                    </div>
+
+                    {(isRoad() || isArea()) && (
+                        <div>
+                            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 ml-1">Ketebalan Garis</label>
+                            <input type="range" name="weight" className="w-full accent-green-600" min={1} max={5} step={1} />
+                        </div>
+                    )}
+
+                    {isBridge() && (
+                        <div>
+                            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 ml-1">Ukuran Marker (Radius)</label>
+                            <input type="range" name="radius" className="w-full accent-green-600" min={1} max={5} step={1} />
+                        </div>
+                    )}
+
+                    <div>
+                        <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 ml-1">Warna Visual</label>
+                        <input type="color" name="color" className="block w-full h-10 border-0 p-0 rounded-xl cursor-pointer" />
+                    </div>
+                </div>
+                <SubmitButton />
+                </form>
+            )}
+        </div>
       </div>
-
-      {isRoadCondition ? (
-        <form
-          action={ruasFormAction}
-          className="max-w-sm mx-auto bg-white rounded shadow-md p-4"
-        >
-          <div className="mb-4">
-            <Label className="mb-3">Tahun</Label>
-            <TextInput name="tahun" value={inputYear.current.toString()} onChange={(e) =>  inputYear.current = parseInt(e.target.value)} />
-          </div>
-          <div className="mb-4">
-            <label
-              htmlFor="file"
-              className="text-gray-700 text-sm font-bold block mb-2"
-            >
-              File GeoJSON (Structured)
-            </label>
-            <input
-              type="file"
-              name="file"
-              id="file"
-              accept=".geojson"
-              className="text-sm border focus:border-green-500 w-full focus:outline-none rounded-lg px-3 py-2 transition-all duration-300"
-            />
-
-            {state.error?.file && (
-              <p className="text-red-500 text-sm">{state.error.file}</p>
-            )}
-          </div>
-
-          <div className="mb-4">
-            <label
-              htmlFor="name"
-              className="text-gray-700 text-sm font-bold block mb-2"
-            >
-              Nama
-            </label>
-            <input
-              type="text"
-              name="name"
-              id="name"
-              placeholder="Contoh: Jalan Nasional"
-              className="text-sm border focus:border-green-500 w-full focus:outline-none rounded-lg px-3 py-2 transition-all duration-300"
-            />
-
-            {state.error?.name && (
-              <p className="text-red-500 text-sm">{state.error.name}</p>
-            )}
-          </div>
-
-          <SubmitButton />
-        </form>
-      ) : (
-        <form
-          action={formAction}
-          // onSubmit={onSuccess}
-          className="max-w-sm mx-auto bg-white rounded shadow-md p-4"
-        >
-          <div className="mb-4">
-            <Label className="mb-3">Tahun</Label>
-            <TextInput name="tahun" value={inputYear.current.toString()} onChange={(e) =>  inputYear.current = parseInt(e.target.value)} />
-          </div>
-          <div className="mb-4">
-            <label
-              htmlFor="file"
-              className="text-gray-700 text-sm font-bold block mb-2"
-            >
-              File GeoJSON
-            </label>
-            <input
-              type="file"
-              name="file"
-              id="file"
-              accept=".geojson"
-              className="text-sm border focus:border-green-500 w-full focus:outline-none rounded-lg px-3 py-2 transition-all duration-300"
-            />
-
-            {state.error?.file && (
-              <p className="text-red-500 text-sm">{state.error.file}</p>
-            )}
-          </div>
-
-          <div className="mb-4">
-            <label
-              htmlFor="name"
-              className="text-gray-700 text-sm font-bold block mb-2"
-            >
-              Nama
-            </label>
-            <input
-              type="text"
-              name="name"
-              id="name"
-              placeholder="Contoh: Jalan Nasional"
-              className="text-sm border focus:border-green-500 w-full focus:outline-none rounded-lg px-3 py-2 transition-all duration-300"
-            />
-
-            {state.error?.name && (
-              <p className="text-red-500 text-sm">{state.error.name}</p>
-            )}
-          </div>
-
-          <div className="mb-4">
-            <label
-              htmlFor="type"
-              className="text-gray-700 text-sm font-bold block mb-2"
-            >
-              Jenis
-            </label>
-            <select
-              name="type"
-              id="type"
-              className="text-sm border focus:border-green-500 w-full focus:outline-none rounded-lg px-3 py-2 transition-all duration-300"
-              onChange={(event) => {
-                setLayerType(event.target.value as FeatureCollectionType);
-              }}
-            >
-              <option value="road">Jalan</option>
-              <option value="bridge">Jembatan</option>
-              <option value="area">Area</option>
-            </select>
-
-            {state.error?.type && (
-              <p className="text-red-500 text-sm">{state.error.type}</p>
-            )}
-          </div>
-
-          {(isRoad() || isArea()) && (
-            <div className="mb-4">
-              <label
-                htmlFor="weight"
-                className="text-gray-700 text-sm font-bold block mb-2"
-              >
-                Ketebalan Garis
-              </label>
-              <input
-                type="range"
-                name="weight"
-                id="weight"
-                className="text-sm border focus:border-green-500 w-full focus:outline-none rounded-lg px-3 mt-2 transition-all duration-300"
-                min={1}
-                max={5}
-                step={1}
-              />
-
-              {state.error?.weight && (
-                <p className="text-red-500 text-sm">{state.error.weight}</p>
-              )}
-            </div>
-          )}
-
-          {isRoad() && (
-            <div className="mb-4">
-              <label
-                htmlFor="dashed"
-                className="text-gray-700 text-sm font-bold block mb-2"
-              >
-                Putus-putus
-              </label>
-              <input
-                type="checkbox"
-                name="dashed"
-                id="dashed"
-                className="border border-gray-200 rounded-sm px-2 py-1"
-              />
-
-              {state.error?.dashed && (
-                <p className="text-red-500 text-sm">{state.error.dashed}</p>
-              )}
-            </div>
-          )}
-
-          {isBridge() && (
-            <div className="mb-2">
-              <label
-                htmlFor="radius"
-                className="text-gray-700 text-sm font-bold block mb-2"
-              >
-                Radius
-              </label>
-              <input
-                type="range"
-                name="radius"
-                id="radius"
-                className="text-sm border focus:border-green-500 w-full focus:outline-none rounded-lg px-3 py-2 transition-all duration-300"
-                min={1}
-                max={5}
-                step={1}
-              />
-
-              {state.error?.radius && (
-                <p className="text-red-500 text-sm">{state.error.radius}</p>
-              )}
-            </div>
-          )}
-
-          <div className="mb-4">
-            <label
-              htmlFor="color"
-              className="text-gray-700 text-sm font-bold block mb-2"
-            >
-              {isRoad() || isBridge() ? "Warna" : "Warna Garis"}
-            </label>
-            <input
-              type="color"
-              name="color"
-              id="color"
-              className="border focus:border-green-500 focus:outline-none rounded transition-all duration-300"
-            />
-
-            {state.error?.color && (
-              <p className="text-red-500 text-sm">{state.error.color}</p>
-            )}
-          </div>
-
-          <SubmitButton />
-        </form>
-      )}
     </div>
   );
 }

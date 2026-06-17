@@ -6,6 +6,7 @@ type SelectedStaStore = {
   isLoading: boolean;
   error: string | null;
   set: (ruas: StaWithPictures | null) => void;
+  
 };
 
 const useSelectedStaStore = create<SelectedStaStore>((set) => ({

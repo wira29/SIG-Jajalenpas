@@ -34,6 +34,10 @@ export class GeoJSONImporter {
   async importGeoJSON(geoJSON: GeoJSON.FeatureCollection, detail: FeatureCollectionDetail) {
     "use server"
 
+    if (!geoJSON || geoJSON.type !== "FeatureCollection" || !Array.isArray(geoJSON.features)) {
+      throw new Error("Invalid GeoJSON: FeatureCollection expected.");
+    }
+
     const featureCollection = await this.client.featurecollection.create({
       data: {
         tahun: detail.tahun,

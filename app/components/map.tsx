@@ -2,360 +2,402 @@ import L, { Icon, latLng } from 'leaflet';
 import 'leaflet-defaulticon-compatibility';
 import 'leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.webpack.css';
 import 'leaflet/dist/leaflet.css';
-import { useEffect, useMemo, useState } from 'react';
-import { MdClose, MdLayers, MdLayersClear } from 'react-icons/md';
-import { CircleMarker, MapContainer, Marker, Pane, Polygon, Polyline, Popup, TileLayer, Tooltip, useMap, ZoomControl } from "react-leaflet";
-import MarkerClusterGroup from 'react-leaflet-markercluster';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { MdClose, MdLayers, MdLayersClear, MdMyLocation } from 'react-icons/md';
+import { CircleMarker, MapContainer, Marker, Pane, Polygon, Polyline, Tooltip, useMap } from "react-leaflet";
+import MarkerClusterGroup from "react-leaflet-markercluster";
 import seedColor from 'seed-color';
-import useJalanStore, { JalanInformation } from '../stores/jalan_store';
+import useCurrentPositionStore from '../stores/current_position_store';
+import useJalanStore from '../stores/jalan_store';
 import useLayersStore from '../stores/layers_store';
+import useProjectStore from '../stores/project_store';
 import useSelectedFeatureStore from '../stores/selected_feature_store';
 import useSelectedRuasStore from '../stores/selected_ruas_store';
 import useSelectedStaStore from '../stores/selected_sta_store';
-import { colorFromKondisi, swapLngLat } from '../utils/helpers';
-import { AutoLocateControl } from './autoLocateControl';
-import FeaturePropertyDetailPopup from './feature/featurePropertyPopup';
+import { swapLngLat } from '../utils/helpers';
+import BaseLayer from './baseLayer';
+import ProjectDialog from './dialog/projectDialog';
 
-
-// healt road icon 
+// health road icon 
 const healthIcon = new Icon({
-    iconUrl:
-      "https://static.vecteezy.com/system/resources/previews/009/267/136/non_2x/location-icon-design-free-png.png",
-    iconSize: [25, 35], // size of the icon
-    iconAnchor: [12, 35], // point of the icon which will correspond to marker's location,
+    iconUrl: "https://static.vecteezy.com/system/resources/previews/009/267/136/non_2x/location-icon-design-free-png.png",
+    iconSize: [25, 35],
+    iconAnchor: [12, 35],
     tooltipAnchor: [0, -35 - 4],
-  });
-// end healt road icon 
+});
 
 // autoBound to ruas 
 const AutoboundToRuas = () => {
     const map = useMap();
     const selectedRuas = useSelectedRuasStore((state) => state.selected);
     useEffect(() => {
-      const coordinates = selectedRuas?.sta.reduce((acc: any[], curr: any) => {
-        return [...acc, ...(curr.coordinates as any)[0]];
-    }, []);
-      const bounds = L.latLngBounds(swapLngLat(coordinates as any) as any);
-  
-      if (selectedRuas?.sta) {
-        setTimeout(() => {
-          map.flyToBounds(bounds, {
-            padding: [50, 50],
-            duration: 1,
-          });
-        }, 500);
-      } else {
+      if (!selectedRuas?.sta || selectedRuas.sta.length === 0) {
         setTimeout(() => {
             map.flyTo(latLng(-7.786, 112.8582), 11);
           }, 500);
+        return;
+      }
+
+      try {
+        const coordinates = selectedRuas.sta.flatMap((curr: any) => {
+          const coords = curr.coordinates;
+          return Array.isArray(coords[0][0]) ? coords[0] : coords;
+        });
+        
+        if (coordinates.length > 0) {
+          const bounds = L.latLngBounds(coordinates as any);
+          setTimeout(() => {
+            map.flyToBounds(bounds, {
+              padding: [50, 50],
+              duration: 1,
+            });
+          }, 500);
+        }
+      } catch (err) {
+        console.error("Autobound error:", err);
       }
     }, [selectedRuas, map]);
     return null;
-  };
-// end auto bound to ruas 
+};
 
 // invalidate map size 
 const AutoInvalidateMapSize = () => {
     const map = useMap();
-  
-    // resize map whenever sidebar is toggled
     const isLayerSidebar = useLayersStore((state) => state.isVisible);
-    const isFeatureSidebar = useSelectedFeatureStore(
-      (state) => state.selectedFeature
-    );
+    const isFeatureSidebar = useSelectedFeatureStore((state) => state.selectedFeature);
   
     useEffect(() => {
-      setTimeout(() => {
-        console.log("invalidate map size");
-        map.invalidateSize();
-      }, 500);
+      if (map) {
+        setTimeout(() => {
+          map.invalidateSize();
+        }, 500);
+      }
     }, [map, isLayerSidebar, isFeatureSidebar]);
   
     return null;
-  };
-// end invalidate map size 
-
+};
 
 export default function Map() {
+    const [map, setMap] = useState<L.Map | null>(null); 
+    const [currentZoom, setCurrentZoom] = useState(11);
+    const [projectDialog, setProjectDialog] = useState(false);
+    const [project, setProject] = useState<any>(null);
 
-    // state 
-    const [markerClusterKey, setMarkerClusterKey] = useState(0);
+    const onZoom = useCallback(() => {
+        if (map) {
+          setCurrentZoom(map.getZoom());
+        }
+    }, [map]);
+    
+    useEffect(() => {
+        if (map) {
+          map.on("zoom", onZoom);
+          return () => { map.off("zoom", onZoom); };
+        }
+    }, [map, onZoom]);
 
-    // stores 
     const {
         layers: layersInformation,
         isLayerVisible,
         isVisible : isSidebarLayerVisible,
         toggleVisibility: toggleSidebarLayerVisibility,
-      } = useLayersStore();
+    } = useLayersStore();
     const { roads: dataKondisiJalan } = useJalanStore();
+    const { projects, isProjectVisible } = useProjectStore();
+    const { position, updatePosition } = useCurrentPositionStore();
 
-    // end stores
     useEffect(() => {
-        setMarkerClusterKey(markerClusterKey + 1);
-    }, [dataKondisiJalan]);
+        updatePosition();
+    }, [updatePosition]);
 
-    // selected state 
     const selectedRuas = useSelectedRuasStore((state) => state.selected);
     const setSelectedRuas = useSelectedRuasStore((state) => state.set);
     const selectedSta = useSelectedStaStore((state) => state.selected);
     const setSelectedSta = useSelectedStaStore((state) => state.set);
-    const selectedFeature = useSelectedFeatureStore((state) => state.selectedFeature);
     const setSelectedFeature = useSelectedFeatureStore((state) => state.setSelectedFeature);
-    // end selected state 
 
-    // create marker data kondisi jalan 
-    const icons = useMemo(() => {
-        const result: Record<number, L.DivIcon> = {};
-
-        for (let jalan of dataKondisiJalan) {
-        const color = seedColor(jalan.road.id.toString()).toHex();
-        const markerHtmlStyles = `
-            background-color: ${color};
+    const markerHtmlStyles = `
+            background-color: orange;
             width: 16px;
             height: 16px;
             display: block;
             left: -8px;
             top: -8px;
             position: relative;
-            border-radius: 3rem 3rem 0;
+            border-radius: 3rem 3rem 0;  
             transform: rotate(45deg);
             border: 1px solid #FFFFFF`;
 
-        const icon = new L.DivIcon({
-            className: "my-custom-pin",
-            iconAnchor: [-8, 0],
-            html: `<span style="${markerHtmlStyles}" />`,
-        });
+    const projectIcon = useMemo(() => new L.DivIcon({
+        className: "my-custom-pin",
+        iconAnchor: [-8, 0],
+        html: `<span style="${markerHtmlStyles}" />`,
+    }), [markerHtmlStyles]);
 
-        result[jalan.road.id] = icon;
-        }
-        return result;
-    }, [dataKondisiJalan]);
-    // end create marker data kondisi jalan
+    const projectMarkers = useMemo(() => {
+        return projects.map((project: any, index: number) => {
+            if (!project.latitude || !project.longtitude) return null;
+            const offset = 0.0001 * index;
+            return <Marker 
+                key={"project-" + project.id} 
+                position={[Number(project.latitude) + offset, Number(project.longtitude) + offset]} 
+                icon={projectIcon}
+                eventHandlers={{ 
+                    click: () => {
+                        setProjectDialog(true);
+                        setProject(project);
+                    }
+                 }} 
+            />
+        }).filter(Boolean);
+    }, [projects, projectIcon]);
+
+    const roadLayers = useMemo(() => {
+        return dataKondisiJalan.flatMap((jalan: any) => {
+            if (!jalan.visible || !Array.isArray(jalan.road)) return [];
+            
+            return jalan.road.map((ruas: any, idx: number) => {
+                if (!ruas.coordinates || ruas.coordinates.length === 0) return null;
+                return <Polyline
+                    key={`road-line-${ruas.id || idx}`}
+                    pane="road"
+                    positions={ruas.coordinates as any}
+                    pathOptions={{
+                        color: jalan.color || "blue",
+                        weight: Math.max(1, 3 + (currentZoom - 11)),
+                        dashArray: [jalan.dashLength , jalan.dash].join(","),
+                    }}
+                    eventHandlers={{
+                        click: () => {
+                            setSelectedRuas(ruas);
+                        },
+                    }}
+                ></Polyline>
+            }).filter(Boolean);
+        });
+    }, [dataKondisiJalan, currentZoom, setSelectedRuas]);
+
+    const additionalLayers = useMemo(() => {
+        return layersInformation.flatMap((information) => {
+            if (!isLayerVisible(information.id) || !information.layer?.feature) return [];
+            
+            return information.layer.feature.map((feature:any, i:any) => {
+                const geom = feature?.geometry?.[0];
+                if (!geom || !geom.coordinates) return null;
+
+                switch (information.layer.type) {
+                case "bridge":
+                    return (
+                    <CircleMarker
+                        key={`bridge-${feature.id}-${i}`}
+                        pane="bridge"
+                        center={geom.coordinates as any}
+                        radius={2}
+                        pathOptions={{
+                            color: "black",
+                            weight: 1,
+                            fill: true,
+                            fillColor: information.layer.color,
+                            fillOpacity: 1,
+                        }}
+                        eventHandlers={{
+                            click: () => { setSelectedFeature(feature); },
+                        }}
+                    ></CircleMarker>
+                    );
+                case "area":
+                    return (
+                    <Polygon
+                        key={`area-${feature.id}-${i}`}
+                        pane="area"
+                        positions={geom.coordinates as any}
+                        pathOptions={{
+                            color: information.layer.color,
+                            fillColor: seedColor(feature.id.toString()).toHex(),
+                            opacity: 0.5,
+                            weight: information.layer.weight || 1,
+                            fillOpacity: 0.25,
+                        }}
+                        eventHandlers={{
+                            click: () => { setSelectedFeature(feature); },
+                        }}
+                    ></Polygon>
+                    );
+                default:
+                    return null;
+                }
+            }).filter(Boolean);
+        });
+    }, [layersInformation, isLayerVisible, setSelectedFeature]);
+
+    const staLayers = useMemo(() => {
+        if (!selectedRuas || !selectedRuas.sta) return null;
+        
+        return selectedRuas.sta.map((sta:any) => {
+            if (!sta.coordinates || sta.coordinates.length === 0) return null;
+            const coords = Array.isArray(sta.coordinates[0][0]) ? sta.coordinates[0] : sta.coordinates;
+            const lastPoint = coords[coords.length - 1];
+            
+            return (
+                <React.Fragment key={`sta-group-${sta.id}`}>
+                    <Polyline
+                        pane="sta"
+                        positions={sta.coordinates as any}
+                        pathOptions={{
+                            color: "red",
+                            weight: selectedSta?.id == sta.id ? 10 : 3,
+                        }}
+                        eventHandlers={{
+                            click: () => { setSelectedSta(sta); },
+                        }}
+                    />
+                    {currentZoom >= 15 && (
+                        <Marker
+                            position={[lastPoint[0], lastPoint[1]]}
+                            icon={healthIcon}
+                            eventHandlers={{
+                                click: () => { setSelectedSta(sta); },
+                            }}
+                        >
+                            <Tooltip direction="top" offset={[0, 0]} opacity={1} permanent>
+                                {sta.sta}
+                            </Tooltip>
+                        </Marker>
+                    )}
+                </React.Fragment>
+            );
+        }).filter(Boolean);
+    }, [selectedRuas, selectedSta, currentZoom, setSelectedSta]);
 
     return (
-        <MapContainer
+        <MapContainer 
+            ref={setMap}
             center={[-7.786, 112.8582]}
             zoom={11}
             className="h-full w-full absolute bg-white"
             zoomControl={false}
-            style={{ backgroundColor: "white" }}
-            renderer={L.canvas({
-            tolerance: 500,
-            })}>
-                <TileLayer
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                    />
+            style={{ backgroundColor: "white" }}>
+                <BaseLayer />
 
-                {/* button legenda  */}
-                <button
-                    onClick={() => toggleSidebarLayerVisibility()}
-                    className="float-right z-[500] relative p-4 rounded-lg bg-slate-200 text-xl text-green-900 shadow-lg border-green-900 border-2 hover:bg-slate-300 hover:text-slate-800 m-4"
+                {/* UI Control Overlay - Top Right (Shifts when sidebar open) */}
+                <div 
+                    className={`absolute top-4 transition-all duration-500 z-[2001] flex flex-col gap-2 md:gap-3 ${
+                        isSidebarLayerVisible 
+                        ? "right-[calc(20%+1rem)] md:right-[calc(33.33%+1rem)] xl:right-[calc(25%+1rem)] 2xl:right-[calc(20%+1rem)]" 
+                        : "right-4"
+                    }`}
                 >
-                    {isSidebarLayerVisible ? <MdLayersClear /> : <MdLayers />}
-                </button>
-                {/* end button legenda  */}
-
-                {/* button tutup selected ruas / sta  */}
-                {selectedRuas && (
-                <button
-                    onClick={() => setSelectedRuas(null)}
-                    className="float-right z-[500] relative p-4 rounded-lg bg-slate-200 text-xl text-green-900 shadow-lg border-green-900 border-2 hover:bg-slate-300 hover:text-slate-800 mt-4"
+                    <button
+                        onClick={() => toggleSidebarLayerVisibility()}
+                        className={`p-2.5 md:p-3.5 rounded-xl md:rounded-2xl shadow-2xl border-2 transition-all active:scale-95 ${
+                            isSidebarLayerVisible 
+                            ? "bg-green-700 border-green-800 text-white" 
+                            : "bg-white/90 backdrop-blur-md border-slate-200 text-green-800 hover:bg-white"
+                        }`}
+                        title="Toggle Legend"
                     >
-                        <MdClose />
+                        <div className="md:hidden">
+                            {isSidebarLayerVisible ? <MdLayersClear size={20} /> : <MdLayers size={20} />}
+                        </div>
+                        <div className="hidden md:block">
+                            {isSidebarLayerVisible ? <MdLayersClear size={24} /> : <MdLayers size={24} />}
+                        </div>
                     </button>
-                )}
-                {/* end button tutup selected ruas / sta  */}
 
-                {/* end menampilkan marker kondisi jalan  */}
-                {/* Zoom Control and Auto Locate  */}
-                <ZoomControl position="bottomright" />
-                <AutoLocateControl position="bottomright" />
-                {/* End Zoom Control and Auto Locate  */}
+                    {selectedRuas && (
+                        <button
+                            onClick={() => {
+                                setSelectedRuas(null);
+                                setSelectedSta(null);
+                            }}
+                            className="p-2.5 md:p-3.5 rounded-xl md:rounded-2xl bg-white/90 backdrop-blur-md text-red-600 shadow-2xl border-2 border-slate-200 hover:bg-red-50 transition-all active:scale-95 animate-in zoom-in duration-300"
+                            title="Tutup Detail"
+                        >
+                            <MdClose className="md:hidden" size={20} />
+                            <MdClose className="hidden md:block" size={24} />
+                        </button>
+                    )}
+                </div>
 
-                {/* auto bound to ruas  */}
+                {/* Unified Map Controls - Bottom Right */}
+                <div className="absolute bottom-6 right-6 z-[1010] flex flex-col gap-2 md:gap-3 items-end">
+                    <button
+                        onClick={() => {
+                            map?.locate();
+                            map?.once("locationfound", (e: any) => {
+                                map?.setView(e.latlng, 11);
+                            });
+                        }}
+                        className="p-2.5 md:p-3.5 rounded-xl md:rounded-2xl bg-white/90 backdrop-blur-md text-green-700 shadow-2xl border-2 border-slate-200 hover:bg-green-50 transition-all active:scale-95"
+                        title="Lokasi Saya"
+                    >
+                        <MdMyLocation className="md:hidden" size={20} />
+                        <MdMyLocation className="hidden md:block" size={24} />
+                    </button>
+                    
+                    <div className="flex flex-col bg-white/90 backdrop-blur-md rounded-xl md:rounded-2xl shadow-2xl border-2 border-slate-200 overflow-hidden">
+                        <button 
+                            onClick={() => map?.zoomIn()}
+                            className="p-2.5 md:p-3.5 hover:bg-slate-100 text-slate-600 border-b border-slate-100 transition-colors active:bg-slate-200"
+                            title="Zoom In"
+                        >
+                            <svg className="md:hidden" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                            <svg className="hidden md:block" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        </button>
+                        <button 
+                            onClick={() => map?.zoomOut()}
+                            className="p-2.5 md:p-3.5 hover:bg-slate-100 text-slate-600 transition-colors active:bg-slate-200"
+                            title="Zoom Out"
+                        >
+                            <svg className="md:hidden" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                            <svg className="hidden md:block" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        </button>
+                    </div>
+                </div>
+
                 <AutoboundToRuas />
                 <AutoInvalidateMapSize />
-                {/* end auto bound to ruas  */}
 
-                {/* Pane  */}
                 <Pane name="sta" style={{ zIndex: 504 }} />
                 <Pane name="bridge" style={{ zIndex: 503 }} />
                 <Pane name="road" style={{ zIndex: 502 }} />
                 <Pane name="area" style={{ zIndex: 501 }} />
-                {/* End Pane  */}
 
-                {/* jika ada ruas dipilih  */}
-                {selectedRuas &&
-                selectedRuas.sta.map((sta:any) => {
-                return (
-                    <Polyline
-                    key={`sta-line-${sta.id}`}
-                    pane="sta"
-                    positions={swapLngLat(sta.coordinates as any) as any}
-                    pathOptions={{
-                        color: colorFromKondisi(sta.kondisi),
-                        // color: selectedFeature == road ? "red" : "black",
-                        weight: selectedSta?.id == sta.id ? 10 : 3,
-                    }}
-                    eventHandlers={{
-                        click: (e) => {
-                        setSelectedSta(sta);
-                        },
-                    }}
-                    ></Polyline>
-                );
-                })}
+                {staLayers}
 
-                {selectedRuas &&
-                    selectedRuas.sta.map((sta:any) => {
-                    const coordinates = (sta.coordinates as any)[0];
-                    const lastCoordinate = coordinates[coordinates.length - 1];
-                    return (
-                        <Marker
-                        key={`sta-marker-${sta.id}`}
-                        position={[lastCoordinate[1], lastCoordinate[0]]}
-                        icon={healthIcon}
-                        eventHandlers={{
-                            click: (e) => {
-                            setSelectedSta(sta);
-                            },
-                        }}
-                        >
-                        <Tooltip direction="top" offset={[0, 0]} opacity={1} permanent>
-                            {sta.sta}
-                        </Tooltip>
-                        </Marker>
-                    );
-                    })}
-                {/* end jika ada ruas dipilih  */}
-
-                {/* jika tidak ada ruas dipilih  */}
                 {!selectedRuas && (
                     <>
-                    {/* menampilkan marker kondisi jalan  */}
-                    <MarkerClusterGroup key={markerClusterKey}>
-                        {
-                            
-                            dataKondisiJalan.map((jalan: JalanInformation) => {
-                                const ruas = jalan.road.ruas;
-
-                                if (!jalan.visible) return null;
-
-                                return ruas.map((ruas: any, idx: number) => {
-                                    return <Marker key={"ruas-" + ruas.nomorRuas} position={[ruas.latitude, ruas.longitude]} icon={icons[jalan.road.id]} eventHandlers={{ 
-                                        click: () => {
-                                            setSelectedRuas(ruas);
-                                        }
-                                     }} />;
-                                });
-                            })
-                        }
-                    </MarkerClusterGroup>
-
-                    {/* menampilkan layers  */}
-                    {layersInformation.map((information, i) => {
-                        if (!isLayerVisible(information.id)) return null;
-                        switch (information.layer.type) {
-                        case "road":
-                            return information.layer.feature.map((feature:any, i:any) => (
-                            <Polyline
-                                key={i}
-                                pane="road"
-                                positions={
-                                    // [112.861319, -7.657763] as any
-                                swapLngLat(
-                                    feature?.geometry[0]?.coordinates as any
-                                ) as any
-                                }
-                                pathOptions={{
-                                color: information.layer.color ? information.layer.color : "black",
-                                weight:
-                                    selectedFeature?.id == feature.id
-                                    ? information.layer.weight! + 2
-                                    : information.layer.weight!,
-                                dashArray: information.layer.dashed ? [7, 7] : [],
-                                dashOffset: information.layer.dashed ? "10" : "15",
-                                }}
-                            >
-                                <Popup>
-                                <FeaturePropertyDetailPopup
-                                    feature={feature}
-                                    onDetail={() => {
-                                    setSelectedFeature(feature);
-                                    }}
-                                />
-                                </Popup>
-                            </Polyline>
-                            ));
-                        case "bridge":
-                            return information.layer.feature.map((feature:any, i:any) => (
-                            <CircleMarker
-                                key={i}
-                                pane="bridge"
-                                center={
-                                    // [112.861319, -7.657763] as any
-                                swapLngLat(
-                                    feature?.geometry[0]?.coordinates as any
-                                ) as any
-                                }
-                                radius={2}
-                                // radius={
-                                // selectedFeature?.id == feature.id
-                                //     ? information.layer.radius! + 2
-                                //     : information.layer.radius!
-                                // }
-                                pathOptions={{
-                                color: "black",
-                                weight: 1,
-                                fill: true,
-                                fillColor: information.layer.color,
-                                fillOpacity: 0.5,
-                                }}
-                                eventHandlers={{
-                                click: () => {
-                                    setSelectedFeature(feature);
-                                },
-                                }}
-                            ></CircleMarker>
-                            ));
-                        case "area":
-                            return information.layer.feature.map((feature:any, i:any) => (
-                            <Polygon
-                                key={i}
-                                pane="area"
-                                positions={
-                                swapLngLat(
-                                    feature?.geometry[0]?.coordinates as any
-                                ) as any
-                                }
-                                pathOptions={{
-                                // color: seedColor(feature.properties[0]).toHex(),
-                                color: information.layer.color,
-                                fillColor: seedColor(feature.id.toString()).toHex(),
-                                // opacity: selectedFeature?.id == feature.id ? 1 : 0.5,
-                                opacity: 0.5,
-                                weight: information.layer.weight!,
-                                // fillOpacity: selectedFeature?.id == feature.id ? 1 : 0.25,
-                                fillOpacity: 0.25,
-                                }}
-                                eventHandlers={{
-                                click: () => {
-                                    setSelectedFeature(feature);
-                                },
-                                }}
-                            ></Polygon>
-                            ));
-                        default:
-                            return null;
-                        }
-                    })}
-                    {/* end menampilkan layers  */}
+                        {roadLayers}
+                        {isProjectVisible && projects.length > 0 && (
+                            <>
+                                <MarkerClusterGroup>
+                                    {projectMarkers}
+                                </MarkerClusterGroup>
+                                <ProjectDialog isOpen={projectDialog} setOpen={setProjectDialog} project={project}/>
+                            </>
+                        )}
+                        {additionalLayers}
                     </>
                 )}
-                {/* end jika tidak ada ruas dipilih  */}
+
+                {position && (
+                    <CircleMarker
+                        center={[position.coords.latitude, position.coords.longitude]}
+                        radius={8}
+                        pathOptions={{
+                            color: "white",
+                            weight: 3,
+                            fill: true,
+                            fillColor: "#3b82f6",
+                            fillOpacity: 0.8,
+                            stroke: true,
+                        }}
+                    >
+                        <Tooltip direction="top" offset={[0, -5]} opacity={1}>
+                            Lokasi Anda
+                        </Tooltip>
+                    </CircleMarker>
+                )}
         </MapContainer>
-    )
+    );
 }

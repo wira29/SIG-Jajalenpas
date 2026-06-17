@@ -22,6 +22,24 @@ model accidents {
   @@index([executor_project_id], map: "accidents_executor_project_id_foreign")
 }
 
+model aduans {
+  id                  BigInt            @id @default(autoincrement()) @db.UnsignedBigInt
+  created_by          BigInt            @db.UnsignedBigInt
+  ruas_id             BigInt            @db.UnsignedBigInt
+  keluhan             String            @db.Text
+  photo               String            @db.VarChar(255)
+  status              String            @db.VarChar(255)
+  note                String?           @db.Text
+  date_finished       DateTime?         @db.Timestamp(0)
+  created_at          DateTime?         @db.Timestamp(0)
+  updated_at          DateTime?         @db.Timestamp(0)
+  createdBy           users?             @relation(fields: [created_by], references: [id], onDelete: Cascade, map: "aduans_created_by_foreign")
+  ruas                ruas?             @relation(fields: [ruas_id], references: [id], onDelete: Cascade, map: "aduans_ruas_id_foreign")
+
+  @@index([created_by], map: "aduans_created_by_foreign")
+  @@index([status])
+}
+
 model amendment_deeds {
   id                  String            @id @db.Char(36)
   service_provider_id String            @db.Char(36)
@@ -268,6 +286,8 @@ model featurecollection {
   tahun     Int       @default(2023)
   createdAt DateTime  @default(now()) @db.Timestamp(0)
   feature   feature[]
+
+  @@index([tahun])
 }
 
 model fiscal_years {
@@ -337,11 +357,19 @@ model images {
 
 model jalan {
   id         BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
-  nama       String    @unique(map: "jalan_nama_unique") @db.VarChar(255)
+  nama       String    @db.VarChar(255)
   tahun      Int       @default(2023)
+  color      String    @db.VarChar(255)
+  weight     Int       @default(3)
+  dash       Int?       @default(0)
+  dashLength Int?       @default(0)
+  is_kewenangan Boolean @default(false)
+  desc_kewenangan String? @db.Text
   created_at DateTime? @db.Timestamp(0)
   updated_at DateTime? @db.Timestamp(0)
   ruas       ruas[]
+
+  @@index([tahun])
 }
 
 model material_projects {
@@ -591,13 +619,14 @@ model qualifications {
 }
 
 model report {
-  id          String   @id @db.Char(36)
+  id          BigInt   @id @default(autoincrement()) @db.UnsignedBigInt
   title       String   @db.VarChar(255)
   slug        String   @unique(map: "report_slug_unique") @db.VarChar(255)
   description String?  @db.VarChar(255)
   file        String   @db.VarChar(255)
   createdBy   BigInt   @db.UnsignedBigInt
   createdAt   DateTime @default(now()) @db.Timestamp(0)
+  user        users     @relation(fields: [createdBy], references: [id], onDelete: Cascade, map: "report_createdby_foreign")
 
   @@index([createdBy], map: "report_createdby_foreign")
 }
@@ -637,6 +666,7 @@ model ruas {
   jalan          jalan            @relation(fields: [idJalan], references: [id], onDelete: Cascade, map: "ruas_idjalan_foreign")
   ruashistory    ruashistory[]
   sta            sta[]
+  aduans         aduans[]
 
   @@index([idJalan], map: "ruas_idjalan_foreign")
 }
@@ -754,6 +784,7 @@ model service_providers {
   associations                    associations?                              @relation(fields: [association_id], references: [id], onDelete: Restrict, map: "service_providers_association_id_foreign")
   verifications                   verifications[]
   workers                         workers[]
+  user                            users?                                    @relation(fields: [user_id], references: [id], onDelete: Cascade, map: "service_providers_user_id_foreign") 
 
   @@index([association_id], map: "service_providers_association_id_foreign")
   @@index([nomorRuas], map: "service_providers_nomorruas_foreign")
@@ -941,6 +972,9 @@ model users {
   created_at        DateTime? @db.Timestamp(0)
   updated_at        DateTime? @db.Timestamp(0)
   roles             model_has_roles[]
+  reports           report[]
+  service_providers service_providers[]
+  aduans            aduans[]
 }
 
 model verifications {

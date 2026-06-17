@@ -1,8 +1,11 @@
 /* eslint-disable @next/next/no-img-element */
 import { photo } from "@prisma/client";
 // import { DialogTrigger } from "@radix-ui/react-dialog";
+import { DialogTrigger } from "@radix-ui/react-dialog";
 import { useEffect, useMemo, useState } from "react";
 import { FeatureProperty, NewPhoto } from "../../types";
+import ImageDialog from "../dialog/imageDialog";
+import FeaturePropertyEditor from "./featurePropertyEditor";
 // import ImageDialog from "../Dialog/ImageDiaolog";
 // import FeaturePropertyEditor from "../FeaturePropertyEditor";
 // import OperatorOnly from "../OperatorOnly";
@@ -65,13 +68,12 @@ export default function FeaturePropertyDetail({
   return (
     <div className="flex flex-col">
       {isEditing ? (
-        // <FeaturePropertyEditor
-        //   initialData={toJson()}
-        //   photos={property?.photos ?? []}
-        //   isLoading={false}
-        //   onSave={onSave}
-        // />
-        null
+        <FeaturePropertyEditor
+          initialData={toJson()}
+          photos={property?.photo ?? []}
+          isLoading={false}
+          onSave={onSave}
+        />
       ) : (
         <>
           {/* <AuthenticatedOnly> */}
@@ -110,32 +112,32 @@ export default function FeaturePropertyDetail({
             <h1 className="text-sm font-bold mt-4 mb-2">Foto</h1>
 
             <div className="grid grid-cols-2 gap-1">
-              {property?.photos?.length === 0 && (
+              {property?.photo?.length === 0 && (
                 <div className="w-full p-1">
                   <span className="text-xs text-gray-500">Tidak ada foto</span>
                 </div>
               )}
 
-              {property?.photos?.map((photo: any, i: any) => (
+              {property?.photo?.map((photo: any, i: any) => (
                 <div
                   key={i}
                   className="flex flex-col justify-center items-center"
                 >
-                  {/* <ImageDialog image={"/api/photo/" + photo.id} desc={photo.description ?? ""} data={null}>
-                  <DialogTrigger className="w-full">
-                      <img
-                        src={"/api/photo/" + photo.id}
-                        alt={photo.description ?? ""}
-                        className="w-full object-cover rounded"
-                      />
+                  <ImageDialog image={"/api/photo/" + photo.id} desc={photo.description ?? ""} data={null}>
+                    <DialogTrigger className="w-full">
+                        <img
+                          src={"/api/photo/" + photo.id}
+                          alt={photo.description ?? ""}
+                          className="w-full object-cover rounded"
+                        />
 
-                      <div className="flex justify-between items-center mt-1">
-                        <span className="text-xs text-gray-500">
-                          {photo.description}
-                        </span>
-                      </div>
-                  </DialogTrigger>
-                  </ImageDialog> */}
+                        <div className="flex justify-between items-center mt-1">
+                          <span className="text-xs text-gray-500">
+                            {photo.description}
+                          </span>
+                        </div>
+                    </DialogTrigger>
+                  </ImageDialog>
                 </div>
               ))}
             </div>

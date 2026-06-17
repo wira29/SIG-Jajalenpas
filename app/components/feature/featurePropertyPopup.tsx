@@ -1,6 +1,8 @@
 /* eslint-disable @next/next/no-img-element */
+import { DialogTrigger } from "@radix-ui/react-dialog";
 import { useMemo } from "react";
 import { FeatureWithProperties } from "../../types";
+import ImageDialog from "../dialog/imageDialog";
 
 const attributes: Record<string, string> = {
   "Nama Jalan": "Jdl",
@@ -64,18 +66,18 @@ export default function FeaturePropertyDetailPopup({
         <h1 className="text-sm font-bold mt-4 mb-2">Foto</h1>
 
         <div className="grid grid-cols-2 gap-1">
-          {property?.photos?.length === 0 && (
+          {property?.photo?.length === 0 && (
             <div className="w-full p-1">
               <span className="text-xs text-gray-500">Tidak ada foto</span>
             </div>
           )}
 
-          {property?.photos?.map((photo: any, i: any) => (
+          {property?.photo?.map((photo: any, i: any) => (
             <div
             key={i}
             className="flex flex-col justify-center items-center"
           >
-            {/* <ImageDialog image={"/api/photo/" + photo.id} desc={photo.description ?? ""} data={null}>
+            <ImageDialog image={"/api/photo/" + photo.id} desc={photo.description ?? ""} data={null}>
             <DialogTrigger className="w-full">
                 <img
                   src={"/api/photo/" + photo.id}
@@ -89,7 +91,7 @@ export default function FeaturePropertyDetailPopup({
                   </span>
                 </div>
             </DialogTrigger>
-            </ImageDialog> */}
+            </ImageDialog>
           </div>
           ))}
         </div>

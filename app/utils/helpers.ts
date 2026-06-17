@@ -28,3 +28,23 @@ export function swapLngLat(lngLat: number[] | number[][] | number[][][]): number
         return "#ff0000";
     }
   }
+
+  export function formatRupiah(value: number): string  {
+    return new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      minimumFractionDigits: 0,
+    }).format(value);
+  };
+
+  export function formatDate(isoString: string): string {
+    const tanggal = new Date(isoString);
+  
+    const options: Intl.DateTimeFormatOptions = {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    };
+  
+    return tanggal.toLocaleDateString('id-ID', options);
+  }

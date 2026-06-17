@@ -168,6 +168,28 @@ const ruasSchema = z.object({
       required_error: "Name is required.",
     })
     .min(3, "Name must be at least 3 characters."),
+  tahun: z.preprocess(
+    (value) => isNaN(parseInt(value as string)) ? getCurrentYear() : parseInt(value as string),
+    z.number()
+  ),
+  color: z.string(),
+  weight: z.preprocess(
+    (value) =>
+      isNaN(parseInt(value as string)) ? null : parseInt(value as string),
+    z.number()
+  ),
+  dash: z.preprocess(
+    (value) =>
+      isNaN(parseInt(value as string)) ? null : parseInt(value as string),
+    z.number().nullable()
+  ),
+  dashLength: z.preprocess(
+    (value) =>
+      isNaN(parseInt(value as string)) ? null : parseInt(value as string),
+    z.number().nullable()
+  ),
+  is_kewenangan: z.preprocess((value) => value === "on", z.boolean()),
+  desc_kewenangan: z.string(),
 });
 
 export type SaveRuasFormState = {
@@ -178,12 +200,21 @@ export async function saveRuasGeoJSON(
   _: SaveRuasFormState | null,
   formData: FormData
 ): Promise<SaveRuasFormState> {
+  console.log("formdata", formData)
   const data = ruasSchema.safeParse({
     file: formData.getAll("file"),
     name: formData.get("name"),
+    tahun: formData.get("tahun"),
+    color: formData.get("color"),
+    weight: formData.get("weight"),
+    dash: formData.get("dash"),
+    dashLength: formData.get("dashLength"),
+    is_kewenangan: formData.get("is_kewenangan"),
+    desc_kewenangan: formData.get("desc_kewenangan"),
   });
 
   if (!data.success) {
+    console.log("error import", data.error.flatten().fieldErrors as Record<string, string>)
     return {
       error: data.error.flatten().fieldErrors as Record<string, string>,
       success: false,
@@ -209,7 +240,14 @@ export async function saveRuasGeoJSON(
 
   // import geojson
   await importer.importGeoJSON(json, {
+    tahun: data.data.tahun,
     name: data.data.name,
+    color: data.data.color,
+    weight: data.data.weight,
+    dash: data.data.dash,
+    dashLength: data.data.dashLength,
+    is_kewenangan: data.data.is_kewenangan,
+    desc_kewenangan: data.data.desc_kewenangan,
   });
 
   return {
@@ -261,33 +299,4 @@ export async function updateFeatureProperty(
   }
 
   return property;
-
-  // // add photos (upload first)
-  // for (const photo of newPhotos) {
-  //   const file = photo.file;
-  //   const bytes = await file.arrayBuffer();
-  //   const fileBuffer = Buffer.from(bytes);
-
-  //   const fileExtension = file.name.split(".").pop();
-  //   const fileName = `${Date.now()}.${fileExtension}`;
-
-  //   const path = `./public/uploads/${fileName}`;
-
-  //   // write file to public folder
-  //   await writeFile(path, fileBuffer, (err: any) => {
-  //     if (err) {
-  //       console.error(err);
-  //     }
-  //   });
-
-  //   // save file to database
-  //   await prisma.photo.create({
-  //     data: {
-  //       propertyId: property.id,
-  //       path: path,
-  //       url: path.replace("./public", ""),
-  //       description: photo.description,
-  //     },
-  //   });
-  // }
 }

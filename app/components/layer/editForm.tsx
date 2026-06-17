@@ -1,5 +1,6 @@
 import useLayersStore, { LayerInformation } from "@/app/stores/layers_store";
 import { FeatureCollectionType } from "@/app/types";
+import { Label, TextInput } from "flowbite-react";
 import { useState } from "react";
 import { IoClose } from "react-icons/io5";
 
@@ -32,6 +33,7 @@ export default function EditForm({
     const form = event.currentTarget;
     const formData = new FormData(form);
 
+    const tahun = parseInt(formData.get("tahun") as string);
     const name = formData.get("name") as string;
     const type = formData.get("type") as string;
     const color = formData.get("color") as string;
@@ -39,23 +41,15 @@ export default function EditForm({
     const radius = formData.get("radius") as string;
     const dashed = formData.get("dashed") as string;
 
-    console.log({
-        name,
-        type,
-        color,
-        weight: weight ? parseInt(weight) : 0,
-        radius: radius ? parseInt(radius) : 0,
-        dashed: dashed == "on",
-    });
-
     await updateLayer(layerInformation.id, {
+        tahun,
         name,
         type,
         color,
         weight: weight ? parseInt(weight) : 0,
         radius: radius ? parseInt(radius) : 0,
         dashed: dashed == "on",
-    });
+    }, tahun);
 
     setIsLoading(false);
     onSuccess();
@@ -81,6 +75,10 @@ export default function EditForm({
         onSubmit={save}
         className="max-w-sm mx-auto bg-white rounded shadow-md p-4"
       >
+        <div className="mb-4">
+          <Label className="mb-3">Tahun</Label>
+          <TextInput name="tahun" defaultValue={layerInformation.layer.tahun} />
+        </div>
         <div className="mb-4">
           <label
             htmlFor="name"
